@@ -57,7 +57,7 @@
 --              ReadFile() is called to get however many characters have arrived
 --              at the port by that time. This function uses overlapped I/O.
 ------------------------------------------------------------------------------*/
-DWORD WINAPI ReadThreadProc(HWND hWnd) {
+DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     
     PWNDDATA        pwd                     = NULL;
     CHAR            psReadBuf[READ_BUFSIZE] = {0};
@@ -66,16 +66,19 @@ DWORD WINAPI ReadThreadProc(HWND hWnd) {
     DWORD           dwEvent                 = 0;
     DWORD           dwError                 = 0;
     COMSTAT         cs                      = {0};
-    HANDLE          hEvents[2]              = {0};
+    HANDLE*         hEvents                 = NULL;
+    INT             hEventsSize             = 0;
 	BOOL			requestPending 			= FALSE;
 	DWORD			dwPacketLength 			= 0;
 	CHAR*			pcPacket			    = NULL;
     CHAR_LIST*      pHead                   = NULL;
     DWORD           dwQueueSize             = 0;
 	DWORD           i                       = 0;
-
+    INT             state                   = STATE_IDLE;
+    INT             timeout                 = INFINITE;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
+    //GetStateEvents(hEvents, state);
 	
     if ((overlap.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)) == NULL) {
         DISPLAY_ERROR("Error creating event in read thread");
@@ -85,6 +88,7 @@ DWORD WINAPI ReadThreadProc(HWND hWnd) {
 
 	
     while (pwd->bConnected) {
+
 		/*
 		if(!requestPending){
 			RequestPacket(hWnd);
@@ -95,12 +99,11 @@ DWORD WINAPI ReadThreadProc(HWND hWnd) {
         if (!WaitCommEvent(pwd->hPort, &dwEvent, &overlap)) {
             ProcessCommError(pwd->hPort);
         }
-        dwEvent = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+        dwEvent = WaitForMultipleObjects(hEventsSize, hEvents, FALSE, timeout);
         if (dwEvent == WAIT_OBJECT_0 + 1) {
             // the connection was severed
             break;
-        }
-	
+        }	
         ClearCommError(pwd->hPort, &dwError, &cs);    
 		
         // ensures that there is a character at the port
@@ -114,57 +117,18 @@ DWORD WINAPI ReadThreadProc(HWND hWnd) {
 
             dwQueueSize = AddToBack(&pHead, psReadBuf, dwBytesRead);
             
-			
-			//should move this stuff to ProcessRead();
-			/*if (dwQueueSize >= 2) {*/
-               /* dwPacketLength = GetFromList(pHead, 2);*/
-			switch(GetFromList(pHead,1)){
-				case 0x1://SOH  ie a frame.
-					dwPacketLength = 1024;
-					if (dwQueueSize >= dwPacketLength) {
 
-						pcPacket = RemoveFromFront(&pHead, dwPacketLength);
-						ProcessPacket(hWnd, pcPacket, dwPacketLength);
-						memset(psReadBuf, 0, READ_BUFSIZE);
-						/*requestPending = FALSE;*/
-						free(pcPacket);
-					}
+                if (dwQueueSize >= dwPacketLength) {
 
-					break;
-				case 0x4://EOT
-					dwPacketLength = 1;
-					//process EOT
-					RemoveFromFront(&pHead, dwPacketLength);
-					break;
-				case 0x5://ENQ
-					dwPacketLength = 1;
-					//process ENQ
-					RemoveFromFront(&pHead, dwPacketLength);
-					break;
-				case 0x6://ACK0
-					dwPacketLength = 1;
-					//process ACK0
-					RemoveFromFront(&pHead, dwPacketLength);
-					break;
-				case 0x11://ACK1
-					dwPacketLength = 1;
-					//process ACK1
-					RemoveFromFront(&pHead, dwPacketLength);
-					break;
-				case 0x12://WACK
-					dwPacketLength = 1;
-					//process WACK
-					RemoveFromFront(&pHead, dwPacketLength);
-					break;
-				case 0x13://RVI
-					dwPacketLength = 1;
-					//process RVI
-					RemoveFromFront(&pHead, dwPacketLength);
-					break;
-			}
+
+                    pcPacket = RemoveFromFront(&pHead, dwPacketLength);
+				    ProcessPacket(hWnd, pcPacket, dwPacketLength);
+                    memset(psReadBuf, 0, READ_BUFSIZE);
+                    free(pcPacket);
+			    }
+
 			
                 InvalidateRect(hWnd, NULL, FALSE);
-            /*}*/
         }
         ResetEvent(overlap.hEvent);
     }
