@@ -114,6 +114,8 @@ DWORD WINAPI ReadThreadProc(HWND hWnd) {
 
             dwQueueSize = AddToBack(&pHead, psReadBuf, dwBytesRead);
             
+			
+			//should move this stuff to ProcessRead();
 			/*if (dwQueueSize >= 2) {*/
                /* dwPacketLength = GetFromList(pHead, 2);*/
 			switch(GetFromList(pHead,1)){
