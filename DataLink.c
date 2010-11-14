@@ -4,6 +4,7 @@ INT GetStateEvents(HANDLE* hEvents, INT state) {
     
     switch (state) {
         case STATE_IDLE:
+            //hEvents;
         case STATE_T1:
         case STATE_T3:
         case STATE_R2:

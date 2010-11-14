@@ -8,8 +8,7 @@
 #define READ_BUFSIZE    2048
 #define WAIT_TIME       100
 
-VOID            ProcessCommError(HANDLE hPort);
 DWORD WINAPI    PortIOThreadProc(HWND hWnd);
-BOOL	        RequestPacket(HWND hWnd);
+VOID            ProcessCommError(HANDLE hPort);
 
 #endif
