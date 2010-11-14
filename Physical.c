@@ -88,7 +88,13 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
 
 	
     while (pwd->bConnected) {
-		
+
+		/*
+		if(!requestPending){
+			RequestPacket(hWnd);
+			requestPending = TRUE;
+		}*/
+
         SetCommMask(pwd->hPort, EV_RXCHAR);
         if (!WaitCommEvent(pwd->hPort, &dwEvent, &overlap)) {
             ProcessCommError(pwd->hPort);
@@ -110,8 +116,6 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
             }
 
             dwQueueSize = AddToBack(&pHead, psReadBuf, dwBytesRead);
-            if (dwQueueSize >= 2) {
-                dwPacketLength = GetFromList(pHead, 2);
             
                 if (dwQueueSize >= dwPacketLength) {
 
@@ -120,8 +124,9 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
                     memset(psReadBuf, 0, READ_BUFSIZE);
                     free(pcPacket);
 			    }
+
+			
                 InvalidateRect(hWnd, NULL, FALSE);
-            }
         }
         ResetEvent(overlap.hEvent);
     }

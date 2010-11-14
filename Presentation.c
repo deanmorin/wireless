@@ -64,66 +64,36 @@
 VOID ProcessPacket(HWND hWnd, CHAR* pcPacket, DWORD dwLength){
 	PWNDDATA pwd = NULL;
 	
-	CHAR pcToken[512];
-	DWORD dwTokenLength = 0;
-	CHAR pcData[512];
+	
+	
+	CHAR pcData[1019]={0};
 	DWORD dwDataLength = 0;
 	DWORD j, i;
 	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
-	if(DetectLRCError(pcPacket, dwLength)){
-		DISPLAY_ERROR("Error in RFID Packet");
+	//check if correct sequence packet number
+	/*if(pcPacket[1]!= expectedWindow){
+		DISPLAY_ERROR("failed packet sequence number check.");
+		//remove later and replace with increment failed packet and resend frame
+	}*/
+	//check crc
+	if(crcFast(pcPacket,1024)!=0){
+		//failed crc....
+		 DISPLAY_ERROR("failed crc check on read packet");
+		 //remove later and replace with increment failed packet and resend frame
+		return;
 	}
-	
-	
-	switch(pcPacket[7]){
-		case 0x04:
+	dwDataLength = pcPacket[2]*256 + pcPacket[3];//determines payload size
+	//copies data to pcData
+	for(i=0;i<dwDataLength;i++){
+		pcData[i] = pcPacket[i+4];
+	}
 
-			strcpy(pcToken , "ISO 15693");
-			dwTokenLength = strlen(pcToken);
-			dwDataLength = 8;
-			j = (dwLength - 3);
-			for(i = 0; i < dwDataLength; i++){
-				pcData[i] = pcPacket[j];
-				j--;
-			}
-			EchoTag(hWnd, pcToken, dwTokenLength, pcData, dwDataLength);
-			return;
-		case 0x05:
-			
-			strcpy(pcToken , "TAG-IT HF");
-			dwTokenLength = strlen(pcToken);
-			dwDataLength = 4;
-			for(i = 0, j = (dwLength - 1); i < dwDataLength; i++, j--){
-				pcData[i] = pcPacket[j];
-			}
-			EchoTag(hWnd, pcToken, dwTokenLength, pcData, dwDataLength);
-			
-			return;
-		case 0x06:
-	
-			strcpy(pcToken , "LF R/W");
-			dwTokenLength = strlen(pcToken);
-			dwDataLength = 8;
-			for(i = 0, j = (dwLength - 3); i < dwDataLength; i++, j--){
-				pcData[i] = pcPacket[j];
-			}
-			EchoTag(hWnd, pcToken, dwTokenLength, pcData, dwDataLength);
-			
-			return;
-		
-			
-		default:
-			//Ignore response to Rfid initialization
-			if(pcPacket[1] == 0x09){
-				return;
-			}
-			strcpy(pcToken, "Unsupported Tag");
-			
-			EchoTag(hWnd, pcToken,15,NULL,0);
-			
-			return;
+	for(i=0;i<dwDataLength;i++){//should instead place into PortToFile buffer
+		UpdateDisplayBuf(hWnd,pcData[i]);
 	}
+	
+	
 }
 
 /*------------------------------------------------------------------------------

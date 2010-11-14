@@ -116,6 +116,10 @@ VOID InitTerminal(HWND hWnd) {
     pwd->cc.dcb.DCBlength = sizeof(DCB);
     BuildCommDCB((LPCWSTR)"96,N,8,1", &pwd->cc.dcb);
 
+
+
+	//create tables for crc
+	crcInit();
     //print out headers for Tokens and Values
     MakeColumns(hWnd);
 }
