@@ -100,7 +100,7 @@ BOOL Connect(HWND hWnd) {
 	InitRfid(hWnd);
     // create thread for reading
     pwd->hThread = CreateThread(NULL, 0,
-                                (LPTHREAD_START_ROUTINE) ReadThreadProc,
+                                (LPTHREAD_START_ROUTINE) PortIOThreadProc,
                                 hWnd, 0, &dwThreadid);
 
     if (pwd->hThread == INVALID_HANDLE_VALUE) {
