@@ -62,7 +62,6 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     PWNDDATA        pwd                     = NULL;
     CHAR            psReadBuf[READ_BUFSIZE] = {0};
     OVERLAPPED      olRead                  = {0};
-    OVERLAPPED      olWrite                 = {0};
     DWORD           dwBytesRead             = 0;
     DWORD           dwEvent                 = 0;
     DWORD           dwError                 = 0;
@@ -76,53 +75,56 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     DWORD           dwQueueSize             = 0;
 	DWORD           i                       = 0;
     INT             iState                  = STATE_IDLE;
-    INT             iTimeout                = INFINITE;
-    LPCVOID         lpcEnq                  = NULL;
-    const CHAR*     pcEnq                   = "\0x05";
+    DWORD           dwTimeout               = INFINITE;
+    INT             iTOCount                = 0;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
-    //void(*p[2])(int)
-
-    hEvents = (HANDLE*) malloc(sizeof(HANDLE) * 3);
-    lpcEnq  = pcEnq;
-	
+    CreateEvent(NULL, TRUE, FALSE, TEXT("dataToWrite"));         //REMOVE
     if ((olRead.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)) == NULL) {
         DISPLAY_ERROR("Error creating event in read thread");
     }
-    hEvents[0] = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("disconnected"));
-    hEvents[1] = olRead.hEvent;                          // "dataAtPort"
-    hEvents[2] = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("dataToWrite"));
+    hEvents     = (HANDLE*) malloc(sizeof(HANDLE) * 3);
+    hEvents[0]  = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("disconnected"));
+    hEvents[1]  = olRead.hEvent;                           // "dataAtPort"
+    hEvents[2]  = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("dataToWrite"));
 
-    WriteFile(pwd->hPort, lpcEnq, CTRL_CHAR_SIZE, &dwBytesRead, &olWrite);
-	
+
     while (pwd->bConnected) {
-
-        SetCommMask(pwd->hPort, EV_RXCHAR);
+        
+        SetCommMask(pwd->hPort, EV_RXCHAR);      
         if (!WaitCommEvent(pwd->hPort, &dwEvent, &olRead)) {
             ProcessCommError(pwd->hPort);
         }
-        ClearCommError(pwd->hPort, &dwError, &cs);
-
         iEventsSize = (iState == STATE_IDLE) ? 3 : 2;
-        dwEvent = WaitForMultipleObjects(iEventsSize, hEvents, FALSE, iTimeout);
-
+        dwEvent = WaitForMultipleObjects(iEventsSize, hEvents, FALSE, dwTimeout);
+        ClearCommError(pwd->hPort, &dwError, &cs);
+ 
         if (dwEvent == WAIT_OBJECT_0) {
             // the connection was severed
             break;
         }
-        else if (dwEvent == WAIT_OBJECT_0 + 1) {
+        else if (dwEvent == WAIT_OBJECT_0 + 1  &&  cs.cbInQue) {
             // data arrived at the port
+//            ReadFromPort(hWnd);
             //ProcessRead(hWnd, &state, &toCount);
+            DISPLAY_ERROR("A");
+            //ResetEvent(hEvents[dwEvent]);
         }
         else if (dwEvent == WAIT_OBJECT_0 + 2) {
-            // data ready to write to port
-            WriteFile(pwd->hPort, lpcEnq, CTRL_CHAR_SIZE, &dwBytesRead, &olWrite);
+            // in idle state, with data ready to write to port
+            ProcessWrite(hWnd, &iState, &dwTimeout);
         }
-
+        else if (dwEvent == WAIT_TIMEOUT) {
+            // a timeout occured
+            ProcessTimeout(&dwTimeout, &iTOCount, &iState);
+        }
+        else {
+            DISPLAY_ERROR("Invalid event occured in the Port I/O thread");
+            //dwError = GetLastError();
+        }
     
-		
         // ensures that there is a character at the port
-        if (cs.cbInQue) {  
+        if (cs.cbInQue == 399393939) {  
             if (!ReadFile(pwd->hPort, psReadBuf, cs.cbInQue, 
                           &dwBytesRead, &olRead)) {
                 // read is incomplete or had an error
@@ -154,6 +156,11 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     CloseHandle(olRead.hEvent);
     return 0;
 }
+
+VOID ReadFromPort(HWND hWnd) {
+    // run out cbque
+}
+
 
 /*------------------------------------------------------------------------------
 -- FUNCTION:    ProcessCommError

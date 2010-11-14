@@ -1,16 +1,45 @@
 #include "DataLink.h"
 
-INT GetStateEvents(HANDLE* hEvents, INT state) {
-    
-    switch (state) {
-        case STATE_IDLE:
-            //hEvents;
+VOID ProcessWrite(HWND hWnd, INT* piState, DWORD* pdwTimeout) {
+    PWNDDATA    pwd                     = NULL;
+    OVERLAPPED  olWrite                 = {0};
+    BYTE        pEnq[CTRL_CHAR_SIZE]    = {0};
+    pwd     = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    pEnq[0] = ENQ;
+
+    WriteFile(pwd->hPort, pEnq, CTRL_CHAR_SIZE, NULL, &olWrite);
+    *piState = STATE_T1;
+    srand(GetTickCount());
+    *pdwTimeout = rand() % TOR1 + 200;             // adjust this later
+}
+
+
+VOID ProcessTimeout(DWORD* pdwTimeout, INT* piTOCount, INT* piState) {
+   
+    switch (*piState) {
+        
         case STATE_T1:
+            *pdwTimeout  = INFINITE;
+            *piState     = STATE_T2;
+            return;
+
         case STATE_T3:
+            *pdwTimeout *= pow((long double) 2, ++(*piTOCount));
+            *piState     = (*piTOCount >= 3) ? STATE_IDLE : STATE_T2;
+            return;
+        
         case STATE_R2:
-            break;
+            *pdwTimeout *= pow((long double) 2, ++(*piTOCount));
+            *piState     = (*piTOCount >= 3) ? STATE_IDLE : STATE_R2;
+            return;
+        
+        default:
+            DISPLAY_ERROR("Invalid state for timeout");
+            return;
     }
 }
+
+    //void(*p[2])(int)
 
 			/*if (dwQueueSize >= 2) {*/
                /* dwPacketLength = GetFromList(pHead, 2);*/ /*
