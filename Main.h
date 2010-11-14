@@ -13,7 +13,7 @@
 #include "Presentation.h"
 #include "Session.h"
 #include "ErrorDetect.h"
-
+#include "crc.h"
 #pragma warning(disable:4002)
 #pragma warning(disable:4996)
 
