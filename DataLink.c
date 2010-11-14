@@ -1,36 +1,75 @@
 #include "DataLink.h"
 
-VOID ProcessWrite(HWND hWnd, INT* piState, DWORD* pdwTimeout) {
+VOID ProcessWrite(HWND hWnd, PSTATEINFO psi) {
     PWNDDATA    pwd                     = NULL;
-    OVERLAPPED  olWrite                 = {0};
+    OVERLAPPED  ol                      = {0};
     BYTE        pEnq[CTRL_CHAR_SIZE]    = {0};
     pwd     = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     pEnq[0] = ENQ;
 
-    WriteFile(pwd->hPort, pEnq, CTRL_CHAR_SIZE, NULL, &olWrite);
-    *piState = STATE_T1;
+    WriteFile(pwd->hPort, pEnq, CTRL_CHAR_SIZE, NULL, &ol);
+    psi->iState = STATE_T1;
     srand(GetTickCount());
-    *pdwTimeout = rand() % TOR1 + 200;             // adjust this later
+    psi->dwTimeout = rand() % TOR1 + 200;             // adjust this later
 }
 
 
-VOID ProcessTimeout(DWORD* pdwTimeout, INT* piTOCount, INT* piState) {
+VOID ProcessRead(HWND hWnd, PSTATEINFO psi) {  
+    
+    VOID(*pReadFunc[READ_STATES])(HWND, PSTATEINFO);
+    pReadFunc[0] = ReadT1;
+    // .... //
+    pReadFunc[psi->iState](hWnd, psi);
+}
+
+
+VOID ReadT1(HWND hWnd, PSTATEINFO psi) {
+    PWNDDATA    pwd = NULL;
+    OVERLAPPED  ol  = {0};
+    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+
+    if (1){//psPayload == ACK) {
+        WriteFile(pwd->hPort, "HH", CTRL_CHAR_SIZE, NULL, &ol);
+        psi->iState    = STATE_T3;
+		psi->iTOCount  = 0;
+		psi->dwTimeout = TOR2;
+//        SetEvent(OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("fillFTPBuffer")));
+    }
+}
+
+
+VOID ReadT3(HWND hWnd, PSTATEINFO psi) {
+    
+}
+
+
+VOID ReadIDLE(HWND hWnd, PSTATEINFO psi) {
+    
+}
+
+
+VOID ReadR2(HWND hWnd, PSTATEINFO psi) {
+    
+}
+
+
+VOID ProcessTimeout(PSTATEINFO psi) {
    
-    switch (*piState) {
+    switch (psi->iState) {
         
         case STATE_T1:
-            *pdwTimeout  = INFINITE;
-            *piState     = STATE_T2;
+            psi->dwTimeout  = INFINITE;
+            psi->iState     = STATE_IDLE;
             return;
 
         case STATE_T3:
-            *pdwTimeout *= pow((long double) 2, ++(*piTOCount));
-            *piState     = (*piTOCount >= 3) ? STATE_IDLE : STATE_T2;
+            psi->dwTimeout *= (DWORD) pow((long double) 2, ++(psi->iTOCount));
+            psi->iState     = (psi->iTOCount >= 3) ? STATE_IDLE : STATE_T2;
             return;
         
         case STATE_R2:
-            *pdwTimeout *= pow((long double) 2, ++(*piTOCount));
-            *piState     = (*piTOCount >= 3) ? STATE_IDLE : STATE_R2;
+            psi->dwTimeout *= (DWORD) pow(2.0, ++(psi->iTOCount));
+            psi->iState     = (psi->iTOCount >= 3) ? STATE_IDLE : STATE_R2;
             return;
         
         default:
@@ -39,7 +78,7 @@ VOID ProcessTimeout(DWORD* pdwTimeout, INT* piTOCount, INT* piState) {
     }
 }
 
-    //void(*p[2])(int)
+
 
 			/*if (dwQueueSize >= 2) {*/
                /* dwPacketLength = GetFromList(pHead, 2);*/ /*
