@@ -9,9 +9,77 @@ INT GetStateEvents(HANDLE* hEvents, INT state) {
         case STATE_R2:
             break;
     }
+	return 0;
 }
 
-			/*if (dwQueueSize >= 2) {*/
+ProcessRead(HWND hWnd, INT* state, INT* toCount){
+	data = ReadFile
+
+	switch (state){				
+		case STATE_T1:
+			if (data == ACK){
+				GetNextFrame()
+				SetEvent(bufferFrame)
+				WriteFile()
+				state = STATE_T3
+				toCount = 0
+				timeout = TOR2
+			}
+			else if (data == WACK){
+				state = STATE_IDLE
+			}
+		case STATE_T3:
+			if (data == ACK0 / 1){
+				if (fileToPortQueueSize == 0){
+					WriteFile(EOT);
+				}
+				else {
+					GetNextFrame()
+					SetEvent(bufferFrame)
+					WriteFile()					// state doesn’t change
+					toCount = 0
+				}
+			}
+			else if (data){
+			}
+		case STATE_IDLE:
+			if (data == ENQ){
+				if (busyWithOtherTasks){
+					WriteFile(WACK)		
+				}// state doesn’t change
+				else{
+					WriteFile(ACK)
+			   		state = STATE_R2
+					timeout = TOR3
+				}
+			}
+		case STATE_R2:
+			if (data == frame){
+				if (data == EOT){
+					state = STATE_IDLE
+					return
+				}
+				if (portToQueueSize >= FULL_BUFFER){
+					clear buffer	// either through an event, or call function
+				}
+				if (CheckCRC() == no error){
+					if (fileToPortQueueSize == 0){
+						WriteFile(ACK)			// state doesn’t change
+					}
+					else {
+						WriteFile(RVI0/1)
+						state = T1
+					}
+				}
+				else if (data == EOT){
+					state = IDLE
+				}
+			}
+	
+	}
+}
+				
+				/*if (dwQueueSize >= 2) {*/
                /* dwPacketLength = GetFromList(pHead, 2);*/ /*
 			switch(GetFromList(pHead,1)){
 				case 0x1://SOH  ie a frame.
