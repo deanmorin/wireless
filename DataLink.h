@@ -14,6 +14,7 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define TOR1    500
 #define TOR2    500
 #define TOR3    500
+/*
 #define SOH		1
 #define EOT		4
 #define ENQ		5
@@ -21,7 +22,7 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define ACK1	17
 #define RVI		18
 #define WACK	19
-
+*/
 typedef struct Frame {
 	BYTE		soh;
 	SHORT		length;
