@@ -126,8 +126,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 -- NOTES:
 --              The standard WndProc function.
 ------------------------------------------------------------------------------*/
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
-                         WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
                              
     PWNDDATA pwd = {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);

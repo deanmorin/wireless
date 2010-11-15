@@ -1,7 +1,8 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include "Main.h"
+#include "osi.h"
+#include "WndExtra.h"
 
 static const COLORREF TXT_COLOURS[16] = {RGB(0,0,0),		RGB(128,0,0),
 								         RGB(0,128,0),		RGB(128,128,0),

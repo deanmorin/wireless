@@ -1,7 +1,9 @@
 #ifndef SESSION_H
 #define SESSION_H
 
-#include "Main.h"
+#include "Menu.h"
+#include "osi.h"
+#include "WndExtra.h"
 
 BOOL    Connect(HWND hWnd);
 VOID    Disconnect(HWND hWnd);

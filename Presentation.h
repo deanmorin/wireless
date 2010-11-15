@@ -1,8 +1,8 @@
 #ifndef PRESENTATION_H
 #define PRESENTATION_H
 
-#include "Main.h"
 #include <stdio.h>
+#include "WndExtra.h"
 
 #define TAB_LENGTH  8
 #define CLR_UP      -1

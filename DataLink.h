@@ -1,8 +1,9 @@
 #ifndef DATALINK_H
 #define DATALINK_H
+
 #include <Windows.h>
 #include <math.h>
-#include "Main.h"
+#include "WndExtra.h"
 
 #define READ_STATES 4
 enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
@@ -28,7 +29,7 @@ typedef struct Frame {
 	SHORT		length;
 	BYTE*		payload;
 	BYTE		crc;
-} FRAME, PFRAME;
+} FRAME, *PFRAME;
 
 
 #define CTRL_CHAR_SIZE  1
