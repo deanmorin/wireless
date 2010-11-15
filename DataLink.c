@@ -1,17 +1,85 @@
 #include "DataLink.h"
 
-INT GetStateEvents(HANDLE* hEvents, INT state) {
+VOID ProcessWrite(HWND hWnd, PSTATEINFO psi) {
+    PWNDDATA    pwd                     = NULL;
+    OVERLAPPED  ol                      = {0};
+    BYTE        pEnq[CTRL_CHAR_SIZE]    = {0};
+    pwd     = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    pEnq[0] = ENQ;
+
+    WriteFile(pwd->hPort, pEnq, CTRL_CHAR_SIZE, NULL, &ol);
+    psi->iState = STATE_T1;
+    srand(GetTickCount());
+    psi->dwTimeout = rand() % TOR1 + 200;             // adjust this later
+}
+
+
+VOID ProcessRead(HWND hWnd, PSTATEINFO psi) {  
     
-    switch (state) {
-        case STATE_IDLE:
+    VOID(*pReadFunc[READ_STATES])(HWND, PSTATEINFO);
+    pReadFunc[0] = ReadT1;
+    // .... //
+    pReadFunc[psi->iState](hWnd, psi);
+}
+
+
+VOID ReadT1(HWND hWnd, PSTATEINFO psi) {
+    PWNDDATA    pwd = NULL;
+    OVERLAPPED  ol  = {0};
+    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+
+    if (1){//psPayload == ACK) {
+        WriteFile(pwd->hPort, "HH", CTRL_CHAR_SIZE, NULL, &ol);
+        psi->iState    = STATE_T3;
+		psi->iTOCount  = 0;
+		psi->dwTimeout = TOR2;
+//        SetEvent(OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("fillFTPBuffer")));
+    }
+}
+
+
+VOID ReadT3(HWND hWnd, PSTATEINFO psi) {
+    
+}
+
+
+VOID ReadIDLE(HWND hWnd, PSTATEINFO psi) {
+    
+}
+
+
+VOID ReadR2(HWND hWnd, PSTATEINFO psi) {
+    
+}
+
+
+VOID ProcessTimeout(PSTATEINFO psi) {
+   
+    switch (psi->iState) {
+        
         case STATE_T1:
+            psi->dwTimeout  = INFINITE;
+            psi->iState     = STATE_IDLE;
+            return;
+
         case STATE_T3:
+            psi->dwTimeout *= (DWORD) pow((long double) 2, ++(psi->iTOCount));
+            psi->iState     = (psi->iTOCount >= 3) ? STATE_IDLE : STATE_T2;
+            return;
+        
         case STATE_R2:
-            break;
+            psi->dwTimeout *= (DWORD) pow(2.0, ++(psi->iTOCount));
+            psi->iState     = (psi->iTOCount >= 3) ? STATE_IDLE : STATE_R2;
+            return;
+        
+        default:
+            DISPLAY_ERROR("Invalid state for timeout");
+            return;
     }
 	return 0;
 }
 
+/*
 ProcessRead(HWND hWnd, INT* state, INT* toCount){
 	data = ReadFile
 
@@ -78,8 +146,9 @@ ProcessRead(HWND hWnd, INT* state, INT* toCount){
 	
 	}
 }
-				
+*/				
 				/*if (dwQueueSize >= 2) {*/
+
                /* dwPacketLength = GetFromList(pHead, 2);*/ /*
 			switch(GetFromList(pHead,1)){
 				case 0x1://SOH  ie a frame.

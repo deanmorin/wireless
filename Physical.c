@@ -30,6 +30,39 @@
 
 #include "Physical.h"
 
+
+VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
+
+    PWNDDATA    pwd                     = NULL;
+    CHAR        psReadBuf[READ_BUFSIZE] = {0};
+    DWORD       dwBytesRead             = 0;
+    DWORD	    dwPacketLength 		    = 0;
+	CHAR*		pcPacket	            = NULL;
+    CHAR_LIST*  pHead                   = NULL;
+    DWORD       dwQueueSize             = 0;
+    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    
+    if (!ReadFile(pwd->hPort, psReadBuf, cbInQue, &dwBytesRead, &ol)) {
+        // read is incomplete or had an error
+        ProcessCommError(pwd->hPort);
+        GetOverlappedResult(pwd->hThread, &ol, &dwBytesRead, TRUE);
+    }
+
+    if (psi->iState == STATE_R2  &&  dwBytesRead < FRAME_SIZE) {
+    }
+
+    dwQueueSize = AddToBack(&pHead, psReadBuf, dwBytesRead);
+            
+    if (dwQueueSize >= dwPacketLength) {
+        pcPacket = RemoveFromFront(&pHead, dwPacketLength);
+	 	ProcessPacket(hWnd, pcPacket, dwPacketLength);
+        memset(psReadBuf, 0, READ_BUFSIZE);
+        free(pcPacket);
+	}
+	InvalidateRect(hWnd, NULL, FALSE);    
+    ResetEvent(ol.hEvent);
+}
+
 /*------------------------------------------------------------------------------
 -- FUNCTION:    ReadThreadProc
 --
@@ -59,132 +92,71 @@
 ------------------------------------------------------------------------------*/
 DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     
-    PWNDDATA        pwd                     = NULL;
-    CHAR            psReadBuf[READ_BUFSIZE] = {0};
-    OVERLAPPED      overlap                 = {0};
-    DWORD           dwBytesRead             = 0;
-    DWORD           dwEvent                 = 0;
-    DWORD           dwError                 = 0;
-    COMSTAT         cs                      = {0};
-    HANDLE*         hEvents                 = NULL;
-    INT             hEventsSize             = 0;
-	BOOL			requestPending 			= FALSE;
-	DWORD			dwPacketLength 			= 0;
-	CHAR*			pcPacket			    = NULL;
-    CHAR_LIST*      pHead                   = NULL;
-    DWORD           dwQueueSize             = 0;
-	DWORD           i                       = 0;
-    INT             state                   = STATE_IDLE;
-    INT             timeout                 = INFINITE;
+    PWNDDATA    pwd                 = NULL;
+    OVERLAPPED  ol                  = {0};
+    DWORD       dwEvent             = 0;
+    DWORD       dwError             = 0;
+    COMSTAT     cs                  = {0};
+    HANDLE*     hEvents             = NULL;
+    INT         iEventsSize         = 0;
+    PSTATEINFO  psi             = NULL;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
-    //GetStateEvents(hEvents, state);
-	
-    if ((overlap.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)) == NULL) {
+    CreateEvent(NULL, TRUE, FALSE, TEXT("dataToWrite"));         //REMOVE
+    if ((ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)) == NULL) {
         DISPLAY_ERROR("Error creating event in read thread");
     }
-    hEvents[0] = overlap.hEvent;
-    hEvents[1] = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("disconnected"));
+    hEvents     = (HANDLE*) malloc(sizeof(HANDLE) * 3);
+    hEvents[0]  = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("disconnected"));
+    hEvents[1]  = ol.hEvent;                               // "dataAtPort"
+    hEvents[2]  = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("dataToWrite"));
 
-	
+    psi             = (PSTATEINFO) malloc(sizeof(STATEINFO));
+    psi->iState     = STATE_IDLE;
+    psi->dwTimeout  = INFINITE;
+    psi->iTOCount   = 0;
+
     while (pwd->bConnected) {
-
-		/*
-		if(!requestPending){
-			RequestPacket(hWnd);
-			requestPending = TRUE;
-		}*/
-
-        SetCommMask(pwd->hPort, EV_RXCHAR);
-        if (!WaitCommEvent(pwd->hPort, &dwEvent, &overlap)) {
+        
+        SetCommMask(pwd->hPort, EV_RXCHAR);      
+        if (!WaitCommEvent(pwd->hPort, &dwEvent, &ol)) {
             ProcessCommError(pwd->hPort);
         }
-        dwEvent = WaitForMultipleObjects(hEventsSize, hEvents, FALSE, timeout);
-        if (dwEvent == WAIT_OBJECT_0 + 1) {
+        iEventsSize = (psi->iState == STATE_IDLE) ? 3 : 2;
+        dwEvent = WaitForMultipleObjects(iEventsSize, hEvents, FALSE, psi->dwTimeout);
+        ClearCommError(pwd->hPort, &dwError, &cs);
+ 
+        if (dwEvent == WAIT_OBJECT_0) {
             // the connection was severed
             break;
-        }	
-        ClearCommError(pwd->hPort, &dwError, &cs);    
-		
-        // ensures that there is a character at the port
-        if (cs.cbInQue) {  
-            if (!ReadFile(pwd->hPort, psReadBuf, cs.cbInQue, 
-                          &dwBytesRead, &overlap)) {
-                // read is incomplete or had an error
-                ProcessCommError(pwd->hPort);
-                GetOverlappedResult(pwd->hThread, &overlap, &dwBytesRead, TRUE);
-            }
 
-            dwQueueSize = AddToBack(&pHead, psReadBuf, dwBytesRead);
-            
-
-                if (dwQueueSize >= dwPacketLength) {
-
-
-                    pcPacket = RemoveFromFront(&pHead, dwPacketLength);
-				    ProcessPacket(hWnd, pcPacket, dwPacketLength);
-                    memset(psReadBuf, 0, READ_BUFSIZE);
-                    free(pcPacket);
-			    }
-
-			
-                InvalidateRect(hWnd, NULL, FALSE);
         }
-        ResetEvent(overlap.hEvent);
+        else if (dwEvent == WAIT_OBJECT_0 + 1  &&  cs.cbInQue) {
+            // data arrived at the port
+            ReadFromPort(hWnd, psi, ol, cs.cbInQue);
+            //ProcessRead(hWnd, &state, &toCount);
+        }
+        else if (dwEvent == WAIT_OBJECT_0 + 2) {
+            // in idle state, with data ready to write to port
+            ProcessWrite(hWnd, psi);
+        }
+        else if (dwEvent == WAIT_TIMEOUT) {
+            // a timeout occured
+            ProcessTimeout(psi);
+        }
+        else {
+            // change this before release
+            DISPLAY_ERROR("Invalid event occured in the Port I/O thread");
+        }
     }
 
 
     if (!PurgeComm(pwd->hPort, PURGE_RXCLEAR)) {
         DISPLAY_ERROR("Error purging read buffer");
     }
-    CloseHandle(overlap.hEvent);
+    free(hEvents);
+    CloseHandle(ol.hEvent);
     return 0;
-}
-
-/*------------------------------------------------------------------------------
--- FUNCTION:    RequestPacket
---
--- DATE:        Nov 4, 2010
---
--- REVISIONS:   (Date and Description)
---
--- DESIGNER:    Daniel Wright
---
--- PROGRAMMER:  Daniel Wright
---
--- INTERFACE:   BOOL RequestPacket(HWND hWnd)
---                          hWnd        - the handle to the window
---                          
--- RETURNS:     True if the port write was successful.
---
--- NOTES:
---              Writes a string representing a packet request to the port.
-------------------------------------------------------------------------------*/
-BOOL RequestPacket(HWND hWnd) {
- 
-    PWNDDATA    pwd             = {0};
-    CHAR        psWriteBuf[10]  = {0};
-    OVERLAPPED  overlap         = {0};
-    DWORD       dwBytesRead     = 0;
-    UINT        bufLength       = 9;
-    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-
-    psWriteBuf[0] = 0x01;
-	psWriteBuf[1] = 0x09;
-	psWriteBuf[2] = 0x00;
-	psWriteBuf[3] = 0x03;
-	psWriteBuf[4] = 0x01;
-	psWriteBuf[5] = 0x41;
-	psWriteBuf[6] = 0x00; 
-	psWriteBuf[7] = 0x4B; 
-	psWriteBuf[8] = 0xB4; 
-
-    if (!WriteFile(pwd->hPort, psWriteBuf, bufLength, &dwBytesRead, &overlap)) {
-		if (GetLastError() != ERROR_IO_PENDING) {
-            return FALSE;
-        }
-    }
-    return TRUE;
 }
 
 /*------------------------------------------------------------------------------
