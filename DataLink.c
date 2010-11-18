@@ -16,9 +16,8 @@ VOID ProcessWrite(HWND hWnd, PSTATEINFO psi) {
 
 VOID ProcessRead(HWND hWnd, PSTATEINFO psi) {  
     
-    VOID(*pReadFunc[READ_STATES])(HWND, PSTATEINFO);
-    pReadFunc[0] = ReadT1;
-    // .... //
+    static VOID(*pReadFunc[READ_STATES])(HWND, PSTATEINFO) 
+            = { ReadT1, ReadT3, ReadIDLE, ReadR2 };
     pReadFunc[psi->iState](hWnd, psi);
 }
 
@@ -76,7 +75,6 @@ VOID ProcessTimeout(PSTATEINFO psi) {
             DISPLAY_ERROR("Invalid state for timeout");
             return;
     }
-	return 0;
 }
 
 /*
