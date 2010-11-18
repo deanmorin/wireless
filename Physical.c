@@ -30,39 +30,6 @@
 
 #include "Physical.h"
 
-
-VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
-
-    PWNDDATA    pwd                     = NULL;
-    CHAR        psReadBuf[READ_BUFSIZE] = {0};
-    DWORD       dwBytesRead             = 0;
-    DWORD	    dwPacketLength 		    = 0;
-	CHAR*		pcPacket	            = NULL;
-    CHAR_LIST*  pHead                   = NULL;
-    DWORD       dwQueueSize             = 0;
-    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-    
-    if (!ReadFile(pwd->hPort, psReadBuf, cbInQue, &dwBytesRead, &ol)) {
-        // read is incomplete or had an error
-        ProcessCommError(pwd->hPort);
-        GetOverlappedResult(pwd->hThread, &ol, &dwBytesRead, TRUE);
-    }
-
-    if (psi->iState == STATE_R2  &&  dwBytesRead < FRAME_SIZE) {
-    }
-
-    dwQueueSize = AddToBack(&pHead, psReadBuf, dwBytesRead);
-            
-    if (dwQueueSize >= dwPacketLength) {
-        pcPacket = RemoveFromFront(&pHead, dwPacketLength);
-	 	ProcessPacket(hWnd, pcPacket, dwPacketLength);
-        memset(psReadBuf, 0, READ_BUFSIZE);
-        free(pcPacket);
-	}
-	InvalidateRect(hWnd, NULL, FALSE);    
-    ResetEvent(ol.hEvent);
-}
-
 /*------------------------------------------------------------------------------
 -- FUNCTION:    ReadThreadProc
 --
@@ -145,7 +112,7 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
             ProcessTimeout(psi);
         }
         else {
-            // change this before release
+            // change this to conditionalo before release
             DISPLAY_ERROR("Invalid event occured in the Port I/O thread");
         }
     }
@@ -157,6 +124,39 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     free(hEvents);
     CloseHandle(ol.hEvent);
     return 0;
+}
+
+
+VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
+
+    PWNDDATA    pwd                     = NULL;
+    CHAR        psReadBuf[READ_BUFSIZE] = {0};
+    DWORD       dwBytesRead             = 0;
+    DWORD	    dwPacketLength 		    = 0;
+	CHAR*		pcPacket	            = NULL;
+    CHAR_LIST*  pHead                   = NULL;
+    DWORD       dwQueueSize             = 0;
+    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    
+    if (!ReadFile(pwd->hPort, psReadBuf, cbInQue, &dwBytesRead, &ol)) {
+        // read is incomplete or had an error
+        ProcessCommError(pwd->hPort);
+        GetOverlappedResult(pwd->hThread, &ol, &dwBytesRead, TRUE);
+    }
+
+    if (psi->iState == STATE_R2  &&  dwBytesRead < FRAME_SIZE) {
+    }
+
+    dwQueueSize = AddToBack(&pHead, psReadBuf, dwBytesRead);
+            
+    if (dwQueueSize >= dwPacketLength) {
+        pcPacket = RemoveFromFront(&pHead, dwPacketLength);
+	 	ProcessPacket(hWnd, pcPacket, dwPacketLength);
+        memset(psReadBuf, 0, READ_BUFSIZE);
+        free(pcPacket);
+	}
+	InvalidateRect(hWnd, NULL, FALSE);    
+    ResetEvent(ol.hEvent);
 }
 
 /*------------------------------------------------------------------------------
