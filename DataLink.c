@@ -79,6 +79,67 @@ VOID ProcessTimeout(PSTATEINFO psi) {
 	return 0;
 }
 
+VOID OpenFileTransmit(HWND hWnd){
+	PWNDDATA pwd = {0};
+	OPENFILENAME ofn;
+	char szFile[100] = {0};
+	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.lpstrFile = szFile;
+	ofn.lpstrFile[0] = '\0';
+	ofn.nMaxFile = sizeof(szFile);
+
+
+	GetOpenFileName(&ofn);
+	pwd->lpszTransmitName = ofn.lpstrFile;
+	pwd->hFileTransmit =CreateFile(pwd->lpszTransmitName, GENERIC_READ | GENERIC_WRITE,
+							FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+							OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
+	//MessageBox(hWnd, pwd->lpszTransmitName, "File", MB_OK);
+	
+}
+
+VOID CloseFileTransmit(HWND hWnd){
+	PWNDDATA pwd = {0};
+	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+	
+	CloseHandle(pwd->hFileTransmit);
+	pwd->lpszTransmitName = "";
+	SetWindowLongPtr(hWnd, 0, 0);
+}
+
+VOID OpenFileReceive(HWND hWnd){
+	PWNDDATA pwd = {0};
+	OPENFILENAME ofn;
+	char szFile[100] = {0};
+	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.lpstrFile = szFile;
+	ofn.lpstrFile[0] = '\0';
+	ofn.nMaxFile = sizeof(szFile);
+
+
+	GetSaveFileName(&ofn);
+	pwd->lpszReceiveName = ofn.lpstrFile;
+	pwd->hFileReceive = CreateFile(pwd->lpszReceiveName, GENERIC_READ | GENERIC_WRITE,
+									FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+									OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
+}
+
+VOID CloseFileRecieve(HWND hWnd){
+	PWNDDATA pwd = {0};
+	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+	
+	CloseHandle(pwd->hFileReceive);
+	pwd->lpszReceiveName = "";
+	SetWindowLongPtr(hWnd, 0, 0);
+}
 /*
 ProcessRead(HWND hWnd, INT* state, INT* toCount){
 	data = ReadFile

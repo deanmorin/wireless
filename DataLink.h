@@ -50,5 +50,6 @@ VOID    ReadT1(HWND hWnd, PSTATEINFO psi);
 VOID    ReadT3(HWND hWnd, PSTATEINFO psi);
 VOID    ReadIDLE(HWND hWnd, PSTATEINFO psi);
 VOID    ReadR2(HWND hWnd, PSTATEINFO psi);
-
+VOID 	OpenFileReceive(HWND hWnd);
+VOID 	OpenFileTransmit(HWND hWnd);
 #endif
