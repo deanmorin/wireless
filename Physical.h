@@ -8,7 +8,6 @@
 #define READ_BUFSIZE    2048
 
 DWORD WINAPI    PortIOThreadProc(HWND hWnd);
-DWORD WINAPI FileIOThreadProc(HWND hWnd);
 VOID    ProcessCommError(HANDLE hPort);
 VOID    ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue);
 
