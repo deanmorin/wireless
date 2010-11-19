@@ -3,6 +3,7 @@
 
 #include "osi.h"
 #include "WndExtra.h"
+#include <tchar.h>
 
 static const COLORREF TXT_COLOURS[16] = {RGB(0,0,0),		RGB(128,0,0),
 								         RGB(0,128,0),		RGB(128,128,0),
@@ -19,5 +20,6 @@ VOID			Paint(HWND hWnd);
 VOID			PerformMenuAction(HWND hWnd, WPARAM wParam);
 VOID			SetBell(HWND hWnd, INT iSelected);
 BOOL CALLBACK	Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+VOID			UpdateStats(HWND hWnd);
 
 #endif
