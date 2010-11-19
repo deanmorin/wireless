@@ -14,81 +14,41 @@ VOID ProcessWrite(HWND hWnd, PSTATEINFO psi) {
 }
 
 
-VOID ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {  
+VOID ProcessRead(HWND hWnd, PSTATEINFO psi) {  
     
-    static VOID(*pReadFunc[READ_STATES])(HWND, PSTATEINFO, BYTE*, DWORD) 
+    static VOID(*pReadFunc[READ_STATES])(HWND, PSTATEINFO) 
             = { ReadT1, ReadT3, ReadIDLE, ReadR2 };
-    // call the read function related to the current state
-    pReadFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
+    pReadFunc[psi->iState](hWnd, psi);
 }
 
 
-VOID ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
+VOID ReadT1(HWND hWnd, PSTATEINFO psi) {
     PWNDDATA    pwd = NULL;
     OVERLAPPED  ol  = {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
-    if (pReadBuf[0] == ACK) {
-        WriteFile(pwd->hPort, TEXT("MYFILE"), CTRL_CHAR_SIZE, NULL, &ol);
-        psi->iState     = STATE_T3;
-		psi->itoCount   = 0;
-		psi->dwTimeout  = TOR2;
+    if (1){//psPayload == ACK) {
+        WriteFile(pwd->hPort, "HH", CTRL_CHAR_SIZE, NULL, &ol);
+        psi->iState    = STATE_T3;
+		psi->iTOCount  = 0;
+		psi->dwTimeout = TOR2;
 //        SetEvent(OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("fillFTPBuffer")));
-    } else {
-        psi->iState     = STATE_IDLE;
     }
 }
 
 
-VOID ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
-    PWNDDATA    pwd = NULL;
-    OVERLAPPED  ol  = {0};
-    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-
-    if (pReadBuf[0] == ACK) {
-        if (pwd->FTPQueueSize == 0)
-            WriteFile(pwd->hPort, TEXT("PUTA EOT"), CTRL_CHAR_SIZE, NULL, &ol);
-        } else {
-            //Get next frame
-            SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillftpBuffer")));
-            WriteFile(pwd->hPort, TEXT("A FRAME"), CTRL_CHAR_SIZE, NULL, &ol);
-		    psi->itoCount = 0;
-    }
+VOID ReadT3(HWND hWnd, PSTATEINFO psi) {
+    
 }
 
 
-VOID ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
-    PWNDDATA    pwd = NULL;
-    OVERLAPPED  ol  = {0};
-    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-
-    if (pReadBuf[0] == ENQ) {
-        WriteFile(pwd->hPort, TEXT("AN ACK"), CTRL_CHAR_SIZE, NULL, &ol);
-        psi->iState     = STATE_R2;
-        psi->dwTimeout  = TOR3;
-    }
+VOID ReadIDLE(HWND hWnd, PSTATEINFO psi) {
+    
 }
 
 
-VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
-    PWNDDATA    pwd = NULL;
-    OVERLAPPED  ol  = {0};
-    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-
-    if (pReadBuf[0] == EOT) {
-        psi->iState = STATE_IDLE;
-    } 
-    else if (pwd->PTFQueueSize >= FULL_BUFFER) {
-        // clear buffer
-    }
-    else if (crcFast(pReadBuf, dwLength) == 0) {
-        if (pwd->FTPQueueSize) {
-            WriteFile(pwd->hPort, TEXT("AN RVI"), CTRL_CHAR_SIZE, NULL, &ol);
-        } else {
-            WriteFile(pwd->hPort, TEXT("AN ACK"), CTRL_CHAR_SIZE, NULL, &ol);
-            psi->iState = STATE_T1;
-        }
-    }
+VOID ReadR2(HWND hWnd, PSTATEINFO psi) {
+    
 }
 
 
@@ -102,13 +62,13 @@ VOID ProcessTimeout(PSTATEINFO psi) {
             return;
 
         case STATE_T3:
-            psi->dwTimeout *= (DWORD) pow((long double) 2, ++(psi->itoCount));
-            psi->iState     = (psi->itoCount >= 3) ? STATE_IDLE : STATE_T2;
+            psi->dwTimeout *= (DWORD) pow((long double) 2, ++(psi->iTOCount));
+            psi->iState     = (psi->iTOCount >= 3) ? STATE_IDLE : STATE_T2;
             return;
         
         case STATE_R2:
-            psi->dwTimeout *= (DWORD) pow(2.0, ++(psi->itoCount));
-            psi->iState     = (psi->itoCount >= 3) ? STATE_IDLE : STATE_R2;
+            psi->dwTimeout *= (DWORD) pow(2.0, ++(psi->iTOCount));
+            psi->iState     = (psi->iTOCount >= 3) ? STATE_IDLE : STATE_R2;
             return;
         
         default:
@@ -331,4 +291,3 @@ ProcessRead(HWND hWnd, INT* state, INT* toCount){
 			}
 
             */
-

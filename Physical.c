@@ -81,7 +81,7 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     psi             = (PSTATEINFO) malloc(sizeof(STATEINFO));
     psi->iState     = STATE_IDLE;
     psi->dwTimeout  = INFINITE;
-    psi->itoCount   = 0;
+    psi->iTOCount   = 0;
 
     while (pwd->bConnected) {
         
@@ -96,10 +96,12 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
         if (dwEvent == WAIT_OBJECT_0) {
             // the connection was severed
             break;
+
         }
         else if (dwEvent == WAIT_OBJECT_0 + 1  &&  cs.cbInQue) {
             // data arrived at the port
             ReadFromPort(hWnd, psi, ol, cs.cbInQue);
+            //ProcessRead(hWnd, &state, &toCount);
         }
         else if (dwEvent == WAIT_OBJECT_0 + 2) {
             // in idle state, with data ready to write to port
@@ -112,7 +114,6 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
         else {
             // change this to conditionalo before release
            // DISPLAY_ERROR("Invalid event occured in the Port I/O thread");
-
         }
     }
 
@@ -202,7 +203,7 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
 VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
 
     PWNDDATA    pwd                     = NULL;
-    BYTE        pReadBuf[READ_BUFSIZE]  = {0};
+    CHAR        psReadBuf[READ_BUFSIZE] = {0};
     DWORD       dwBytesRead             = 0;
     DWORD	    dwPacketLength 		    = 0;
 	CHAR*		pcPacket	            = NULL;
@@ -210,20 +211,16 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
     DWORD       dwQueueSize             = 0;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
-    if (!ReadFile(pwd->hPort, pReadBuf, cbInQue, &dwBytesRead, &ol)) {
+    if (!ReadFile(pwd->hPort, psReadBuf, cbInQue, &dwBytesRead, &ol)) {
         // read is incomplete or had an error
         ProcessCommError(pwd->hPort);
         GetOverlappedResult(pwd->hThread, &ol, &dwBytesRead, TRUE);
     }
 
     if (psi->iState == STATE_R2  &&  dwBytesRead < FRAME_SIZE) {
-        // get more bytes y'all ///////////////////////////////////////////////
-    } 
-    else if (dwBytesRead >= CTRL_CHAR_SIZE) {
-        ProcessRead(hWnd, psi, pReadBuf, dwBytesRead);
     }
-    /*
-    dwQueueSize = AddToBack(&pHead, pReadBuf, dwBytesRead);
+
+    dwQueueSize = AddToBack(&pHead, psReadBuf, dwBytesRead);
             
     if (dwQueueSize >= dwPacketLength) {
         pcPacket = RemoveFromFront(&pHead, dwPacketLength);
@@ -231,8 +228,7 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
         memset(psReadBuf, 0, READ_BUFSIZE);
         free(pcPacket);
 	}
-	InvalidateRect(hWnd, NULL, FALSE);
-    */
+	InvalidateRect(hWnd, NULL, FALSE);    
     ResetEvent(ol.hEvent);
 }
 

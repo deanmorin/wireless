@@ -9,22 +9,6 @@ typedef struct CHAR_LIST {
     CHAR_LIST*  next;
 } CHAR_LIST;
 
-
-typedef struct FRAME {
-	BYTE		soh;
-	BYTE		sequence;
-	SHORT		length;
-	BYTE*		payload;
-	BYTE		crc;
-} FRAME, *PFRAME;
-typedef struct FRAME_LIST FRAME_LIST;
-typedef struct FRAME_LIST {
-    FRAME        c;
-    FRAME_LIST*  next;
-} FRAME_LIST;
-
-
-
 DWORD AddToBack(CHAR_LIST** p, CHAR* psBuf, DWORD dwLength);
 DWORD GetFromList(CHAR_LIST* p, UINT ordinal);
 CHAR* RemoveFromFront(CHAR_LIST** p, DWORD dwLength);

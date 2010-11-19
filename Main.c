@@ -93,16 +93,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     ShowWindow(hWnd, iCmdShow);
     UpdateWindow(hWnd);
 
-	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-	pwd->hDlgStats = CreateDialog (hInstance, TEXT("Statistics"), hWnd, Stats);
-	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 
     while (GetMessage(&msg, NULL, 0, 0)) {
-		if (pwd->hDlgStats == 0 || !IsDialogMessage (pwd->hDlgStats, &msg))
-		 {
-			 TranslateMessage (&msg) ;
-			 DispatchMessage (&msg) ;
-		 }
+        TranslateMessage (&msg);
+        DispatchMessage (&msg);
     }
     return msg.wParam;
 }
