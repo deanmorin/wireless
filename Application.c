@@ -116,10 +116,8 @@ VOID InitTerminal(HWND hWnd) {
     pwd->cc.dcb.DCBlength = sizeof(DCB);
     BuildCommDCB((LPCWSTR)"96,N,8,1", &pwd->cc.dcb);
 
-
-
 	//create tables for crc
-	crcInit();
+	//crcInit();
     //print out headers for Tokens and Values
     MakeColumns(hWnd);
 }
@@ -180,6 +178,10 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
                 DISPLAY_ERROR("The comm settings dialogue failed.\nThis port may not exist");
             }
 		    return;
+
+		case IDM_STATISTICS:       
+			ShowWindow(pwd->hDlgStats, SW_NORMAL);
+            return;
         
         default:
             return;
@@ -283,4 +285,39 @@ VOID MakeColumns(HWND hWnd){
     for(i=0;i<10;i++){
         UpdateDisplayBuf(hWnd,temp2[i]);
     }    
+}
+
+/*------------------------------------------------------------------------------
+-- FUNCTION:    Stats
+--
+-- DATE:        
+--
+-- REVISIONS:   (Date and Description)
+--
+-- DESIGNER:	Marcel Vangrootheest
+--
+-- PROGRAMMER:  Marcel Vangrootheest
+--
+-- INTERFACE:   BOOL CALLBACK Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+--                              hDlg	- handle to the Dialog
+--								message - the message received
+--								wParam  - contents vary based on the message
+--								lParam  - contents vary based on the message
+--
+-- RETURNS:     BOOL - returns true if the message was handled.
+--
+-- NOTES:
+--              
+--
+------------------------------------------------------------------------------*/
+BOOL CALLBACK Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		return TRUE;
+	case WM_CLOSE:
+		ShowWindow(hDlg, SW_HIDE);
+		return TRUE;
+	}
+	return FALSE;
 }

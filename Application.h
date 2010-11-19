@@ -13,10 +13,11 @@ static const COLORREF TXT_COLOURS[16] = {RGB(0,0,0),		RGB(128,0,0),
 								         RGB(0,0,255),		RGB(255,0,255),
 								         RGB(0,255,255),	RGB(255,255,255)};
 
-VOID    InitTerminal(HWND hWnd);
-VOID 	MakeColumns(HWND hWnd);
-VOID    Paint(HWND hWnd);
-VOID    PerformMenuAction(HWND hWnd, WPARAM wParam);
-VOID    SetBell(HWND hWnd, INT iSelected);
+VOID			InitTerminal(HWND hWnd);
+VOID 			MakeColumns(HWND hWnd);
+VOID			Paint(HWND hWnd);
+VOID			PerformMenuAction(HWND hWnd, WPARAM wParam);
+VOID			SetBell(HWND hWnd, INT iSelected);
+BOOL CALLBACK	Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 #endif

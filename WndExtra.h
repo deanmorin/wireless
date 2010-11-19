@@ -59,6 +59,7 @@ typedef struct displayBuf {
 } DISPLAYBUF;
 
 typedef struct wndData {
+	HWND			hDlgStats;
     HANDLE          hPort;
     LPTSTR          lpszCommName;
     COMMCONFIG      cc;
