@@ -232,7 +232,6 @@ VOID Paint(HWND hWnd) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     hdc = BeginPaint(hWnd, &ps) ;
-	
     SelectObject(hdc, pwd->displayBuf.hFont);
 
     tempfgColor = CUR_FG_COLOR;
@@ -299,18 +298,10 @@ VOID MakeColumns(HWND hWnd){
     }    
 }
 
-VOID UpdateStats(HWND hWnd) {
-	
-	TCHAR text[20];
-	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-	_stprintf(text, _T("%d"), ++pwd->statsInfo.numFiles);
-	SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
-}
-
 /*------------------------------------------------------------------------------
 -- FUNCTION:    Stats
 --
--- DATE:        Nov 8, 2010
+-- DATE:        
 --
 -- REVISIONS:   (Date and Description)
 --
@@ -325,8 +316,8 @@ VOID UpdateStats(HWND hWnd) {
 --								lParam  - contents vary based on the message
 --
 -- RETURNS:     BOOL - returns true if the message was handled.
--- 
--- NOTES:	This is the Dialog process for the Statistics Box.
+--
+-- NOTES:
 --              
 --
 ------------------------------------------------------------------------------*/

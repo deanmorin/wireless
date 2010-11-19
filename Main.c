@@ -25,6 +25,7 @@
 ------------------------------------------------------------------------------*/
 
 #include "Main.h"
+
 /*------------------------------------------------------------------------------
 -- FUNCTION:    WinMain
 --
@@ -94,7 +95,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 	pwd->hDlgStats = CreateDialog (hInstance, TEXT("Statistics"), hWnd, Stats);
-	SetTimer(hWnd, TIMER, 1000, (TIMERPROC) NULL);
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 
     while (GetMessage(&msg, NULL, 0, 0)) {
@@ -133,10 +133,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 --              The standard WndProc function.
 ------------------------------------------------------------------------------*/
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-   
+                             
     PWNDDATA pwd = {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-	
 
     switch (message) {
 
@@ -151,12 +150,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         case WM_COMMAND:
             PerformMenuAction(hWnd, wParam);
             return 0;
-
-		case WM_TIMER:
-			if (wParam == TIMER) {
-				UpdateStats(hWnd);
-			}
-			return 0;
 
         case WM_DESTROY:
             Disconnect(hWnd);
