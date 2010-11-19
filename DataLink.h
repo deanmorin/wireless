@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 #include <math.h>
+#include "crc.h"
 #include "WndExtra.h"
 
 #define READ_STATES 4
@@ -29,7 +30,7 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 typedef struct STATEINFO_tag {
     INT     iState;
     DWORD   dwTimeout;
-    INT     iTOCount;
+    INT     itoCount;
 } STATEINFO, *PSTATEINFO;
 
 

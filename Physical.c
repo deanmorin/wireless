@@ -81,7 +81,7 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     psi             = (PSTATEINFO) malloc(sizeof(STATEINFO));
     psi->iState     = STATE_IDLE;
     psi->dwTimeout  = INFINITE;
-    psi->iTOCount   = 0;
+    psi->itoCount   = 0;
 
     while (pwd->bConnected) {
         
