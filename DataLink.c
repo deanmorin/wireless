@@ -135,6 +135,7 @@ VOID OpenFileTransmit(HWND hWnd){
 	pwd->hFileTransmit =CreateFile(pwd->lpszTransmitName, GENERIC_READ | GENERIC_WRITE,
 							FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
 							OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 	//MessageBox(hWnd, pwd->lpszTransmitName, "File", MB_OK);
 	
@@ -144,9 +145,12 @@ VOID CloseFileTransmit(HWND hWnd){
 	PWNDDATA pwd = {0};
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 	
-	CloseHandle(pwd->hFileTransmit);
-	pwd->lpszTransmitName = "";
-	SetWindowLongPtr(hWnd, 0, 0);
+	if(pwd->hFileTransmit){
+		CloseHandle(pwd->hFileTransmit);
+		pwd->lpszTransmitName = "";
+		SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
+		
+	}
 }
 
 VOID OpenFileReceive(HWND hWnd){
@@ -159,6 +163,7 @@ VOID OpenFileReceive(HWND hWnd){
 	ofn.lStructSize = sizeof(ofn);
 	ofn.lpstrFile = szFile;
 	ofn.lpstrFile[0] = '\0';
+	ofn.lpstrFilter = "All\0*.*\0";
 	ofn.nMaxFile = sizeof(szFile);
 
 
@@ -168,15 +173,46 @@ VOID OpenFileReceive(HWND hWnd){
 									FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
 									OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
+	
 }
 
-VOID CloseFileRecieve(HWND hWnd){
+VOID CloseFileReceive(HWND hWnd){
 	PWNDDATA pwd = {0};
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
-	
-	CloseHandle(pwd->hFileReceive);
-	pwd->lpszReceiveName = "";
-	SetWindowLongPtr(hWnd, 0, 0);
+	if(pwd->hFileReceive){
+		CloseHandle(pwd->hFileReceive);
+		pwd->lpszReceiveName = "";
+		SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
+		
+	}
+}
+
+VOID WriteToFile(HWND hWnd, PFRAME frame){
+	PWNDDATA pwd = {0};
+	DWORD dwBytesWritten = 0;
+	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+
+	if(!WriteFile(pwd->hFileReceive, frame->payload, frame->length, &dwBytesWritten, NULL)){
+		DISPLAY_ERROR("Failed to write to file");
+	}
+}
+
+VOID ReadFromFile(HWND hWnd){
+	PWNDDATA pwd = {0};
+	DWORD dwBytesRead = 0;
+	CHAR* ReadBuffer = {0};
+	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+
+	if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
+		DISPLAY_ERROR("Failed to read from file");
+	}
+	//File Empty
+	if(dwBytesRead < 1019){
+		pwd->bMoreData = FALSE;
+		CloseFileTransmit(hWnd);
+	}
+	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
+	//Call createFrame(ReadBuffer, dwBytesRead);
 }
 /*
 ProcessRead(HWND hWnd, INT* state, INT* toCount){
