@@ -46,13 +46,13 @@ VOID ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[0] == ACK) {
-        //if (ftpQueueSize == 0)
-        // WriteFile(pwd->hPort, TEXT("PUTA EOT"), CTRL_CHAR_SIZE, NULL, &ol);
-    } else {
-        //Get next frame
-        SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillftpBuffer")));
-        WriteFile(pwd->hPort, TEXT("A FRAME"), CTRL_CHAR_SIZE, NULL, &ol);
-		psi->itoCount = 0;
+        if (pwd->FTPQueueSize == 0)
+            WriteFile(pwd->hPort, TEXT("PUTA EOT"), CTRL_CHAR_SIZE, NULL, &ol);
+        } else {
+            //Get next frame
+            SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillftpBuffer")));
+            WriteFile(pwd->hPort, TEXT("A FRAME"), CTRL_CHAR_SIZE, NULL, &ol);
+		    psi->itoCount = 0;
     }
 }
 
@@ -78,16 +78,16 @@ VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     if (pReadBuf[0] == EOT) {
         psi->iState = STATE_IDLE;
     } 
-    //else if (portToQueueSize >= FULL_BUFFER) {
+    else if (pwd->PTFQueueSize >= FULL_BUFFER) {
         // clear buffer
-    //}
+    }
     else if (crcFast(pReadBuf, dwLength) == 0) {
- //       if (FileToPortQueueSize) {
- //           WriteFile(pwd->hPort, TEXT("AN RVI"), CTRL_CHAR_SIZE, NULL, &ol);
-   //     } else {
+        if (pwd->FTPQueueSize) {
+            WriteFile(pwd->hPort, TEXT("AN RVI"), CTRL_CHAR_SIZE, NULL, &ol);
+        } else {
             WriteFile(pwd->hPort, TEXT("AN ACK"), CTRL_CHAR_SIZE, NULL, &ol);
             psi->iState = STATE_T1;
-     //   }
+        }
     }
 }
 

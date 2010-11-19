@@ -75,13 +75,13 @@ typedef struct wndData {
     INT             cyWindowBottom;
 	BOOL			wordWrap;
 	BOOL			relOrigin;
-
-	
+    UINT            FTPQueueSize;
+	UINT            PTFQueueSize;
 	FRAME_LIST		FTPBuff;
 	FRAME_LIST		PTFBuff;
 	BYTE			TxSequenceNumber;
 	BYTE			RxSequenceNumber;
-
+    
 
 
 } WNDDATA, *PWNDDATA;
