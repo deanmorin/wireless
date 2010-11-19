@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 #include <math.h>
+#include "crc.h"
 #include "WndExtra.h"
 
 #define READ_STATES 4
@@ -35,7 +36,7 @@ typedef struct Frame {
 typedef struct STATEINFO_tag {
     INT     iState;
     DWORD   dwTimeout;
-    INT     iTOCount;
+    INT     itoCount;
 } STATEINFO, *PSTATEINFO;
 
 
