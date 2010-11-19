@@ -20,6 +20,7 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 
 
 #define CTRL_CHAR_SIZE  1
+#define MAX_PAYLOAD_SIZE	1019
 #define FRAME_SIZE      1024
 #define SOH             0x01
 #define EOT             0x04
@@ -41,5 +42,5 @@ VOID    ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
-
+FRAME CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength);
 #endif

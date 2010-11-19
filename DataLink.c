@@ -116,3 +116,38 @@ VOID ProcessTimeout(PSTATEINFO psi) {
             return;
     }
 }
+
+FRAME CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength){
+	DWORD		i;
+	DWORD		j;
+	FRAME myFrame;
+	BYTE* myData;
+	PWNDDATA    pwd                 = NULL;
+	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+	myData = (BYTE*) malloc(sizeof(BYTE) * FRAME_SIZE);
+	
+	myFrame.soh = 0x1;
+	myFrame.sequence = pwd->TxSequenceNumber++;
+	myFrame.length = (SHORT)dwLength;
+	myFrame.payload = (BYTE*) calloc(MAX_PAYLOAD_SIZE,sizeof(BYTE));
+	
+	for (i = 0; i<dwLength;i++) {
+		myFrame.payload[i] = *(psBuf++);
+	}
+	myFrame.crc =0;
+	i = 0;
+	j = 0;
+	myData[i++] = myFrame.soh;
+	myData[i++] = myFrame.sequence;
+	myData[i++] = myFrame.length;
+	myData[i++]	= myFrame.length>>sizeof(BYTE)*8;
+	for(j = 0; j< MAX_PAYLOAD_SIZE;j++){
+		myData[i++] = myFrame.payload[j];
+	}
+	myData[i++] = myFrame.crc;
+	//memcpy(myData,&myFrame,sizeof(BYTE) * FRAME_SIZE);
+	myFrame.crc = crcFast(myData,FRAME_SIZE - sizeof(crc));
+
+
+	return myFrame;
+}

@@ -47,7 +47,7 @@
 --              Initializes the terminal to its default state.
 ------------------------------------------------------------------------------*/
 VOID InitTerminal(HWND hWnd) {
-
+BYTE* temp;//for testing out Create Frame
     PWNDDATA    pwd         = {0};
     HDC         hdc         = {0};
     COMMCONFIG  cc          = {0};
@@ -120,6 +120,14 @@ VOID InitTerminal(HWND hWnd) {
 
 	//create tables for crc
 	crcInit();
+
+
+	//testing out CreateFrame
+	pwd->TxSequenceNumber=1;
+	temp = (BYTE*) calloc(2*256+1,sizeof(BYTE));
+	temp[1] = 0x3;
+	CreateFrame(hWnd,temp,2*256+1);
+
     //print out headers for Tokens and Values
     MakeColumns(hWnd);
 }
