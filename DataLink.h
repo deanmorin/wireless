@@ -50,4 +50,5 @@ VOID	CloseFileTransmit(HWND hWnd);
 VOID	WriteToFile(HWND hWnd, PFRAME frame);
 VOID	ReadFromFile(HWND hWnd);
 
+
 #endif
