@@ -14,15 +14,16 @@ VOID ProcessWrite(HWND hWnd, PSTATEINFO psi) {
 }
 
 
-VOID ProcessRead(HWND hWnd, PSTATEINFO psi) {  
+VOID ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {  
     
-    static VOID(*pReadFunc[READ_STATES])(HWND, PSTATEINFO) 
+    static VOID(*pReadFunc[READ_STATES])(HWND, PSTATEINFO, BYTE*, DWORD) 
             = { ReadT1, ReadT3, ReadIDLE, ReadR2 };
-    pReadFunc[psi->iState](hWnd, psi);
+    // call the read function related to the current state
+    pReadFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
 }
 
 
-VOID ReadT1(HWND hWnd, PSTATEINFO psi) {
+VOID ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     PWNDDATA    pwd = NULL;
     OVERLAPPED  ol  = {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
@@ -37,17 +38,17 @@ VOID ReadT1(HWND hWnd, PSTATEINFO psi) {
 }
 
 
-VOID ReadT3(HWND hWnd, PSTATEINFO psi) {
+VOID ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     
 }
 
 
-VOID ReadIDLE(HWND hWnd, PSTATEINFO psi) {
+VOID ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     
 }
 
 
-VOID ReadR2(HWND hWnd, PSTATEINFO psi) {
+VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     
 }
 
