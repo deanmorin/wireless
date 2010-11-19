@@ -135,11 +135,12 @@ FRAME CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength){
 		myFrame.payload[i] = *(psBuf++);
 	}
 	myFrame.crc =0;
+	
 	i = 0;
 	j = 0;
 	myData[i++] = myFrame.soh;
 	myData[i++] = myFrame.sequence;
-	myData[i++] = myFrame.length;
+	myData[i++] = (BYTE) myFrame.length;
 	myData[i++]	= myFrame.length>>sizeof(BYTE)*8;
 	for(j = 0; j< MAX_PAYLOAD_SIZE;j++){
 		myData[i++] = myFrame.payload[j];
@@ -148,6 +149,8 @@ FRAME CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength){
 	//memcpy(myData,&myFrame,sizeof(BYTE) * FRAME_SIZE);
 	myFrame.crc = crcFast(myData,FRAME_SIZE - sizeof(crc));
 
+
+	//myFrame.crc = crcFast((BYTE*)myFrame,FRAME_SIZE - sizeof(crc));
 
 	return myFrame;
 }
