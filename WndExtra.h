@@ -73,7 +73,11 @@ typedef struct displayBuf {
 typedef struct wndData {
 	HWND			hDlgStats;
     HANDLE          hPort;
+	HANDLE			hFileReceive;
+	HANDLE			hFileTransmit;
     LPTSTR          lpszCommName;
+	LPTSTR			lpszReceiveName;
+	LPTSTR			lpszTransmitName;
     COMMCONFIG      cc;
     BOOL            bConnected;
     HANDLE          hThread;
@@ -89,12 +93,14 @@ typedef struct wndData {
 	BOOL			wordWrap;
 	BOOL			relOrigin;
 	STATSINFO		statsInfo;
-
+	BOOL			bMoreData;
+    UINT            FTPQueueSize;
+	UINT            PTFQueueSize;
 	FRAME_LIST		FTPBuff;
 	FRAME_LIST		PTFBuff;
 	BYTE			TxSequenceNumber;
 	BYTE			RxSequenceNumber;
-
+    
 
 
 } WNDDATA, *PWNDDATA;
