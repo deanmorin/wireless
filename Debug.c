@@ -1,4 +1,4 @@
-/*LRESULT CALLBACK DebugProc(HWND hWnd, UINT message,
+LRESULT CALLBACK DebugProc(HWND hWnd, UINT message,
                          WPARAM wParam, LPARAM lParam){
 
 	                        
@@ -45,4 +45,4 @@ VOID DebugPaint(HWND hWnd){
 
 	
     EndPaint(hWnd, &ps);
-}*/
+}
