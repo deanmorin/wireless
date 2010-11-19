@@ -11,6 +11,7 @@
                                     // "Select Ports" dropdown
 #define CHARS_PER_LINE      80      // characters per line
 #define LINES_PER_SCRN      24      // lines per screen
+#define TIMER				3003	// the id for timer
 
 #define DISPLAY_ERROR(x)    MessageBox(NULL, TEXT(x), TEXT(""), MB_OK)
 #define X                   pwd->displayBuf.cxCursor
@@ -40,7 +41,18 @@ typedef struct charInfo {
     BYTE    style;
 } CHARINFO;
 
-typedef struct line line;
+typedef struct statsInfo {
+	INT	numFiles;
+	INT upFrames;
+	INT downFrames;
+	INT sentACKS;
+	INT recACKS;
+	INT sentEOT;
+	INT recEOT;
+	INT sentRVI;
+	INT recRVI;
+} STATSINFO;
+
 typedef struct line {
     CHARINFO    columns[CHARS_PER_LINE];
 } LINE, *PLINE;
@@ -59,6 +71,7 @@ typedef struct displayBuf {
 } DISPLAYBUF;
 
 typedef struct wndData {
+	HWND			hDlgStats;
     HANDLE          hPort;
     LPTSTR          lpszCommName;
     COMMCONFIG      cc;
@@ -75,8 +88,8 @@ typedef struct wndData {
     INT             cyWindowBottom;
 	BOOL			wordWrap;
 	BOOL			relOrigin;
+	STATSINFO		statsInfo;
 
-	
 	FRAME_LIST		FTPBuff;
 	FRAME_LIST		PTFBuff;
 	BYTE			TxSequenceNumber;

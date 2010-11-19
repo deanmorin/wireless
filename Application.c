@@ -116,9 +116,8 @@ BYTE* temp;//for testing out Create Frame
     pwd->cc.dcb.DCBlength = sizeof(DCB);
     BuildCommDCB((LPCWSTR)"96,N,8,1", &pwd->cc.dcb);
 
-
-
 	//create tables for crc
+
 	crcInit();
 
 
@@ -188,6 +187,10 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
                 DISPLAY_ERROR("The comm settings dialogue failed.\nThis port may not exist");
             }
 		    return;
+
+		case IDM_STATISTICS:       
+			ShowWindow(pwd->hDlgStats, SW_NORMAL);
+            return;
         
         default:
             return;
@@ -227,6 +230,7 @@ VOID Paint(HWND hWnd) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     hdc = BeginPaint(hWnd, &ps) ;
+	
     SelectObject(hdc, pwd->displayBuf.hFont);
 
     tempfgColor = CUR_FG_COLOR;
@@ -291,4 +295,47 @@ VOID MakeColumns(HWND hWnd){
     for(i=0;i<10;i++){
         UpdateDisplayBuf(hWnd,temp2[i]);
     }    
+}
+
+VOID UpdateStats(HWND hWnd) {
+	
+	TCHAR text[20];
+	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+	_stprintf(text, _T("%d"), ++pwd->statsInfo.numFiles);
+	SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
+}
+
+/*------------------------------------------------------------------------------
+-- FUNCTION:    Stats
+--
+-- DATE:        Nov 8, 2010
+--
+-- REVISIONS:   (Date and Description)
+--
+-- DESIGNER:	Marcel Vangrootheest
+--
+-- PROGRAMMER:  Marcel Vangrootheest
+--
+-- INTERFACE:   BOOL CALLBACK Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+--                              hDlg	- handle to the Dialog
+--								message - the message received
+--								wParam  - contents vary based on the message
+--								lParam  - contents vary based on the message
+--
+-- RETURNS:     BOOL - returns true if the message was handled.
+-- 
+-- NOTES:	This is the Dialog process for the Statistics Box.
+--              
+--
+------------------------------------------------------------------------------*/
+BOOL CALLBACK Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		return TRUE;
+	case WM_CLOSE:
+		ShowWindow(hDlg, SW_HIDE);
+		return TRUE;
+	}
+	return FALSE;
 }
