@@ -17,12 +17,6 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define TOR2    500
 #define TOR3    500
 
-typedef struct Frame {
-	BYTE		soh;
-	SHORT		length;
-	BYTE*		payload;
-	BYTE		crc;
-} FRAME, *PFRAME;
 
 
 #define CTRL_CHAR_SIZE  1
