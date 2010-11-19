@@ -76,6 +76,7 @@ VOID InitTerminal(HWND hWnd) {
 
     // initialize variables in PWDDATA struct to defaults
     pwd->bConnected         = FALSE;
+	pwd->bMoreData			= TRUE;
     pwd->psIncompleteEsc    = NULL;
     CHAR_WIDTH              = tm.tmAveCharWidth;
     CHAR_HEIGHT             = tm.tmHeight;
@@ -122,6 +123,8 @@ VOID InitTerminal(HWND hWnd) {
 	crcInit();
     //print out headers for Tokens and Values
     MakeColumns(hWnd);
+
+	
 }
 
 /*------------------------------------------------------------------------------
@@ -159,6 +162,9 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
 
         case IDM_DISCONNECT:
             Disconnect(hWnd);
+			CloseFileReceive(hWnd);
+			CloseFileTransmit(hWnd);
+			
             return;
 
         case IDM_EXIT:
@@ -182,6 +188,10 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
             }
 		    return;
         
+		case IDM_OPEN:
+			OpenFileTransmit(hWnd);
+			SetEvent(OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("fillFTPBuffer")));
+			return;
         default:
             return;
     }

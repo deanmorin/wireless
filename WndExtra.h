@@ -60,7 +60,11 @@ typedef struct displayBuf {
 
 typedef struct wndData {
     HANDLE          hPort;
+	HANDLE			hFileReceive;
+	HANDLE			hFileTransmit;
     LPTSTR          lpszCommName;
+	LPTSTR			lpszReceiveName;
+	LPTSTR			lpszTransmitName;
     COMMCONFIG      cc;
     BOOL            bConnected;
     HANDLE          hThread;
@@ -75,6 +79,7 @@ typedef struct wndData {
     INT             cyWindowBottom;
 	BOOL			wordWrap;
 	BOOL			relOrigin;
+	BOOL			bMoreData;
 } WNDDATA, *PWNDDATA;
 
 #endif

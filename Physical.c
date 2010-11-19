@@ -113,7 +113,7 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
         }
         else {
             // change this to conditionalo before release
-            DISPLAY_ERROR("Invalid event occured in the Port I/O thread");
+           // DISPLAY_ERROR("Invalid event occured in the Port I/O thread");
         }
     }
 
@@ -123,6 +123,79 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     }
     free(hEvents);
     CloseHandle(ol.hEvent);
+    return 0;
+}
+DWORD WINAPI FileIOThreadProc(HWND hWnd) {
+    
+    PWNDDATA    pwd                 = NULL;
+    OVERLAPPED  ol                  = {0};
+    DWORD       dwEvent             = 0;
+    DWORD       dwError             = 0;
+    COMSTAT     cs                  = {0};
+    HANDLE*     hEvents             = NULL;
+    INT         iEventsSize         = 0;
+    PSTATEINFO  psi             = NULL;
+    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    
+    
+   // CreateEvent(NULL, TRUE, FALSE, TEXT("fillFTPBuffer"));         //REMOVE
+    if ((ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)) == NULL) {
+        DISPLAY_ERROR("Error creating event in File I/o thread");
+    }
+	
+    hEvents     = (HANDLE*) malloc(sizeof(HANDLE) * 2);
+    hEvents[0]  = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("fillFTPBuffer"));
+    hEvents[1]  = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("emptyPTFBuffer"));
+    
+
+    psi             = (PSTATEINFO) malloc(sizeof(STATEINFO));
+    psi->iState     = STATE_IDLE;
+    psi->dwTimeout  = INFINITE;
+    psi->iTOCount   = 0;
+
+    while (pwd->bConnected) {
+        
+        SetCommMask(pwd->hPort, EV_RXCHAR);  
+        if (!WaitCommEvent(pwd->hPort, &dwEvent, &ol)) {
+            ProcessCommError(pwd->hPort);
+        }
+        iEventsSize = 2;
+        dwEvent = WaitForMultipleObjects(iEventsSize, hEvents, FALSE, INFINITE);
+        ClearCommError(pwd->hPort, &dwError, &cs);
+ 
+        if (dwEvent == WAIT_OBJECT_0) {
+            // fill ftp buffer
+			/*while(FTPQueueSize < FULL_WRITE_BUFFER && pwd->bMoreData){
+				read data
+				frame data
+				add frame to writeQueue
+			}*/
+			
+            break;
+
+        }
+        else if (dwEvent == WAIT_OBJECT_0 + 1) {
+            // empty ptf buffer
+            /*while(ptfQueuesize > 0){
+				getporttofilequeue
+				write data to file
+				display data on screen
+			}*/
+			break;
+        }
+        else if (dwEvent == WAIT_TIMEOUT) {
+            // a timeout occured
+            ProcessTimeout(psi);
+        }
+        
+        else {
+            // change this to conditionalo before release
+            DISPLAY_ERROR("Invalid event occured in the File I/O thread");
+        }
+    }
+	
+	free(hEvents);
+	CloseHandle(ol.hEvent);
     return 0;
 }
 

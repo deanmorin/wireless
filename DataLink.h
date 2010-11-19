@@ -52,4 +52,9 @@ VOID    ReadIDLE(HWND hWnd, PSTATEINFO psi);
 VOID    ReadR2(HWND hWnd, PSTATEINFO psi);
 VOID 	OpenFileReceive(HWND hWnd);
 VOID 	OpenFileTransmit(HWND hWnd);
+VOID	CloseFileReceive(HWND hWnd);
+VOID	CloseFileTransmit(HWND hWnd);
+VOID	WriteToFile(HWND hWnd, PFRAME frame);
+VOID	ReadFromFile(HWND hWnd);
+
 #endif
