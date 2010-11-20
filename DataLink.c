@@ -166,6 +166,7 @@ VOID OpenFileTransmit(HWND hWnd){
 	ofn.lStructSize = sizeof(ofn);
 	ofn.lpstrFile = szFile;
 	ofn.lpstrFile[0] = '\0';
+	ofn.lpstrFilter = "All\0*.*\0";
 	ofn.nMaxFile = sizeof(szFile);
 
 
@@ -173,7 +174,7 @@ VOID OpenFileTransmit(HWND hWnd){
 	pwd->lpszTransmitName = ofn.lpstrFile;
 	pwd->hFileTransmit =CreateFile(pwd->lpszTransmitName, GENERIC_READ | GENERIC_WRITE,
 							FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-							OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+							OPEN_ALWAYS, FILE_FLAG_OVERLAPPED, NULL);
 	
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 	//MessageBox(hWnd, pwd->lpszTransmitName, "File", MB_OK);
@@ -184,9 +185,12 @@ VOID CloseFileTransmit(HWND hWnd){
 	PWNDDATA pwd = {0};
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 	
-	if(pwd->hFileTransmit){
-		CloseHandle(pwd->hFileTransmit);
-		pwd->lpszTransmitName = "";
+	if(pwd->hFileTransmit != NULL){
+		if(!CloseHandle(pwd->hFileTransmit)){
+			DISPLAY_ERROR("Failed to close Transmit File");
+		}
+		//pwd->lpszTransmitName = "";
+		pwd->hFileTransmit = NULL;
 		SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 		
 	}
@@ -210,7 +214,7 @@ VOID OpenFileReceive(HWND hWnd){
 	pwd->lpszReceiveName = ofn.lpstrFile;
 	pwd->hFileReceive = CreateFile(pwd->lpszReceiveName, GENERIC_READ | GENERIC_WRITE,
 									FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-									OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+									OPEN_ALWAYS, FILE_FLAG_OVERLAPPED, NULL);
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 	
 }
@@ -219,8 +223,11 @@ VOID CloseFileReceive(HWND hWnd){
 	PWNDDATA pwd = {0};
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 	if(pwd->hFileReceive){
-		CloseHandle(pwd->hFileReceive);
-		pwd->lpszReceiveName = "";
+		if(!CloseHandle(pwd->hFileReceive)){
+			DISPLAY_ERROR("Failed to close Receive File");
+		}
+		//pwd->lpszReceiveName = "";
+		pwd->hFileReceive = NULL;
 		SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 		
 	}
@@ -229,9 +236,10 @@ VOID CloseFileReceive(HWND hWnd){
 VOID WriteToFile(HWND hWnd, PFRAME frame){
 	PWNDDATA pwd = {0};
 	DWORD dwBytesWritten = 0;
+	OVERLAPPED  ol                      = {0};
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 
-	if(!WriteFile(pwd->hFileReceive, frame->payload, frame->length, &dwBytesWritten, NULL)){
+	if(!WriteFile(pwd->hFileReceive, frame->payload, frame->length, &dwBytesWritten, &ol)){
 		DISPLAY_ERROR("Failed to write to file");
 	}
 }
@@ -239,18 +247,37 @@ VOID WriteToFile(HWND hWnd, PFRAME frame){
 VOID ReadFromFile(HWND hWnd){
 	PWNDDATA pwd = {0};
 	DWORD dwBytesRead = 0;
-	CHAR* ReadBuffer = {0};
+	BYTE* ReadBuffer = {0};
+	OVERLAPPED  ol                      = {0};
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+	DWORD	dwSizeOfFile = 0;
 
-	if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
-		DISPLAY_ERROR("Failed to read from file");
-	}
-	//File Empty
-	if(dwBytesRead < 1019){
-		pwd->bMoreData = FALSE;
-		CloseFileTransmit(hWnd);
+	dwSizeOfFile = GetFileSize(pwd->hFileTransmit, NULL);
+	while(pwd->FTPQueueSize < FULL_BUFFER){
+		if(pwd->NumOfReads == 0){
+			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, &ol)){
+				DISPLAY_ERROR("Failed to read from file");
+			}
+			pwd->NumOfReads++;
+			//set DataToWrite
+		} else if(dwSizeOfFile/pwd->NumOfReads >= 1019){
+			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, &ol)){
+				DISPLAY_ERROR("Failed to read from file");
+			}
+			pwd->NumOfReads++;
+		} else if(dwSizeOfFile/pwd->NumOfReads > 0){
+			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%pwd->NumOfReads, &dwBytesRead, &ol)){
+				DISPLAY_ERROR("Failed to read from file");
+			}
+			pwd->NumOfReads++;
+		} else { //file empty
+			CloseFileTransmit(hWnd);
+			//send end of file message
+		}
+				
+		CreateFrame(hWnd, ReadBuffer, dwBytesRead);
 	}
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
-	//Call createFrame(ReadBuffer, dwBytesRead);
+	
 }
 

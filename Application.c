@@ -87,6 +87,8 @@ BYTE* temp;//for testing out Create Frame
 
     pwd->FTPQueueSize = 0;
     pwd->PTFQueueSize = 0;
+	pwd->bMoreData = TRUE;
+	pwd->NumOfReads = 0;
     
     // initialize a "blank" display buffer
     for (i = 0; i < LINES_PER_SCRN; i++) {
@@ -163,10 +165,13 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
                 
         case IDM_CONNECT:       
             Connect(hWnd);
+			OpenFileReceive(hWnd);
             return;
 
         case IDM_DISCONNECT:
             Disconnect(hWnd);
+			CloseFileReceive(hWnd);
+			CloseFileTransmit(hWnd);
             return;
 
         case IDM_EXIT:
