@@ -94,14 +94,12 @@ typedef struct wndData {
 	BOOL			wordWrap;
 	BOOL			relOrigin;
 	STATSINFO		statsInfo;
-
+    INT             FTPQueueSize;
+    INT             PTFQueueSize;
 	FRAME_LIST		FTPBuff;
 	FRAME_LIST		PTFBuff;
 	BYTE			TxSequenceNumber;
 	BYTE			RxSequenceNumber;
-
-
-
 } WNDDATA, *PWNDDATA;
 
 #endif

@@ -33,7 +33,7 @@ VOID ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         psi->iState     = STATE_T3;
 		psi->itoCount   = 0;
 		psi->dwTimeout  = TOR2;
-//        SetEvent(OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("fillFTPBuffer")));
+        SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
     } else {
         psi->iState     = STATE_IDLE;
     }
@@ -46,8 +46,8 @@ VOID ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[0] == ACK) {
-        //if (ftpQueueSize == 0)
-        // WriteFile(pwd->hPort, TEXT("PUTA EOT"), CTRL_CHAR_SIZE, NULL, &ol);
+        if (pwd->FTPQueueSize == 0)
+        WriteFile(pwd->hPort, TEXT("PUTA EOT"), CTRL_CHAR_SIZE, NULL, &ol);
     } else {
         //Get next frame
         SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillftpBuffer")));
@@ -78,16 +78,16 @@ VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     if (pReadBuf[0] == EOT) {
         psi->iState = STATE_IDLE;
     } 
-    //else if (portToQueueSize >= FULL_BUFFER) {
+    else if (pwd->PTFQueueSize >= FULL_BUFFER) {
         // clear buffer
-    //}
+    }
     else if (crcFast(pReadBuf, dwLength) == 0) {
- //       if (FileToPortQueueSize) {
- //           WriteFile(pwd->hPort, TEXT("AN RVI"), CTRL_CHAR_SIZE, NULL, &ol);
-   //     } else {
+        if (pwd->FTPQueueSize) {
+            WriteFile(pwd->hPort, TEXT("AN RVI"), CTRL_CHAR_SIZE, NULL, &ol);
+        } else {
             WriteFile(pwd->hPort, TEXT("AN ACK"), CTRL_CHAR_SIZE, NULL, &ol);
             psi->iState = STATE_T1;
-     //   }
+        }
     }
 }
 
@@ -102,7 +102,7 @@ VOID ProcessTimeout(PSTATEINFO psi) {
             return;
 
         case STATE_T3:
-            psi->dwTimeout *= (DWORD) pow((long double) 2, ++(psi->itoCount));
+            psi->dwTimeout *= (DWORD) pow(2.0, ++(psi->itoCount));
             psi->iState     = (psi->itoCount >= 3) ? STATE_IDLE : STATE_T2;
             return;
         

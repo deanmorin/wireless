@@ -113,6 +113,7 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
             // change this to conditional before release //////////////////////
             DISPLAY_ERROR("Invalid event occured in the Port I/O thread");
         }
+        ResetEvent(ol.hEvent);
     }
 
 

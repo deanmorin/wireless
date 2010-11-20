@@ -27,23 +27,41 @@
 
 #include "List.h"
 
-BOOL AddByteToBack(PBYTE_NODE pHead, PBYTE_NODE pTail, BYTE data) {
-    PBYTE_NODE p        = NULL;
+BOOL AddToQueue(PBYTE_NODE* pHead, PBYTE_NODE* pTail, BYTE data) {
     PBYTE_NODE newNode  = NULL;
     
     if ((newNode = (PBYTE_NODE) malloc(sizeof(BYTE_NODE))) == NULL) {
         return FALSE;
     }
     if (pHead == NULL) {
-        pHead = newNode;
-        pTail = newNode;
+        *pHead = newNode;
+        *pTail = newNode;
         return TRUE;
     }
-    pTail->next = newNode;
-    pTail       = newNode;
+    (*pTail)->next = newNode;
+    *pTail         = newNode;
     return TRUE;
 }
 
+
+PBYTE RemoveFromQueue(PBYTE_NODE* pHead, DWORD dwLength) {
+    PBYTE_NODE  p       = NULL;
+    PBYTE_NODE  tracer  = NULL;
+    UINT        i       = 0;
+    PBYTE       removed = NULL;
+    
+    p       = *pHead;
+    removed = (PBYTE) malloc(sizeof(BYTE) * dwLength);
+
+    for (i = 0; i < dwLength; i++) {
+        removed[i]  = p->b;
+        tracer      = p;
+        p           = p->next;
+        free(tracer);
+    }
+    *pHead = p;
+    return removed;
+}
 
 /*------------------------------------------------------------------------------
 -- FUNCTION:    AddToBack
@@ -124,13 +142,13 @@ DWORD AddToBack(CHAR_LIST** pHead, CHAR* psBuf, DWORD dwLength) {
 --              uiOrdinal = 2 for example, then it returns the value in the
 --              2nd node in the list).
 ------------------------------------------------------------------------------*/
-DWORD GetFromList(CHAR_LIST* p, UINT uiOrdinal) {
+DWORD GetFromList(PBYTE_NODE p, UINT uiOrdinal) {
     UINT i = 0;
 
     for (i = 1; i < uiOrdinal; i++) {
         p = p->next;
     }
-    return p->c;
+    return p->b;
 }
 
 /*------------------------------------------------------------------------------
