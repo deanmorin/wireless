@@ -46,13 +46,13 @@ VOID ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[0] == ACK) {
-        if (pwd->FTPQueueSize == 0)
-            WriteFile(pwd->hPort, TEXT("PUTA EOT"), CTRL_CHAR_SIZE, NULL, &ol);
-        } else {
-            //Get next frame
-            SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillftpBuffer")));
-            WriteFile(pwd->hPort, TEXT("A FRAME"), CTRL_CHAR_SIZE, NULL, &ol);
-		    psi->itoCount = 0;
+        //if (ftpQueueSize == 0)
+        // WriteFile(pwd->hPort, TEXT("PUTA EOT"), CTRL_CHAR_SIZE, NULL, &ol);
+    } else {
+        //Get next frame
+        SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillftpBuffer")));
+        WriteFile(pwd->hPort, TEXT("A FRAME"), CTRL_CHAR_SIZE, NULL, &ol);
+		psi->itoCount = 0;
     }
 }
 
@@ -78,16 +78,16 @@ VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     if (pReadBuf[0] == EOT) {
         psi->iState = STATE_IDLE;
     } 
-    else if (pwd->PTFQueueSize >= FULL_BUFFER) {
+    //else if (portToQueueSize >= FULL_BUFFER) {
         // clear buffer
-    }
+    //}
     else if (crcFast(pReadBuf, dwLength) == 0) {
-        if (pwd->FTPQueueSize) {
-            WriteFile(pwd->hPort, TEXT("AN RVI"), CTRL_CHAR_SIZE, NULL, &ol);
-        } else {
+ //       if (FileToPortQueueSize) {
+ //           WriteFile(pwd->hPort, TEXT("AN RVI"), CTRL_CHAR_SIZE, NULL, &ol);
+   //     } else {
             WriteFile(pwd->hPort, TEXT("AN ACK"), CTRL_CHAR_SIZE, NULL, &ol);
             psi->iState = STATE_T1;
-        }
+     //   }
     }
 }
 
@@ -116,3 +116,141 @@ VOID ProcessTimeout(PSTATEINFO psi) {
             return;
     }
 }
+
+
+FRAME CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength){
+	DWORD		i;
+	DWORD		j;
+	FRAME myFrame;
+	BYTE* myData;
+	PWNDDATA    pwd                 = NULL;
+	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+	myData = (BYTE*) malloc(sizeof(BYTE) * FRAME_SIZE);
+	
+	myFrame.soh = 0x1;
+	myFrame.sequence = pwd->TxSequenceNumber++;
+	myFrame.length = (SHORT)dwLength;
+	myFrame.payload = (BYTE*) calloc(MAX_PAYLOAD_SIZE,sizeof(BYTE));
+	
+	for (i = 0; i<dwLength;i++) {
+		myFrame.payload[i] = *(psBuf++);
+	}
+	myFrame.crc =0;
+	
+	i = 0;
+	j = 0;
+	myData[i++] = myFrame.soh;
+	myData[i++] = myFrame.sequence;
+	myData[i++] = (BYTE) myFrame.length;
+	myData[i++]	= myFrame.length>>sizeof(BYTE)*8;
+	for(j = 0; j< MAX_PAYLOAD_SIZE;j++){
+		myData[i++] = myFrame.payload[j];
+	}
+	myData[i++] = myFrame.crc;
+	//memcpy(myData,&myFrame,sizeof(BYTE) * FRAME_SIZE);
+	myFrame.crc = crcFast(myData,FRAME_SIZE - sizeof(crc));
+
+
+	//myFrame.crc = crcFast((BYTE*)myFrame,FRAME_SIZE - sizeof(crc));
+
+	return myFrame;
+}
+
+VOID OpenFileTransmit(HWND hWnd){
+	PWNDDATA pwd = {0};
+	OPENFILENAME ofn;
+	char szFile[100] = {0};
+	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.lpstrFile = szFile;
+	ofn.lpstrFile[0] = '\0';
+	ofn.nMaxFile = sizeof(szFile);
+
+
+	GetOpenFileName(&ofn);
+	pwd->lpszTransmitName = ofn.lpstrFile;
+	pwd->hFileTransmit =CreateFile(pwd->lpszTransmitName, GENERIC_READ | GENERIC_WRITE,
+							FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+							OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	
+	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
+	//MessageBox(hWnd, pwd->lpszTransmitName, "File", MB_OK);
+	
+}
+
+VOID CloseFileTransmit(HWND hWnd){
+	PWNDDATA pwd = {0};
+	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+	
+	if(pwd->hFileTransmit){
+		CloseHandle(pwd->hFileTransmit);
+		pwd->lpszTransmitName = "";
+		SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
+		
+	}
+}
+
+VOID OpenFileReceive(HWND hWnd){
+	PWNDDATA pwd = {0};
+	OPENFILENAME ofn;
+	char szFile[100] = {0};
+	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.lpstrFile = szFile;
+	ofn.lpstrFile[0] = '\0';
+	ofn.lpstrFilter = "All\0*.*\0";
+	ofn.nMaxFile = sizeof(szFile);
+
+
+	GetSaveFileName(&ofn);
+	pwd->lpszReceiveName = ofn.lpstrFile;
+	pwd->hFileReceive = CreateFile(pwd->lpszReceiveName, GENERIC_READ | GENERIC_WRITE,
+									FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+									OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
+	
+}
+
+VOID CloseFileReceive(HWND hWnd){
+	PWNDDATA pwd = {0};
+	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+	if(pwd->hFileReceive){
+		CloseHandle(pwd->hFileReceive);
+		pwd->lpszReceiveName = "";
+		SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
+		
+	}
+}
+
+VOID WriteToFile(HWND hWnd, PFRAME frame){
+	PWNDDATA pwd = {0};
+	DWORD dwBytesWritten = 0;
+	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+
+	if(!WriteFile(pwd->hFileReceive, frame->payload, frame->length, &dwBytesWritten, NULL)){
+		DISPLAY_ERROR("Failed to write to file");
+	}
+}
+
+VOID ReadFromFile(HWND hWnd){
+	PWNDDATA pwd = {0};
+	DWORD dwBytesRead = 0;
+	CHAR* ReadBuffer = {0};
+	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+
+	if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
+		DISPLAY_ERROR("Failed to read from file");
+	}
+	//File Empty
+	if(dwBytesRead < 1019){
+		pwd->bMoreData = FALSE;
+		CloseFileTransmit(hWnd);
+	}
+	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
+	//Call createFrame(ReadBuffer, dwBytesRead);
+}
+

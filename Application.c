@@ -48,7 +48,7 @@
 --              Initializes the terminal to its default state.
 ------------------------------------------------------------------------------*/
 VOID InitTerminal(HWND hWnd) {
-
+BYTE* temp;//for testing out Create Frame
     PWNDDATA    pwd         = {0};
     HDC         hdc         = {0};
     COMMCONFIG  cc          = {0};
@@ -122,6 +122,13 @@ VOID InitTerminal(HWND hWnd) {
 
 	//create tables for crc
 	crcInit();
+
+	//testing out CreateFrame
+	pwd->TxSequenceNumber=1;
+	temp = (BYTE*) calloc(2*256+1,sizeof(BYTE));
+	temp[1] = 0x3;
+	CreateFrame(hWnd,temp,2*256+1);
+
     //print out headers for Tokens and Values
     MakeColumns(hWnd);
 }
@@ -225,6 +232,7 @@ VOID Paint(HWND hWnd) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     hdc = BeginPaint(hWnd, &ps) ;
+	
     SelectObject(hdc, pwd->displayBuf.hFont);
 
     tempfgColor = CUR_FG_COLOR;
@@ -291,10 +299,18 @@ VOID MakeColumns(HWND hWnd){
     }    
 }
 
+VOID UpdateStats(HWND hWnd) {
+	
+	TCHAR text[20];
+	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+	_stprintf(text, _T("%d"), ++pwd->statsInfo.numFiles);
+	SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
+}
+
 /*------------------------------------------------------------------------------
 -- FUNCTION:    Stats
 --
--- DATE:        
+-- DATE:        Nov 8, 2010
 --
 -- REVISIONS:   (Date and Description)
 --
@@ -309,8 +325,8 @@ VOID MakeColumns(HWND hWnd){
 --								lParam  - contents vary based on the message
 --
 -- RETURNS:     BOOL - returns true if the message was handled.
---
--- NOTES:
+-- 
+-- NOTES:	This is the Dialog process for the Statistics Box.
 --              
 --
 ------------------------------------------------------------------------------*/

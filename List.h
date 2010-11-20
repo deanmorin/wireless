@@ -15,6 +15,10 @@ typedef struct CHAR_LIST {
     CHAR_LIST*  next;
 } CHAR_LIST;
 
+//pragma pack allow for a structure without padding
+#pragma pack(push)
+#pragma pack(1)
+
 
 typedef struct FRAME {
 	BYTE		soh;
@@ -23,6 +27,9 @@ typedef struct FRAME {
 	BYTE*		payload;
 	BYTE		crc;
 } FRAME, *PFRAME;
+#pragma pack(pop)
+
+
 typedef struct FRAME_LIST FRAME_LIST;
 typedef struct FRAME_LIST {
     FRAME        c;
