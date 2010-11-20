@@ -3,6 +3,12 @@
 
 #include <Windows.h>
 
+typedef struct BYTE_NODE BYTE_NODE;
+typedef struct BYTE_NODE {
+    BYTE        b;
+    BYTE_NODE*  next;
+} BYTE_NODE, *PBYTE_NODE;
+
 typedef struct CHAR_LIST CHAR_LIST;
 typedef struct CHAR_LIST {
     CHAR        c;

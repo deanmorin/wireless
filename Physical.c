@@ -66,10 +66,10 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     COMSTAT     cs                  = {0};
     HANDLE*     hEvents             = NULL;
     INT         iEventsSize         = 0;
-    PSTATEINFO  psi             = NULL;
+    PSTATEINFO  psi                 = NULL;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
-    CreateEvent(NULL, TRUE, FALSE, TEXT("dataToWrite"));         //REMOVE
+    CreateEvent(NULL, TRUE, FALSE, TEXT("dataToWrite"));         //REMOVE//////
     if ((ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)) == NULL) {
         DISPLAY_ERROR("Error creating event in read thread");
     }
@@ -142,12 +142,15 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
         GetOverlappedResult(pwd->hThread, &ol, &dwBytesRead, TRUE);
     }
 
-    if (psi->iState == STATE_R2  &&  dwBytesRead < FRAME_SIZE) {
-        // get more bytes y'all ///////////////////////////////////////////////
-    } 
-    else if (dwBytesRead >= CTRL_CHAR_SIZE) {
+    if ((psi->iState == STATE_R2  &&  dwBytesRead >= FRAME_SIZE)  ||
+        (psi->iState != STATE_R2  &&  dwBytesRead >= CTRL_CHAR_SIZE)) {
+        // expected amount of bytes were read
         ProcessRead(hWnd, psi, pReadBuf, dwBytesRead);
+    } else {
+    
     }
+    // get more bytes y'all ///////////////////////////////////////////////
+
     /*
     dwQueueSize = AddToBack(&pHead, pReadBuf, dwBytesRead);
             

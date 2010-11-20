@@ -27,6 +27,24 @@
 
 #include "List.h"
 
+BOOL AddByteToBack(PBYTE_NODE pHead, PBYTE_NODE pTail, BYTE data) {
+    PBYTE_NODE p        = NULL;
+    PBYTE_NODE newNode  = NULL;
+    
+    if ((newNode = (PBYTE_NODE) malloc(sizeof(BYTE_NODE))) == NULL) {
+        return FALSE;
+    }
+    if (pHead == NULL) {
+        pHead = newNode;
+        pTail = newNode;
+        return TRUE;
+    }
+    pTail->next = newNode;
+    pTail       = newNode;
+    return TRUE;
+}
+
+
 /*------------------------------------------------------------------------------
 -- FUNCTION:    AddToBack
 --

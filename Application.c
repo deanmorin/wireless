@@ -27,6 +27,7 @@
 ------------------------------------------------------------------------------*/
 
 #include "Application.h"
+
 /*------------------------------------------------------------------------------
 -- FUNCTION:    InitTerminal
 --
@@ -83,6 +84,9 @@ VOID InitTerminal(HWND hWnd) {
     WINDOW_BOTTOM           = LINES_PER_SCRN -1;
 	pwd->wordWrap			= FALSE;
 	pwd->relOrigin			= FALSE;
+
+    pwd->FTPQueueSize = 0;
+    pwd->PTFQueueSize = 0;
     
     // initialize a "blank" display buffer
     for (i = 0; i < LINES_PER_SCRN; i++) {
@@ -117,7 +121,7 @@ VOID InitTerminal(HWND hWnd) {
     BuildCommDCB((LPCWSTR)"96,N,8,1", &pwd->cc.dcb);
 
 	//create tables for crc
-	//crcInit();
+	crcInit();
     //print out headers for Tokens and Values
     MakeColumns(hWnd);
 }
