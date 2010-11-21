@@ -339,11 +339,11 @@ VOID MakeColumns(HWND hWnd){
 --
 ------------------------------------------------------------------------------*/
 VOID UpdateStats(HWND hWnd) {
-	
 	TCHAR text[20];
 	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-	_stprintf(text, _T("%d"), ++pwd->statsInfo.numFiles);
-	SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
+	
+	//_stprintf(text, _T("%d"), ++pwd->statsInfo.numFiles);
+	//SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
 }
 
 /*------------------------------------------------------------------------------
@@ -382,10 +382,53 @@ BOOL CALLBACK Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 }
 
 BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+	static HBITMAP	bmp[16];
+	static UINT		i = 0;
+	HINSTANCE		hInst = (HINSTANCE)GetWindowLong(GetParent(hDlg), GWL_HINSTANCE);
+	PWNDDATA		pwd = (PWNDDATA) GetWindowLongPtr(GetParent(hDlg), 0);
+
 	switch (message)
 	{
 	case WM_INITDIALOG:
+		bmp[0] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_IDLE));
+		bmp[1] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_IDLE2));
+		bmp[2] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R1));
+		bmp[3] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R1_2));
+		bmp[4] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R2));
+		bmp[5] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R2_2));
+		bmp[6] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R3));
+		bmp[7] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R3_2));
+		bmp[8] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R4));
+		bmp[9] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R4_2));
+		bmp[10] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_T1));
+		bmp[11] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_T1_2));
+		bmp[12] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_T2));
+		bmp[13] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_T2_2));
+		bmp[14] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_T3));
+		bmp[15] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_T3_2));
 		return TRUE;
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+        {
+			case IDC_BUTTONENQ:
+				if (i == 0) i = 1;
+				else i = 0;
+				SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_IDLE, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[i]);
+				return TRUE;
+			case IDC_BUTTONACK:
+				return TRUE;
+			case IDC_BUTTONRVI:
+				return TRUE;
+			case IDC_BUTTONEOT:
+				return TRUE;
+			case IDC_BUTTONF1:
+				return TRUE;
+			case IDC_BUTTONF2:
+				return TRUE;
+		}
+		return FALSE;
+
 	case WM_CLOSE:
 		ShowWindow(hDlg, SW_HIDE);
 		return TRUE;
