@@ -126,17 +126,15 @@ VOID ProcessTimeout(PSTATEINFO psi) {
 
 FRAME CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength){
 	DWORD		i;
-	//DWORD		j;
 	FRAME myFrame;
-	//BYTE* myData;
 	PWNDDATA    pwd                 = NULL;
+
 	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-	//myData = (BYTE*) malloc(sizeof(BYTE) * FRAME_SIZE);
-	
+
 	myFrame.soh = 0x1;
 	myFrame.sequence = pwd->TxSequenceNumber++;
 	myFrame.length = (SHORT)dwLength;
-	//myFrame.payload = psBuff;
+
 	for (i = 0; i<dwLength;i++) {
 		myFrame.payload[i] = *(psBuf++);
 	}
@@ -144,27 +142,13 @@ FRAME CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength){
 		myFrame.payload[i++] =0;
 	}
 	myFrame.crc =0;
-	/*
-	myFrame.payload = (BYTE*) calloc(MAX_PAYLOAD_SIZE,sizeof(BYTE));
-	
-	
-	
-	i = 0;
-	j = 0;
-	myData[i++] = myFrame.soh;
-	myData[i++] = myFrame.sequence;
-	myData[i++] = (BYTE) myFrame.length;
-	myData[i++]	= myFrame.length>>sizeof(BYTE)*8;
-	for(j = 0; j< MAX_PAYLOAD_SIZE;j++){
-		myData[i++] = myFrame.payload[j];
-	}
-	myData[i++] = myFrame.crc;
-	//memcpy(myData,&myFrame,sizeof(BYTE) * FRAME_SIZE);
-	myFrame.crc = crcFast(myData,FRAME_SIZE - sizeof(crc));
-
-*/
 	myFrame.crc = crcFast((BYTE*)&myFrame,FRAME_SIZE - sizeof(crc));
-
+	if(crcFast((BYTE*)&myFrame,FRAME_SIZE)!=0){
+		DISPLAY_ERROR("Failure Creating Frame");
+	}
+	/*else{
+			DISPLAY_ERROR("Success Creating Frame");
+	}*/
 	return myFrame;
 }
 
@@ -262,7 +246,11 @@ VOID ReadFromFile(HWND hWnd){
 	DWORD dwBytesRead = 0;
 	DWORD dwBytesWritten = 0;
 	DWORD	dwSizeOfFile = 0;
+
+	FRAME frame;
+
 	BYTE* ReadBuffer[1019] = {0};
+
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 	
 
@@ -291,12 +279,23 @@ VOID ReadFromFile(HWND hWnd){
 			CloseFileTransmit(hWnd);
 			MessageBox(hWnd, TEXT("File Read Complete"), 0, MB_OK);
 		}
+
 		/*if(!WriteFile(pwd->hFileReceive, ReadBuffer, dwBytesRead, &dwBytesWritten, NULL)){
 			DISPLAY_ERROR("Failed to write to file");
 		}*/		
 		
 		//AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, CreateFrame(hWnd, *ReadBuffer, dwBytesRead);
 		//				 (FTPhead, FTPtail, CreateFrame(hWnd, *ReadBuffer, dwBytesRead)
+
+
+				
+		frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
+		//TODO: Enter FTP crit section
+		AddToFrameQueue(pwd->FTPBuffHead, pwd->FTPBuffTail, frame);
+		//TODO: exit FTP crit section
+
+
+
 	}
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 	
