@@ -82,7 +82,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     }
 
     hWnd = CreateWindow(szAppName,
-                        TEXT("RFID Reader - Enterprise Edition (Trial Expired)"), 
+                        TEXT("Full-duplex is for amateurs"), 
                         WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU 
                         | WS_MINIMIZEBOX,
                         CW_USEDEFAULT, CW_USEDEFAULT,

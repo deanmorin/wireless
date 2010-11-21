@@ -78,6 +78,7 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
 
     psi             = (PSTATEINFO) malloc(sizeof(STATEINFO));
     psi->iState     = STATE_IDLE;
+    DL_STATE        = psi->iState;
     psi->itoCount   = 0;
     srand(GetTickCount());
     psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
@@ -146,6 +147,7 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
 
     psi             = (PSTATEINFO) malloc(sizeof(STATEINFO));
     psi->iState     = STATE_IDLE;
+    DL_STATE        = psi->iState;
     psi->dwTimeout  = INFINITE;
     psi->itoCount   = 0;
 

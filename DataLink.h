@@ -12,16 +12,18 @@
 enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define STATE_T2    100
 #define STATE_R1    101
-#define START_R3    102
+#define STATE_R3    102
 #define STATE_R4    103
 
 
 // timeout values
-#define TOR0_BASE   4000
-#define TOR0_RANGE  2000
-#define TOR1        5000
-#define TOR2        5000
-#define TOR3        5000
+#define TOR0_BASE               4000
+#define TOR0_RANGE              2000
+#define TOR1                    5000
+#define TOR2                    5000
+#define TOR3                    5000
+#define TOR2_INCREASE_FACTOR    2
+#define TOR3_INCREASE_FACTOR    2
 
 // frame components
 #define CTRL_FRAME_SIZE     1
@@ -48,7 +50,7 @@ VOID    ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
-VOID    RespondToACK(HWND hWnd, PSTATEINFO psi);
+VOID    SendFrame(HWND hWnd, PSTATEINFO psi);
 FRAME   CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength);
 VOID 	OpenFileReceive(HWND hWnd);
 VOID 	OpenFileTransmit(HWND hWnd);
