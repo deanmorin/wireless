@@ -44,7 +44,7 @@ typedef struct STATEINFO_tag {
 
 
 VOID    ProcessTimeout(HWND hWnd, PSTATEINFO psi);
-VOID    ProcessWrite(HWND hWnd, PSTATEINFO psi, BYTE* pFrame, DWORD dwLength);
+VOID    ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength);
 VOID    ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);

@@ -1,11 +1,11 @@
 #include "DataLink.h"
 
-VOID ProcessWrite(HWND hWnd, PSTATEINFO psi, BYTE* pFrame, DWORD dwLength) {
+VOID ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength) {
     PWNDDATA    pwd = NULL;
     OVERLAPPED  ol  = {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
-    if (!WriteFile(pwd->hPort, pFrame, dwLength, NULL, &ol));
+    WriteFile(pwd->hPort, pFrame, dwLength, NULL, &ol);
 }
 
 
@@ -52,7 +52,7 @@ VOID ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
                                                     // a frame
         REC_RVI++;
         pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
-        ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
+        ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
         SENT_ACK++;
     }
 }
@@ -65,7 +65,7 @@ VOID ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ENQ) {
         pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
-        ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
+        ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
         SENT_ACK++;
         psi->iState     = STATE_R2;
         DL_STATE        = psi->iState;
@@ -98,11 +98,11 @@ VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
             if (pwd->FTPQueueSize) {
                 pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
-                ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
+                ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
                 SENT_RVI++;
             } else {
                 pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
-                ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
+                ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
                 psi->iState = STATE_T1;
                 DL_STATE    = psi->iState;
                 SENT_ACK++;
@@ -119,10 +119,10 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
 
     if (pwd->FTPQueueSize == 0) {
         pCtrlFrame[CTRL_CHAR_INDEX] = EOT;
-        ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
+        ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
         SENT_EOT++;
     } else {
-        ProcessWrite(hWnd, psi, NULL, CTRL_FRAME_SIZE); //PEEK NEXT FRAME
+        ProcessWrite(hWnd, NULL, CTRL_FRAME_SIZE); //PEEK NEXT FRAME
         UP_FRAMES++;
         SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
 		psi->itoCount = 0;
@@ -139,7 +139,7 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
         
         case STATE_IDLE:
             pCtrlFrame[CTRL_CHAR_INDEX] = ENQ;
-            ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
+            ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
             psi->dwTimeout  = TOR1;
             psi->iState     = STATE_T1;
             DL_STATE        = psi->iState;
