@@ -198,6 +198,9 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
 		case IDM_STATISTICS:       
 			ShowWindow(pwd->hDlgStats, SW_NORMAL);
             return;
+		case IDM_DEBUGGER:       
+			ShowWindow(pwd->hDlgDebug, SW_NORMAL);
+            return;
 		/*case ID_TRANSMIT_OPENFILE:
 			OpenFileTransmit(hWnd);
 			return;
@@ -367,6 +370,18 @@ VOID UpdateStats(HWND hWnd) {
 --
 ------------------------------------------------------------------------------*/
 BOOL CALLBACK Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		return TRUE;
+	case WM_CLOSE:
+		ShowWindow(hDlg, SW_HIDE);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message)
 	{
 	case WM_INITDIALOG:

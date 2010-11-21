@@ -72,6 +72,7 @@ typedef struct displayBuf {
 
 typedef struct wndData {
 	HWND			hDlgStats;
+	HWND			hDlgDebug;
     HANDLE          hPort;
 	HANDLE			hFileReceive;
 	HANDLE			hFileTransmit;
