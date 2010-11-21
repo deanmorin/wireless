@@ -165,15 +165,15 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
         ClearCommError(pwd->hPort, &dwError, &cs);
  
         if (dwEvent == WAIT_OBJECT_0) {
-			MessageBox(hWnd, TEXT("fillFTPBuffer"), 0, MB_OK);
+			//MessageBox(hWnd, TEXT("fillFTPBuffer"), 0, MB_OK);
             // fill ftp buffer
 			/*while(FTPQueueSize < FULL_WRITE_BUFFER && pwd->bMoreData){
 				read data
 				frame data
 				add frame to writeQueue
 			}*/
-			
-            break;
+			ReadFromFile(hWnd);
+            //break;
 
         }
         else if (dwEvent == WAIT_OBJECT_0 + 1) {
@@ -185,18 +185,19 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
 				display data on screen
 			}*/
 
-			break;
+			//break;
         }
-        else if (dwEvent == WAIT_TIMEOUT) {
+        /*else if (dwEvent == WAIT_TIMEOUT) {
             // a timeout occured
             ProcessTimeout(psi);
-        }
+        }*/
         
         /*else {
             // change this to conditionalo before release
             DISPLAY_ERROR("Invalid event occured in the File I/O thread");
         }*/
-		ResetEvent(ol.hEvent);
+		ResetEvent(hEvents[0]);
+		ResetEvent(hEvents[1]);
     }
 	
 	free(hEvents);

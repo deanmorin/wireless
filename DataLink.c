@@ -187,6 +187,7 @@ VOID OpenFileTransmit(HWND hWnd){
 	pwd->hFileTransmit =CreateFile(ofn.lpstrFile, GENERIC_READ | GENERIC_WRITE,
 							FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
 							OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 	//MessageBox(hWnd, pwd->lpszTransmitName, "File", MB_OK);
 	
@@ -227,6 +228,7 @@ VOID OpenFileReceive(HWND hWnd){
 	pwd->hFileReceive = CreateFile(ofn.lpstrFile, GENERIC_READ | GENERIC_WRITE,
 									FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
 									OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 	
 }
@@ -248,10 +250,9 @@ VOID CloseFileReceive(HWND hWnd){
 VOID WriteToFile(HWND hWnd, PFRAME frame){
 	PWNDDATA pwd = {0};
 	DWORD dwBytesWritten = 0;
-	OVERLAPPED  ol                      = {0};
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 
-	if(!WriteFile(pwd->hFileReceive, frame->payload, frame->length, &dwBytesWritten, &ol)){
+	if(!WriteFile(pwd->hFileReceive, frame->payload, frame->length, &dwBytesWritten, NULL)){
 		DISPLAY_ERROR("Failed to write to file");
 	}
 }
@@ -262,7 +263,6 @@ VOID ReadFromFile(HWND hWnd){
 	DWORD dwBytesWritten = 0;
 	DWORD	dwSizeOfFile = 0;
 	BYTE* ReadBuffer[1019] = {0};
-	OVERLAPPED  ol                      = {0};
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 	
 
@@ -273,7 +273,7 @@ VOID ReadFromFile(HWND hWnd){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			pwd->NumOfReads++;
-			//set DataToWrite
+			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("dataToWrite")));
 		} else if(pwd->NumOfReads == 0 && dwSizeOfFile < 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
@@ -289,12 +289,15 @@ VOID ReadFromFile(HWND hWnd){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			CloseFileTransmit(hWnd);
+			MessageBox(hWnd, TEXT("File Read Complete"), 0, MB_OK);
 			//pwd->NumOfReads++;
 		}
-		/*if(!WriteFile(pwd->hFileReceive, ReadBuffer, dwBytesRead, &dwBytesWritten, NULL)){
+		if(!WriteFile(pwd->hFileReceive, ReadBuffer, dwBytesRead, &dwBytesWritten, NULL)){
 			DISPLAY_ERROR("Failed to write to file");
-		}*/		
-		CreateFrame(hWnd, *ReadBuffer, dwBytesRead);
+		}		
+		/*CreateFrame(hWnd, *ReadBuffer, dwBytesRead);
+
+		*/
 	}
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 	

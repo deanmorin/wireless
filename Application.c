@@ -198,7 +198,7 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
 		case IDM_STATISTICS:       
 			ShowWindow(pwd->hDlgStats, SW_NORMAL);
             return;
-		case ID_TRANSMIT_OPENFILE:
+		/*case ID_TRANSMIT_OPENFILE:
 			OpenFileTransmit(hWnd);
 			return;
 		case ID_TRANSMIT_READ:
@@ -209,7 +209,7 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
 			return;
 		case ID_TRANSMIT_SETPTF:
 			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
-			return;
+			return;*/
         default:
             return;
     }
