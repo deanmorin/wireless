@@ -365,8 +365,8 @@ VOID UpdateStats(HWND hWnd) {
 	_stprintf(text, _T("%d"), REC_RVI);
 	SetDlgItemText(pwd->hDlgStats, IDC_RVIRECEIVED, text);
 
-	dRate = DOWN_FRAMES / (FLOAT)TIME_LENGTH;
-	uRate = UP_FRAMES / (FLOAT)TIME_LENGTH;
+	dRate = (DOWN_FRAMES * 1024) / (FLOAT)TIME_LENGTH;
+	uRate = (UP_FRAMES * 1024) / (FLOAT)TIME_LENGTH;
 	tRate = dRate + uRate;
 	
 	_stprintf(text, _T("%.2f"), dRate);
@@ -378,8 +378,8 @@ VOID UpdateStats(HWND hWnd) {
 	_stprintf(text, _T("%.2f"), tRate);
 	SetDlgItemText(pwd->hDlgStats, IDC_TRATE, text);
 
-	edRate = DOWN_FRAMES_ACKD / TIME_LENGTH;
-	euRate = UP_FRAMES_ACKD / TIME_LENGTH;
+	edRate = (DOWN_FRAMES_ACKD * 1019) / TIME_LENGTH;
+	euRate = (UP_FRAMES_ACKD * 1019) / TIME_LENGTH;
 	etRate = edRate + euRate;
 
 	_stprintf(text, _T("%.2f"), edRate);
