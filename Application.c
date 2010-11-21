@@ -165,7 +165,7 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
                 
         case IDM_CONNECT:       
             Connect(hWnd);
-			OpenFileReceive(hWnd);
+			//OpenFileReceive(hWnd);
             return;
 
         case IDM_DISCONNECT:

@@ -33,6 +33,18 @@
 #define WINDOW_TOP          pwd->cyWindowTop
 #define WINDOW_BOTTOM       pwd->cyWindowBottom
 
+#define NUM_FILES           pwd->statsInfo.numFiles
+#define UP_FRAMES           pwd->statsInfo.upFrames
+#define DOWN_FRAMES         pwd->statsInfo.downFrames
+#define FRAMES_ACKD         pwd->statsInfo.framesACKd
+#define SENT_ACK            pwd->statsInfo.sentACK
+#define REC_ACK             pwd->statsInfo.recACK
+#define SENT_EOT            pwd->statsInfo.sentEOT
+#define REC_EOT             pwd->statsInfo.recEOT
+#define SENT_RVI            pwd->statsInfo.sentRVI
+#define REC_RVI             pwd->statsInfo.recRVI
+
+
 /*-------------------------------Structures-----------------------------------*/
 typedef struct charInfo {
     CHAR    character;
@@ -45,8 +57,9 @@ typedef struct statsInfo {
 	INT	numFiles;
 	INT upFrames;
 	INT downFrames;
-	INT sentACKS;
-	INT recACKS;
+    INT framesACKd;
+	INT sentACK;
+	INT recACK;
 	INT sentEOT;
 	INT recEOT;
 	INT sentRVI;

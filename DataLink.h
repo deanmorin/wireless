@@ -6,8 +6,9 @@
 #include "crc.h"
 #include "WndExtra.h"
 
-#define FULL_BUFFER 32
-#define READ_STATES 4
+#define FULL_BUFFER     32
+#define READ_STATES     4
+#define PORT_IO_EVENTS  2
 enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define STATE_T2    100
 #define STATE_R1    101
@@ -23,7 +24,7 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define TOR3        500
 
 // frame components
-#define CTRL_CHAR_SIZE      1
+#define CTRL_FRAME_SIZE     1
 #define CTRL_CHAR_INDEX     0
 
 
@@ -33,7 +34,6 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define ACK 0x06
 #define RVI 0x13
 
-
 typedef struct STATEINFO_tag {
     INT     iState;
     DWORD   dwTimeout;
@@ -41,14 +41,15 @@ typedef struct STATEINFO_tag {
 } STATEINFO, *PSTATEINFO;
 
 
-VOID    ProcessTimeout(PSTATEINFO psi);
-VOID    ProcessWrite(HWND hWnd, PSTATEINFO psi);
+VOID    ProcessTimeout(HWND hWnd, PSTATEINFO psi);
+VOID    ProcessWrite(HWND hWnd, PSTATEINFO psi, BYTE* pFrame, DWORD dwLength);
 VOID    ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
-FRAME CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength);
+VOID    RespondToACK(HWND hWnd, PSTATEINFO psi);
+FRAME   CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength);
 VOID 	OpenFileReceive(HWND hWnd);
 VOID 	OpenFileTransmit(HWND hWnd);
 VOID	CloseFileReceive(HWND hWnd);
