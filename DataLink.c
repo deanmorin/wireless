@@ -55,6 +55,10 @@ VOID ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
         SENT_ACK++;
+        psi->iState     = STATE_R2;
+        DL_STATE        = psi->iState;
+        psi->dwTimeout  = TOR3;
+        psi->itoCount  = 0;
     }
 }
 
@@ -77,7 +81,7 @@ VOID ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
 VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     PWNDDATA    pwd = NULL;
-    static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
+    static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pwd->PTFQueueSize >= FULL_BUFFER) {
@@ -94,7 +98,7 @@ VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     } else {
         DOWN_FRAMES++;
 
-        if (crcFast(pReadBuf, dwLength) == 0) { // also check for sequence       
+        if (crcFast(pReadBuf, dwLength) == 0) { // also check for sequence #     
             DOWN_FRAMES_ACKD++;
 
             if (pwd->FTPQueueSize) {
@@ -159,7 +163,7 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
         case STATE_T3:
             psi->dwTimeout *= TOR2_INCREASE_FACTOR;
 
-            if (++(psi->itoCount) >= 3) {
+            if (++(psi->itoCount) >= MAX_TIMEOUTS) {
                 srand(GetTickCount());
                 psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
                 psi->iState     = STATE_IDLE;
@@ -173,7 +177,7 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
         case STATE_R2:
             psi->dwTimeout *= TOR3_INCREASE_FACTOR;
 
-            if (++(psi->itoCount) >= 3) {
+            if (++(psi->itoCount) >= MAX_TIMEOUTS) {
                 srand(GetTickCount());
                 psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
                 psi->iState     = STATE_IDLE;

@@ -223,9 +223,8 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
         GetOverlappedResult(pwd->hThread, &ol, &dwBytesRead, TRUE);
     }
 
-    if ((psi->iState == STATE_R2  &&  dwBytesRead >= FRAME_SIZE)  ||
-        (psi->iState != STATE_R2  &&  dwBytesRead >= CTRL_FRAME_SIZE)) {
-        // expected amount of bytes were read
+    if (dwBytesRead >= CTRL_FRAME_SIZE) {
+        // expected amount of bytes were read   (EXCEPT FOR DATA FRAMES (add bool return val?)
         ProcessRead(hWnd, psi, pReadBuf, dwBytesRead);
     } else {
     

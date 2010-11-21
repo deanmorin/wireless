@@ -23,6 +23,7 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define TOR1                    5000
 #define TOR2                    5000
 #define TOR3                    5000
+#define MAX_TIMEOUTS            1//3
 #define TOR2_INCREASE_FACTOR    2
 #define TOR3_INCREASE_FACTOR    2
 
