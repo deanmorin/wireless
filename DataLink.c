@@ -24,6 +24,7 @@ VOID ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {
+        REC_ACK++;
         psi->iState     = STATE_T3;
 		psi->dwTimeout  = TOR2;
         RespondToACK(hWnd, psi);
@@ -41,12 +42,16 @@ VOID ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {         // last frame acknowledged
+        REC_ACK++;
+        FRAMES_ACKD++;
         // pop ack'd frame
         RespondToACK(hWnd, psi);
     } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {  // receiver wants to send
                                                     // a frame
+        REC_RVI++;
         pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
-        ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);        
+        ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
+        SENT_ACK++;
     }
 }
 
@@ -59,6 +64,7 @@ VOID ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     if (pReadBuf[CTRL_CHAR_INDEX] == ENQ) {
         pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
         ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
+        SENT_ACK++;
         psi->iState     = STATE_R2;
         psi->dwTimeout  = TOR3;
     }
@@ -71,6 +77,7 @@ VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == EOT) {
+        REC_EOT++;
         psi->iState = STATE_IDLE;
         srand(GetTickCount());
         psi->dwTimeout = TOR0_BASE + rand() % TOR0_RANGE;
@@ -79,13 +86,17 @@ VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
     }
     else if (crcFast(pReadBuf, dwLength) == 0) {
+        DOWN_FRAMES++;
+
         if (pwd->FTPQueueSize) {
             pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
             ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
+            SENT_RVI++;
         } else {
             pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
             ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
             psi->iState = STATE_T1;
+            SENT_ACK++;
         }
     }
 }
@@ -99,8 +110,10 @@ VOID RespondToACK(HWND hWnd, PSTATEINFO psi) {
     if (pwd->FTPQueueSize == 0) {
         pCtrlFrame[CTRL_CHAR_INDEX] = EOT;
         ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
+        SENT_EOT++;
     } else {
         ProcessWrite(hWnd, psi, NULL, CTRL_FRAME_SIZE); //PEEK NEXT FRAME
+        UP_FRAMES++;
         SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
 		psi->itoCount = 0;
     }
