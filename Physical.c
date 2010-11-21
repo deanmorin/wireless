@@ -129,6 +129,7 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
     COMSTAT     cs                  = {0};
     HANDLE*     hEvents             = NULL;
     INT         iEventsSize         = 0;
+	FRAME		tempFrame = {0};
     PSTATEINFO  psi             = NULL;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
@@ -167,7 +168,7 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
 				add frame to writeQueue
 			}*/
 			ReadFromFile(hWnd);
-            //break;
+           
 
         }
         else if (dwEvent == WAIT_OBJECT_0 + 1) {
@@ -178,18 +179,22 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
 				write data to file
 				display data on screen
 			}*/
-
-			//break;
+			while(pwd->PTFQueueSize != 0){
+				//tempFrame = RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength);
+				//								  (PTFhead, pwd->PTFQueueSize?)
+				//WriteToFile(hWnd, &tempFrame);
+			}
+			
         }
         /*else if (dwEvent == WAIT_TIMEOUT) {
             // a timeout occured
             ProcessTimeout(psi);
         }*/
         
-        /*else {
+        else {
             // change this to conditionalo before release
             DISPLAY_ERROR("Invalid event occured in the File I/O thread");
-        }*/
+        }
 		ResetEvent(hEvents[0]);
 		ResetEvent(hEvents[1]);
     }

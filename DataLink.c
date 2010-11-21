@@ -47,7 +47,7 @@ VOID ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
             WriteFile(pwd->hPort, TEXT("PUTA EOT"), CTRL_FRAME_SIZE, NULL, &ol);
         } else {
             //Get next frame
-            SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillftpBuffer")));
+            SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
             WriteFile(pwd->hPort, TEXT("A FRAME"), CTRL_FRAME_SIZE, NULL, &ol);
 		    psi->itoCount = 0;
         }
@@ -278,21 +278,23 @@ VOID ReadFromFile(HWND hWnd){
 			}
 			CloseFileTransmit(hWnd);
 			MessageBox(hWnd, TEXT("File Read Complete"), 0, MB_OK);
-			//pwd->NumOfReads++;
 		}
+
+		/*if(!WriteFile(pwd->hFileReceive, ReadBuffer, dwBytesRead, &dwBytesWritten, NULL)){
+			DISPLAY_ERROR("Failed to write to file");
+		}*/		
+		
+		//AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, CreateFrame(hWnd, *ReadBuffer, dwBytesRead);
+		//				 (FTPhead, FTPtail, CreateFrame(hWnd, *ReadBuffer, dwBytesRead)
+
 
 				
 		frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
 		//TODO: Enter FTP crit section
 		AddToFrameQueue(pwd->FTPBuffHead, pwd->FTPBuffTail, frame);
 		//TODO: exit FTP crit section
-/*
-		if(!WriteFile(pwd->hFileReceive, ReadBuffer, dwBytesRead, &dwBytesWritten, NULL)){
-			DISPLAY_ERROR("Failed to write to file");
-		}	*/	
-		/*CreateFrame(hWnd, *ReadBuffer, dwBytesRead);
 
-		*/
+
 
 	}
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
