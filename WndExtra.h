@@ -97,9 +97,11 @@ typedef struct wndData {
 	STATSINFO		statsInfo;
     INT             FTPQueueSize;
     INT             PTFQueueSize;
+	PPFRAME_NODE		FTPBuffHead;
+	PPFRAME_NODE		PTFBuffHead;
+	PPFRAME_NODE		FTPBuffTail;
+	PPFRAME_NODE		PTFBuffTail;
 	INT				NumOfReads;
-	FRAME_LIST		FTPBuff;
-	FRAME_LIST		PTFBuff;
 	BYTE			TxSequenceNumber;
 	BYTE			RxSequenceNumber;
 } WNDDATA, *PWNDDATA;
