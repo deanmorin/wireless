@@ -3,6 +3,10 @@
 
 #include <Windows.h>
 
+#define MAX_PAYLOAD_SIZE	1019
+#define FRAME_SIZE      1024
+
+
 typedef struct BYTE_NODE BYTE_NODE;
 typedef struct BYTE_NODE {
     BYTE        b;
@@ -24,7 +28,7 @@ typedef struct FRAME {
 	BYTE		soh;
 	BYTE		sequence;
 	SHORT		length;
-	BYTE*		payload;
+	BYTE		payload[MAX_PAYLOAD_SIZE];
 	BYTE		crc;
 } FRAME, *PFRAME;
 #pragma pack(pop)

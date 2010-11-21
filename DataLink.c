@@ -120,22 +120,28 @@ VOID ProcessTimeout(PSTATEINFO psi) {
 
 FRAME CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength){
 	DWORD		i;
-	DWORD		j;
+	//DWORD		j;
 	FRAME myFrame;
-	BYTE* myData;
+	//BYTE* myData;
 	PWNDDATA    pwd                 = NULL;
 	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-	myData = (BYTE*) malloc(sizeof(BYTE) * FRAME_SIZE);
+	//myData = (BYTE*) malloc(sizeof(BYTE) * FRAME_SIZE);
 	
 	myFrame.soh = 0x1;
 	myFrame.sequence = pwd->TxSequenceNumber++;
 	myFrame.length = (SHORT)dwLength;
-	myFrame.payload = (BYTE*) calloc(MAX_PAYLOAD_SIZE,sizeof(BYTE));
-	
+	//myFrame.payload = psBuff;
 	for (i = 0; i<dwLength;i++) {
 		myFrame.payload[i] = *(psBuf++);
 	}
+	while(i<MAX_PAYLOAD_SIZE){
+		myFrame.payload[i++] =0;
+	}
 	myFrame.crc =0;
+	/*
+	myFrame.payload = (BYTE*) calloc(MAX_PAYLOAD_SIZE,sizeof(BYTE));
+	
+	
 	
 	i = 0;
 	j = 0;
@@ -150,8 +156,8 @@ FRAME CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength){
 	//memcpy(myData,&myFrame,sizeof(BYTE) * FRAME_SIZE);
 	myFrame.crc = crcFast(myData,FRAME_SIZE - sizeof(crc));
 
-
-	//myFrame.crc = crcFast((BYTE*)myFrame,FRAME_SIZE - sizeof(crc));
+*/
+	myFrame.crc = crcFast((BYTE*)&myFrame,FRAME_SIZE - sizeof(crc));
 
 	return myFrame;
 }
@@ -249,8 +255,9 @@ VOID ReadFromFile(HWND hWnd){
 	DWORD dwBytesRead = 0;
 	BYTE* ReadBuffer = {0};
 	OVERLAPPED  ol                      = {0};
-	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 	DWORD	dwSizeOfFile = 0;
+	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+	
 
 	dwSizeOfFile = GetFileSize(pwd->hFileTransmit, NULL);
 	while(pwd->FTPQueueSize < FULL_BUFFER){
