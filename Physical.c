@@ -144,8 +144,8 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
     }
 	
     hEvents     = (HANDLE*) malloc(sizeof(HANDLE) * 2);
-    hEvents[0]  = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("fillFTPBuffer"));
-    hEvents[1]  = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("emptyPTFBuffer"));
+    hEvents[0]  = CreateEvent(NULL, TRUE, FALSE, TEXT("fillFTPBuffer"));
+    hEvents[1]  = CreateEvent(NULL, TRUE, FALSE, TEXT("emptyPTFBuffer"));
     
 
     psi             = (PSTATEINFO) malloc(sizeof(STATEINFO));
@@ -164,6 +164,7 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
         ClearCommError(pwd->hPort, &dwError, &cs);
  
         if (dwEvent == WAIT_OBJECT_0) {
+			MessageBox(hWnd, TEXT("fillFTPBuffer"), 0, MB_OK);
             // fill ftp buffer
 			/*while(FTPQueueSize < FULL_WRITE_BUFFER && pwd->bMoreData){
 				read data
@@ -175,20 +176,22 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
 
         }
         else if (dwEvent == WAIT_OBJECT_0 + 1) {
+			MessageBox(hWnd, TEXT("emptyPTFBuffer"), 0, MB_OK);
             // empty ptf buffer
             /*while(ptfQueuesize > 0){
 				getporttofilequeue
 				write data to file
 				display data on screen
 			}*/
+
 			break;
         }
-        /*else if (dwEvent == WAIT_TIMEOUT) {
+        else if (dwEvent == WAIT_TIMEOUT) {
             // a timeout occured
             ProcessTimeout(psi);
         }
         
-        else {
+        /*else {
             // change this to conditionalo before release
             DISPLAY_ERROR("Invalid event occured in the File I/O thread");
         }*/
