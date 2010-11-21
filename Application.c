@@ -304,6 +304,26 @@ VOID MakeColumns(HWND hWnd){
     }    
 }
 
+/*------------------------------------------------------------------------------
+-- FUNCTION:    UpdateStats
+--
+-- DATE:        Nov 20, 2010
+--
+-- REVISIONS:   (Date and Description)
+--
+-- DESIGNER:	Marcel Vangrootheest
+--
+-- PROGRAMMER:  Marcel Vangrootheest
+--
+-- INTERFACE:   BOOL CALLBACK UpdateStats(HWND hWnd)
+--                              hWnd- handle to the window
+--
+-- RETURNS:     VOID
+-- 
+-- NOTES:	Updates the statistics box values.
+--              
+--
+------------------------------------------------------------------------------*/
 VOID UpdateStats(HWND hWnd) {
 	
 	TCHAR text[20];
@@ -315,7 +335,7 @@ VOID UpdateStats(HWND hWnd) {
 /*------------------------------------------------------------------------------
 -- FUNCTION:    Stats
 --
--- DATE:        Nov 8, 2010
+-- DATE:        Nov 18, 2010
 --
 -- REVISIONS:   (Date and Description)
 --
