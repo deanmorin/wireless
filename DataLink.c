@@ -262,6 +262,7 @@ VOID ReadFromFile(HWND hWnd){
 	BYTE* ReadBuffer = {0};
 	OVERLAPPED  ol                      = {0};
 	DWORD	dwSizeOfFile = 0;
+	FRAME frame;
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 	
 
@@ -288,7 +289,10 @@ VOID ReadFromFile(HWND hWnd){
 			//send end of file message
 		}
 				
-		CreateFrame(hWnd, ReadBuffer, dwBytesRead);
+		frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
+		//TODO: Enter FTP crit section
+		AddToFrameQueue(pwd->FTPBuffHead, pwd->FTPBuffTail, frame);
+		//TODO: exit FTP crit section
 	}
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 	
