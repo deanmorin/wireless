@@ -3,21 +3,10 @@
 
 #include <Windows.h>
 
+
 #define MAX_PAYLOAD_SIZE	1019
 #define FRAME_SIZE      1024
 
-
-typedef struct BYTE_NODE BYTE_NODE;
-typedef struct BYTE_NODE {
-    BYTE        b;
-    BYTE_NODE*  next;
-} BYTE_NODE, *PBYTE_NODE;
-
-typedef struct CHAR_LIST CHAR_LIST;
-typedef struct CHAR_LIST {
-    CHAR        c;
-    CHAR_LIST*  next;
-} CHAR_LIST;
 
 //pragma pack allow for a structure without padding
 #pragma pack(push)
@@ -33,17 +22,22 @@ typedef struct FRAME {
 } FRAME, *PFRAME;
 #pragma pack(pop)
 
+typedef struct BYTE_NODE BYTE_NODE;
+typedef struct BYTE_NODE {
+    BYTE        b;
+    BYTE_NODE*  next;
+} BYTE_NODE, *PBYTE_NODE, **PPBYTE_NODE;
 
-typedef struct FRAME_LIST FRAME_LIST;
-typedef struct FRAME_LIST {
-    FRAME        c;
-    FRAME_LIST*  next;
-} FRAME_LIST;
+typedef struct FRAME_NODE FRAME_NODE;
+typedef struct FRAME_NODE {
+    FRAME       f;
+    FRAME_NODE* next;
+} FRAME_NODE, *PFRAME_NODE, **PPFRAME_NODE;
 
 
-
-DWORD AddToBack(CHAR_LIST** p, CHAR* psBuf, DWORD dwLength);
-DWORD GetFromList(CHAR_LIST* p, UINT ordinal);
-CHAR* RemoveFromFront(CHAR_LIST** p, DWORD dwLength);
+BOOL AddToByteQueue(PPBYTE_NODE pHead, PPBYTE_NODE pTail, BYTE data);
+PBYTE RemoveFromByteQueue(PPBYTE_NODE pHead, DWORD dwLength);
+BOOL AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, FRAME data);
+PBYTE RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength);
 
 #endif
