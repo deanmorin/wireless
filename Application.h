@@ -20,6 +20,7 @@ VOID			Paint(HWND hWnd);
 VOID			PerformMenuAction(HWND hWnd, WPARAM wParam);
 VOID			SetBell(HWND hWnd, INT iSelected);
 BOOL CALLBACK	Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+BOOL CALLBACK	Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 VOID			UpdateStats(HWND hWnd);
 
 #endif

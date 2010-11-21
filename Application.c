@@ -48,7 +48,7 @@
 --              Initializes the terminal to its default state.
 ------------------------------------------------------------------------------*/
 VOID InitTerminal(HWND hWnd) {
-BYTE* temp;//for testing out Create Frame
+//BYTE* temp;//for testing out Create Frame
     PWNDDATA    pwd         = {0};
     HDC         hdc         = {0};
     COMMCONFIG  cc          = {0};
@@ -124,13 +124,13 @@ BYTE* temp;//for testing out Create Frame
 
 	//create tables for crc
 	crcInit();
-
+/*
 	//testing out CreateFrame
 	pwd->TxSequenceNumber=1;
 	temp = (BYTE*) calloc(2*256+1,sizeof(BYTE));
 	temp[1] = 0x3;
 	CreateFrame(hWnd,temp,2*256+1);
-
+*/
     //print out headers for Tokens and Values
     MakeColumns(hWnd);
 }
@@ -198,7 +198,21 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
 		case IDM_STATISTICS:       
 			ShowWindow(pwd->hDlgStats, SW_NORMAL);
             return;
-        
+		case IDM_DEBUGGER:       
+			ShowWindow(pwd->hDlgDebug, SW_NORMAL);
+            return;
+		/*case ID_TRANSMIT_OPENFILE:
+			OpenFileTransmit(hWnd);
+			return;
+		case ID_TRANSMIT_READ:
+			ReadFromFile(hWnd);
+			return;
+		case ID_TRANSMIT_SETFTP:
+			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
+			return;
+		case ID_TRANSMIT_SETPTF:
+			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
+			return;*/
         default:
             return;
     }
@@ -304,6 +318,26 @@ VOID MakeColumns(HWND hWnd){
     }    
 }
 
+/*------------------------------------------------------------------------------
+-- FUNCTION:    UpdateStats
+--
+-- DATE:        Nov 20, 2010
+--
+-- REVISIONS:   (Date and Description)
+--
+-- DESIGNER:	Marcel Vangrootheest
+--
+-- PROGRAMMER:  Marcel Vangrootheest
+--
+-- INTERFACE:   BOOL CALLBACK UpdateStats(HWND hWnd)
+--                              hWnd- handle to the window
+--
+-- RETURNS:     VOID
+-- 
+-- NOTES:	Updates the statistics box values.
+--              
+--
+------------------------------------------------------------------------------*/
 VOID UpdateStats(HWND hWnd) {
 	
 	TCHAR text[20];
@@ -315,7 +349,7 @@ VOID UpdateStats(HWND hWnd) {
 /*------------------------------------------------------------------------------
 -- FUNCTION:    Stats
 --
--- DATE:        Nov 8, 2010
+-- DATE:        Nov 18, 2010
 --
 -- REVISIONS:   (Date and Description)
 --
@@ -336,6 +370,18 @@ VOID UpdateStats(HWND hWnd) {
 --
 ------------------------------------------------------------------------------*/
 BOOL CALLBACK Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		return TRUE;
+	case WM_CLOSE:
+		ShowWindow(hDlg, SW_HIDE);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message)
 	{
 	case WM_INITDIALOG:

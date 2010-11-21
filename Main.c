@@ -94,6 +94,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 	pwd->hDlgStats = CreateDialog (hInstance, TEXT("Statistics"), hWnd, Stats);
+	pwd->hDlgDebug = CreateDialog (hInstance, TEXT("Debug"), hWnd, Debug);
 	SetTimer(hWnd, TIMER, 1000, (TIMERPROC) NULL);
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 

@@ -103,8 +103,10 @@ BOOL Connect(HWND hWnd) {
     pwd->hThread = CreateThread(NULL, 0,
                                 (LPTHREAD_START_ROUTINE) PortIOThreadProc,
                                 hWnd, 0, &dwThreadid);
-	pwd->hFileThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) FileIOThreadProc,
+
+    pwd->hFileThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) FileIOThreadProc,
 									hWnd, 0, &dwFileThreadID);
+
     if (pwd->hThread == INVALID_HANDLE_VALUE) {
         DISPLAY_ERROR("Error creating read thread");
         return FALSE;
