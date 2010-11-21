@@ -65,18 +65,16 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     DWORD       dwError             = 0;
     COMSTAT     cs                  = {0};
     HANDLE*     hEvents             = NULL;
-    INT         iEventsSize         = 0;
     PSTATEINFO  psi                 = NULL;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
-    CreateEvent(NULL, TRUE, FALSE, TEXT("dataToWrite"));         //REMOVE//////
+
     if ((ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)) == NULL) {
         DISPLAY_ERROR("Error creating event in read thread");
     }
-    hEvents     = (HANDLE*) malloc(sizeof(HANDLE) * 3);
+    hEvents     = (HANDLE*) malloc(sizeof(HANDLE) * PORT_IO_EVENTS);
     hEvents[0]  = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("disconnected"));
     hEvents[1]  = ol.hEvent;                               // "dataAtPort"
-    hEvents[2]  = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("dataToWrite"));
 
     psi             = (PSTATEINFO) malloc(sizeof(STATEINFO));
     psi->iState     = STATE_IDLE;
@@ -84,14 +82,15 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     srand(GetTickCount());
     psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
 
+
     while (pwd->bConnected) {
         
         SetCommMask(pwd->hPort, EV_RXCHAR);      
         if (!WaitCommEvent(pwd->hPort, &dwEvent, &ol)) {
             ProcessCommError(pwd->hPort);
         }
-        iEventsSize = (psi->iState == STATE_IDLE) ? 3 : 2;
-        dwEvent = WaitForMultipleObjects(iEventsSize, hEvents, FALSE, psi->dwTimeout);
+        dwEvent = WaitForMultipleObjects(PORT_IO_EVENTS, hEvents, FALSE, 
+                                         psi->dwTimeout);
         ClearCommError(pwd->hPort, &dwError, &cs);
  
         if (dwEvent == WAIT_OBJECT_0) {
@@ -102,13 +101,9 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
             // data arrived at the port
             ReadFromPort(hWnd, psi, ol, cs.cbInQue);
         }
-        else if (dwEvent == WAIT_OBJECT_0 + 2) {
-            // in idle state, with data ready to write to port
-            ProcessWrite(hWnd, psi);
-        }
         else if (dwEvent == WAIT_TIMEOUT) {
             // a timeout occured
-            ProcessTimeout(psi);
+            ProcessTimeout(hWnd, psi);
         }
         else {
             // change this to conditional before release //////////////////////
@@ -183,14 +178,14 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
 				display data on screen
 			}*/
 			break;
-        }
-        /*else if (dwEvent == WAIT_TIMEOUT) {
+        }/*
+        else if (dwEvent == WAIT_TIMEOUT) {
             // a timeout occured
             ProcessTimeout(psi);
         }
         
         else {
-            // change this to conditionalo before release
+            // change this to conditional before release
             DISPLAY_ERROR("Invalid event occured in the File I/O thread");
         }*/
 		ResetEvent(ol.hEvent);
@@ -216,7 +211,7 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
     }
 
     if ((psi->iState == STATE_R2  &&  dwBytesRead >= FRAME_SIZE)  ||
-        (psi->iState != STATE_R2  &&  dwBytesRead >= CTRL_CHAR_SIZE)) {
+        (psi->iState != STATE_R2  &&  dwBytesRead >= CTRL_FRAME_SIZE)) {
         // expected amount of bytes were read
         ProcessRead(hWnd, psi, pReadBuf, dwBytesRead);
     } else {
