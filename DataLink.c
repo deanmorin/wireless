@@ -25,6 +25,7 @@ VOID ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {
         REC_ACK++;
+        psi->iFailedENQCount = 0;
         psi->iState     = STATE_T3;
         DL_STATE        = psi->iState;
 		psi->dwTimeout  = TOR2;
@@ -146,6 +147,9 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
             return;
 
         case STATE_T1:
+            /*if (++(psi->iFailedENQCount) >= MAX_FAILED_ENQS) {
+                DISPLAY_ERROR("Connection cannot be established"); 
+            }*/                   // NEED TO SET APPROPRIATE EVENT
             srand(GetTickCount());
             psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
             psi->iState     = STATE_IDLE;

@@ -75,13 +75,10 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     hEvents     = (HANDLE*) malloc(sizeof(HANDLE) * PORT_IO_EVENTS);
     hEvents[0]  = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("disconnected"));
     hEvents[1]  = ol.hEvent;                               // "dataAtPort"
-
-    psi             = (PSTATEINFO) malloc(sizeof(STATEINFO));
-    psi->iState     = STATE_IDLE;
-    DL_STATE        = psi->iState;
-    psi->itoCount   = 0;
-    srand(GetTickCount());
-    psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
+    
+    psi = (PSTATEINFO) malloc(sizeof(STATEINFO));
+    InitStateInfo(psi);
+    DL_STATE = psi->iState;
 
 
     while (pwd->bConnected) {
@@ -120,6 +117,16 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     CloseHandle(ol.hEvent);
     return 0;
 }
+
+
+VOID InitStateInfo (PSTATEINFO psi) {
+    psi->iState     = STATE_IDLE;
+    psi->itoCount   = 0;
+    srand(GetTickCount());
+    psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
+    psi->iFailedENQCount = 0;    
+}
+
 
 DWORD WINAPI FileIOThreadProc(HWND hWnd) {
     
