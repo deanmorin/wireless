@@ -80,8 +80,9 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
 
     psi             = (PSTATEINFO) malloc(sizeof(STATEINFO));
     psi->iState     = STATE_IDLE;
-    psi->dwTimeout  = INFINITE;
     psi->itoCount   = 0;
+    srand(GetTickCount());
+    psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
 
     while (pwd->bConnected) {
         
@@ -208,9 +209,6 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
     PWNDDATA    pwd                     = NULL;
     BYTE        pReadBuf[READ_BUFSIZE]  = {0};
     DWORD       dwBytesRead             = 0;
-    DWORD	    dwPacketLength 		    = 0;
-	CHAR*		pcPacket	            = NULL;
-    CHAR_LIST*  pHead                   = NULL;
     DWORD       dwQueueSize             = 0;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
