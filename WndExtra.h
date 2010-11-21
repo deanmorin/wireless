@@ -33,6 +33,7 @@
 #define WINDOW_TOP          pwd->cyWindowTop
 #define WINDOW_BOTTOM       pwd->cyWindowBottom
 
+#define DL_STATE            pwd->statsInfo.dlState
 #define NUM_FILES           pwd->statsInfo.numFiles
 #define UP_FRAMES           pwd->statsInfo.upFrames
 #define DOWN_FRAMES         pwd->statsInfo.downFrames
@@ -54,6 +55,7 @@ typedef struct charInfo {
 } CHARINFO;
 
 typedef struct statsInfo {
+    INT dlState;
 	INT	numFiles;
 	INT upFrames;
 	INT downFrames;
