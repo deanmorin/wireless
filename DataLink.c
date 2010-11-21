@@ -26,10 +26,12 @@ VOID ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {
         REC_ACK++;
         psi->iState     = STATE_T3;
+        DL_STATE        = psi->iState;
 		psi->dwTimeout  = TOR2;
-        RespondToACK(hWnd, psi);
+        SendFrame(hWnd, psi);
     } else {
         psi->iState     = STATE_IDLE;
+        DL_STATE        = psi->iState;
         srand(GetTickCount());
         psi->dwTimeout = TOR0_BASE + rand() % TOR0_RANGE;
     }
@@ -43,9 +45,9 @@ VOID ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {         // last frame acknowledged
         REC_ACK++;
-        FRAMES_ACKD++;
+        UP_FRAMES_ACKD++;
         // pop ack'd frame
-        RespondToACK(hWnd, psi);
+        SendFrame(hWnd, psi);
     } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {  // receiver wants to send
                                                     // a frame
         REC_RVI++;
@@ -66,6 +68,7 @@ VOID ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
         SENT_ACK++;
         psi->iState     = STATE_R2;
+        DL_STATE        = psi->iState;
         psi->dwTimeout  = TOR3;
     }
 }
@@ -76,33 +79,40 @@ VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
+    if (pwd->PTFQueueSize >= FULL_BUFFER) {
+        SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
+    }
+
     if (pReadBuf[CTRL_CHAR_INDEX] == EOT) {
         REC_EOT++;
         psi->iState = STATE_IDLE;
+        DL_STATE    = psi->iState;
         srand(GetTickCount());
         psi->dwTimeout = TOR0_BASE + rand() % TOR0_RANGE;
-    } 
-    else if (pwd->PTFQueueSize >= FULL_BUFFER) {
-        SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
-    }
-    else if (crcFast(pReadBuf, dwLength) == 0) {
+    
+    } else {
         DOWN_FRAMES++;
 
-        if (pwd->FTPQueueSize) {
-            pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
-            ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
-            SENT_RVI++;
-        } else {
-            pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
-            ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
-            psi->iState = STATE_T1;
-            SENT_ACK++;
+        if (crcFast(pReadBuf, dwLength) == 0) { // also check for sequence       
+            DOWN_FRAMES_ACKD++;
+
+            if (pwd->FTPQueueSize) {
+                pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
+                ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
+                SENT_RVI++;
+            } else {
+                pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
+                ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
+                psi->iState = STATE_T1;
+                DL_STATE    = psi->iState;
+                SENT_ACK++;
+            }
         }
     }
 }
 
 
-VOID RespondToACK(HWND hWnd, PSTATEINFO psi) {
+VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
     PWNDDATA    pwd = NULL;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
@@ -121,7 +131,9 @@ VOID RespondToACK(HWND hWnd, PSTATEINFO psi) {
 
 
 VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
+    PWNDDATA    pwd = NULL;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
+    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     switch (psi->iState) {
         
@@ -130,22 +142,39 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
             ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
             psi->dwTimeout  = TOR1;
             psi->iState     = STATE_T1;
+            DL_STATE        = psi->iState;
             return;
 
         case STATE_T1:
             srand(GetTickCount());
             psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
             psi->iState     = STATE_IDLE;
+            DL_STATE        = psi->iState;
             return;
-
+        
         case STATE_T3:
-            psi->dwTimeout *= (DWORD) pow(2.0, ++(psi->itoCount));
-            psi->iState     = (psi->itoCount >= 3) ? STATE_IDLE : STATE_T2;
+            psi->dwTimeout *= TOR2_INCREASE_FACTOR;
+
+            if (++(psi->itoCount) >= 3) {
+                srand(GetTickCount());
+                psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
+                psi->iState     = STATE_IDLE;
+            } else { 
+                psi->iState     = STATE_T3;
+                SendFrame(hWnd, psi);
+            }
+            DL_STATE = psi->iState;
             return;
         
         case STATE_R2:
-            psi->dwTimeout *= (DWORD) pow(2.0, ++(psi->itoCount));
-            psi->iState     = (psi->itoCount >= 3) ? STATE_IDLE : STATE_R2;
+            psi->dwTimeout *= TOR3_INCREASE_FACTOR;
+
+            if (++(psi->itoCount) >= 3) {
+                srand(GetTickCount());
+                psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
+                psi->iState     = STATE_IDLE;
+                DL_STATE        = psi->iState;
+            } 
             return;
         
         default:

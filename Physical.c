@@ -78,6 +78,7 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
 
     psi             = (PSTATEINFO) malloc(sizeof(STATEINFO));
     psi->iState     = STATE_IDLE;
+    DL_STATE        = psi->iState;
     psi->itoCount   = 0;
     srand(GetTickCount());
     psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
@@ -106,7 +107,7 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
             ProcessTimeout(hWnd, psi);
         }
         else if (dwEvent == WAIT_FAILED) {
-            DISPLAY_ERROR("Invalid event occured in the Port I/O thread");
+            //DISPLAY_ERROR("Invalid event occured in the Port I/O thread");
         }
         ResetEvent(ol.hEvent);
     }
@@ -146,6 +147,7 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
 
     psi             = (PSTATEINFO) malloc(sizeof(STATEINFO));
     psi->iState     = STATE_IDLE;
+    DL_STATE        = psi->iState;
     psi->dwTimeout  = INFINITE;
     psi->itoCount   = 0;
 
