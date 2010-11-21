@@ -14,20 +14,24 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define START_R3    102
 #define STATE_R4    103
 
-#define TOR1    500
-#define TOR2    500
-#define TOR3    500
+// timeout values
+#define TOR0_BASE   400
+#define TOR0_RANGE  200
+#define TOR1        500
+#define TOR2        500
+#define TOR3        500
 
-
-
-#define CTRL_CHAR_SIZE  1
+// frame components
+#define CTRL_CHAR_SIZE      1
+#define CTRL_CHAR_INDEX     0
 #define MAX_PAYLOAD_SIZE	1019
-#define FRAME_SIZE      1024
-#define SOH             0x01
-#define EOT             0x04
-#define ENQ             0x05
-#define ACK             0x06
-#define RVI             0x13
+#define FRAME_SIZE          1024
+
+#define SOH 0x01
+#define EOT 0x04
+#define ENQ 0x05
+#define ACK 0x06
+#define RVI 0x13
 
 typedef struct STATEINFO_tag {
     INT     iState;
