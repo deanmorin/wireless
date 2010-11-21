@@ -82,6 +82,7 @@ typedef struct wndData {
 	BOOL			bMoreData;
     BOOL            bConnected;
     HANDLE          hThread;
+	HANDLE			hFileThread;
     DWORD           dwThreadid;
     COMMTIMEOUTS    defaultTimeOuts;
     CHAR*           psIncompleteEsc;
@@ -98,6 +99,7 @@ typedef struct wndData {
     INT             PTFQueueSize;
 	FRAME_NODE		FTPBuff;
 	FRAME_NODE		PTFBuff;
+	INT				NumOfReads;
 	BYTE			TxSequenceNumber;
 	BYTE			RxSequenceNumber;
 } WNDDATA, *PWNDDATA;
