@@ -5,7 +5,7 @@ VOID ProcessWrite(HWND hWnd, PSTATEINFO psi, BYTE* pFrame, DWORD dwLength) {
     OVERLAPPED  ol  = {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
-    WriteFile(pwd->hPort, pFrame, dwLength, NULL, &ol);
+    if (!WriteFile(pwd->hPort, pFrame, dwLength, NULL, &ol));
 }
 
 
@@ -20,15 +20,13 @@ VOID ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
 VOID ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     PWNDDATA    pwd = NULL;
-    OVERLAPPED  ol  = {0};
+    static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {
-        WriteFile(pwd->hPort, TEXT("write a frame"), CTRL_FRAME_SIZE, NULL, &ol);
         psi->iState     = STATE_T3;
-		psi->itoCount   = 0;
 		psi->dwTimeout  = TOR2;
-        SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
+        RespondToACK(hWnd, psi);
     } else {
         psi->iState     = STATE_IDLE;
         srand(GetTickCount());
@@ -39,29 +37,28 @@ VOID ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
 VOID ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     PWNDDATA    pwd = NULL;
-    OVERLAPPED  ol  = {0};
+    static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
-    if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {
-        if (pwd->FTPQueueSize == 0) {
-            WriteFile(pwd->hPort, TEXT("PUTA EOT"), CTRL_FRAME_SIZE, NULL, &ol);
-        } else {
-            //Get next frame
-            SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
-            WriteFile(pwd->hPort, TEXT("A FRAME"), CTRL_FRAME_SIZE, NULL, &ol);
-		    psi->itoCount = 0;
-        }
+    if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {         // last frame acknowledged
+        // pop ack'd frame
+        RespondToACK(hWnd, psi);
+    } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {  // receiver wants to send
+                                                    // a frame
+        pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
+        ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);        
     }
 }
 
 
 VOID ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     PWNDDATA    pwd = NULL;
-    OVERLAPPED  ol  = {0};
+    static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ENQ) {
-        WriteFile(pwd->hPort, TEXT("AN ACK"), CTRL_FRAME_SIZE, NULL, &ol);
+        pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
+        ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
         psi->iState     = STATE_R2;
         psi->dwTimeout  = TOR3;
     }
@@ -70,7 +67,7 @@ VOID ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
 VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     PWNDDATA    pwd = NULL;
-    OVERLAPPED  ol  = {0};
+    static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == EOT) {
@@ -83,23 +80,41 @@ VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     }
     else if (crcFast(pReadBuf, dwLength) == 0) {
         if (pwd->FTPQueueSize) {
-            WriteFile(pwd->hPort, TEXT("AN RVI"), CTRL_FRAME_SIZE, NULL, &ol);
+            pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
+            ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
         } else {
-            WriteFile(pwd->hPort, TEXT("AN ACK"), CTRL_FRAME_SIZE, NULL, &ol);
+            pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
+            ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
             psi->iState = STATE_T1;
         }
     }
 }
 
 
+VOID RespondToACK(HWND hWnd, PSTATEINFO psi) {
+    PWNDDATA    pwd = NULL;
+    static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
+    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+
+    if (pwd->FTPQueueSize == 0) {
+        pCtrlFrame[CTRL_CHAR_INDEX] = EOT;
+        ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
+    } else {
+        ProcessWrite(hWnd, psi, NULL, CTRL_FRAME_SIZE); //PEEK NEXT FRAME
+        SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
+		psi->itoCount = 0;
+    }
+}
+
+
 VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
-    static BYTE pEnq[CTRL_FRAME_SIZE] = {0}; 
+    static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
 
     switch (psi->iState) {
         
         case STATE_IDLE:
-            pEnq[CTRL_CHAR_INDEX] = ENQ;
-            ProcessWrite(hWnd, psi, pEnq, CTRL_FRAME_SIZE);
+            pCtrlFrame[CTRL_CHAR_INDEX] = ENQ;
+            ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
             psi->dwTimeout  = TOR1;
             psi->iState     = STATE_T1;
             return;

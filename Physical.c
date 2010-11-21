@@ -151,13 +151,8 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
 
     while (pwd->bConnected) {
         
-        SetCommMask(pwd->hPort, EV_RXCHAR);  
-        if (!WaitCommEvent(pwd->hPort, &dwEvent, &ol)) {
-            ProcessCommError(pwd->hPort);
-        }
         iEventsSize = 2;
         dwEvent = WaitForMultipleObjects(iEventsSize, hEvents, FALSE, INFINITE);
-        ClearCommError(pwd->hPort, &dwError, &cs);
  
         if (dwEvent == WAIT_OBJECT_0) {
 			//MessageBox(hWnd, TEXT("fillFTPBuffer"), 0, MB_OK);

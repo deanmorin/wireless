@@ -24,7 +24,7 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define TOR3        500
 
 // frame components
-#define CTRL_FRAME_SIZE      1
+#define CTRL_FRAME_SIZE     1
 #define CTRL_CHAR_INDEX     0
 
 
@@ -33,7 +33,6 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define ENQ 0x05
 #define ACK 0x06
 #define RVI 0x13
-
 
 typedef struct STATEINFO_tag {
     INT     iState;
@@ -49,6 +48,7 @@ VOID    ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
+VOID    RespondToACK(HWND hWnd, PSTATEINFO psi);
 FRAME   CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength);
 VOID 	OpenFileReceive(HWND hWnd);
 VOID 	OpenFileTransmit(HWND hWnd);
