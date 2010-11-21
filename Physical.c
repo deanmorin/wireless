@@ -107,7 +107,7 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
             ProcessTimeout(hWnd, psi);
         }
         else if (dwEvent == WAIT_FAILED) {
-            DISPLAY_ERROR("Invalid event occured in the Port I/O thread");
+            //DISPLAY_ERROR("Invalid event occured in the Port I/O thread");
         }
         ResetEvent(ol.hEvent);
     }

@@ -45,7 +45,7 @@ VOID ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {         // last frame acknowledged
         REC_ACK++;
-        FRAMES_ACKD++;
+        UP_FRAMES_ACKD++;
         // pop ack'd frame
         SendFrame(hWnd, psi);
     } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {  // receiver wants to send
@@ -79,29 +79,34 @@ VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
+    if (pwd->PTFQueueSize >= FULL_BUFFER) {
+        SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
+    }
+
     if (pReadBuf[CTRL_CHAR_INDEX] == EOT) {
         REC_EOT++;
         psi->iState = STATE_IDLE;
         DL_STATE    = psi->iState;
         srand(GetTickCount());
         psi->dwTimeout = TOR0_BASE + rand() % TOR0_RANGE;
-    } 
-    else if (pwd->PTFQueueSize >= FULL_BUFFER) {
-        SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
-    }
-    else if (crcFast(pReadBuf, dwLength) == 0) {
+    
+    } else {
         DOWN_FRAMES++;
 
-        if (pwd->FTPQueueSize) {
-            pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
-            ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
-            SENT_RVI++;
-        } else {
-            pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
-            ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
-            psi->iState = STATE_T1;
-            DL_STATE    = psi->iState;
-            SENT_ACK++;
+        if (crcFast(pReadBuf, dwLength) == 0) { // also check for sequence       
+            DOWN_FRAMES_ACKD++;
+
+            if (pwd->FTPQueueSize) {
+                pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
+                ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
+                SENT_RVI++;
+            } else {
+                pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
+                ProcessWrite(hWnd, psi, pCtrlFrame, CTRL_FRAME_SIZE);
+                psi->iState = STATE_T1;
+                DL_STATE    = psi->iState;
+                SENT_ACK++;
+            }
         }
     }
 }
