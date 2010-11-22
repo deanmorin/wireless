@@ -105,7 +105,7 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     }
     DOWN_FRAMES++;
 
-    if (crcFast(pReadBuf, dwLength) == 0) { // also check for sequence #     
+    if (crcFast(pReadBuf, dwLength) == 0) { // ALSO CHECK FOR SEQUENCE #     
         DOWN_FRAMES_ACKD++;
 
         if (pwd->FTPQueueSize) {
@@ -134,7 +134,7 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
         SENT_EOT++;
     } else {
-        ProcessWrite(hWnd, NULL, CTRL_FRAME_SIZE); //PEEK NEXT FRAME
+        ProcessWrite(hWnd, (BYTE*) &pwd->FTPBuffHead->f, CTRL_FRAME_SIZE); //PEEK NEXT FRAME
         UP_FRAMES++;
         SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
 		psi->itoCount = 0;
