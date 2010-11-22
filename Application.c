@@ -344,10 +344,12 @@ VOID MakeColumns(HWND hWnd){
 --
 ------------------------------------------------------------------------------*/
 VOID UpdateStats(HWND hWnd) {
+	static FLOAT totalTime = 0;
 	FLOAT dRate, uRate, tRate, edRate, euRate, etRate;
 	TCHAR text[20];
 	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 	
+	totalTime += TIME_LENGTH;
 	_stprintf(text, _T("%d"), NUM_FILES);
 	SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
 
@@ -369,8 +371,8 @@ VOID UpdateStats(HWND hWnd) {
 	_stprintf(text, _T("%d"), REC_RVI);
 	SetDlgItemText(pwd->hDlgStats, IDC_RVIRECEIVED, text);
 
-	dRate = (DOWN_FRAMES * 1024) / (FLOAT)TIME_LENGTH;
-	uRate = (UP_FRAMES * 1024) / (FLOAT)TIME_LENGTH;
+	dRate = (DOWN_FRAMES * 1024 * 8) / totalTime;
+	uRate = (UP_FRAMES * 1024 * 8) / totalTime;
 	tRate = dRate + uRate;
 	
 	_stprintf(text, _T("%.2f"), dRate);
@@ -382,8 +384,8 @@ VOID UpdateStats(HWND hWnd) {
 	_stprintf(text, _T("%.2f"), tRate);
 	SetDlgItemText(pwd->hDlgStats, IDC_TRATE, text);
 
-	edRate = (DOWN_FRAMES_ACKD * 1019) / TIME_LENGTH;
-	euRate = (UP_FRAMES_ACKD * 1019) / TIME_LENGTH;
+	edRate = (DOWN_FRAMES_ACKD * 1019 * 8) / totalTime;
+	euRate = (UP_FRAMES_ACKD * 1019 * 8) / totalTime;
 	etRate = edRate + euRate;
 
 	_stprintf(text, _T("%.2f"), edRate);
