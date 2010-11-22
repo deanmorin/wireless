@@ -33,7 +33,7 @@ BOOL AddToByteQueue(PPBYTE_NODE pHead, PPBYTE_NODE pTail, BYTE data) {
     if ((newNode = (PBYTE_NODE) malloc(sizeof(BYTE_NODE))) == NULL) {
         return FALSE;
     }
-    if (pHead == NULL) {
+    if (*pHead == NULL) {
         *pHead = newNode;
         *pTail = newNode;
         return TRUE;
@@ -61,6 +61,17 @@ PBYTE RemoveFromByteQueue(PPBYTE_NODE pHead, DWORD dwLength) {
     }
     *pHead = p;
     return removed;
+}
+
+
+VOID DeleteByteQueue(PBYTE_NODE pHead) {
+    PBYTE_NODE  p   = NULL;
+    PBYTE_NODE  q   = NULL;
+        
+    for (p = pHead; p != NULL; p = q) {
+        q = p->next;
+        free(p);
+    }
 }
 
 
