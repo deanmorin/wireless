@@ -251,8 +251,9 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
             if (ProcessRead(hWnd, psi, pReadBuf, dwBytesRead)) {
                 // read completed successfully
                 dwQueueSize         = 0;
+                DeleteByteQueue(pwd->pReadBufHead);
                 pwd->pReadBufHead   = NULL;
-                pwd->pReadBufHead   = NULL;       //MEMORY LEAKS!!!!!
+                pwd->pReadBufHead   = NULL;
                 return;
             }
         }        

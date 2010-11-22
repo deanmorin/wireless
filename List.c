@@ -64,6 +64,17 @@ PBYTE RemoveFromByteQueue(PPBYTE_NODE pHead, DWORD dwLength) {
 }
 
 
+VOID DeleteByteQueue(PBYTE_NODE pHead) {
+    PBYTE_NODE  p   = NULL;
+    PBYTE_NODE  q   = NULL;
+        
+    for (p = pHead; p != NULL; p = q) {
+        q = p->next;
+        free(p);
+    }
+}
+
+
 BOOL AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, FRAME data) {
     PFRAME_NODE newNode  = NULL;
     
