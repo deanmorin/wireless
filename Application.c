@@ -168,7 +168,7 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
                 
         case IDM_CONNECT:       
             Connect(hWnd);
-			//OpenFileReceive(hWnd);
+			OpenFileReceive(hWnd); 
             return;
 
         case IDM_DISCONNECT:
@@ -204,18 +204,8 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
 		case IDM_DEBUGGER:       
 			ShowWindow(pwd->hDlgDebug, SW_NORMAL);
             return;
-		/*case ID_TRANSMIT_OPENFILE:
-			OpenFileTransmit(hWnd);
-			return;
-		case ID_TRANSMIT_READ:
-			ReadFromFile(hWnd);
-			return;
-		case ID_TRANSMIT_SETFTP:
-			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
-			return;
-		case ID_TRANSMIT_SETPTF:
-			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
-			return;*/
+
+		
         default:
             return;
     }

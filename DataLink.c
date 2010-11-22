@@ -321,10 +321,12 @@ VOID ReadFromFile(HWND hWnd){
 	DWORD dwBytesRead = 0;
 	DWORD dwBytesWritten = 0;
 	DWORD	dwSizeOfFile = 0;
-    FRAME frame;
-    BYTE* ReadBuffer[1019] = {0};
-    pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+   	FRAME frame;
 
+	BYTE* ReadBuffer = (BYTE*) malloc(sizeof(BYTE) *1019);
+
+	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+	
 
 	dwSizeOfFile = GetFileSize(pwd->hFileTransmit, NULL);
 	while(pwd->FTPQueueSize < FULL_BUFFER && pwd->hFileTransmit != NULL){
@@ -362,6 +364,7 @@ VOID ReadFromFile(HWND hWnd){
 
 				
 		frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
+		
 		//TODO: Enter FTP crit section
 		AddToFrameQueue(pwd->FTPBuffHead, pwd->FTPBuffTail, frame);
 		//TODO: exit FTP crit section
