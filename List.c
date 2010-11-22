@@ -33,7 +33,7 @@ BOOL AddToByteQueue(PPBYTE_NODE pHead, PPBYTE_NODE pTail, BYTE data) {
     if ((newNode = (PBYTE_NODE) malloc(sizeof(BYTE_NODE))) == NULL) {
         return FALSE;
     }
-    if (pHead == NULL) {
+    if (*pHead == NULL) {
         *pHead = newNode;
         *pTail = newNode;
         return TRUE;
