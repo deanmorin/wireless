@@ -268,7 +268,7 @@ VOID CloseFileTransmit(HWND hWnd){
 	}
 }
 
-VOID OpenFileReceive(HWND hWnd){
+BOOL OpenFileReceive(HWND hWnd){
 	PWNDDATA pwd = {0};
 	OPENFILENAME ofn;
 	char szFile[100] = {0};
@@ -282,14 +282,17 @@ VOID OpenFileReceive(HWND hWnd){
 	ofn.nMaxFile = sizeof(szFile);
 
 
-	GetSaveFileName(&ofn);
-	//pwd->lpszReceiveName = ofn.lpstrFile;
+	if(GetSaveFileName(&ofn) == 0){
+		return FALSE;
+	} 
+	
+	
 	pwd->hFileReceive = CreateFile(ofn.lpstrFile, GENERIC_READ | GENERIC_WRITE,
 									FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
 									OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
-	
+	return TRUE;
 }
 
 VOID CloseFileReceive(HWND hWnd){
@@ -299,7 +302,6 @@ VOID CloseFileReceive(HWND hWnd){
 		if(!CloseHandle(pwd->hFileReceive)){
 			DISPLAY_ERROR("Failed to close Receive File");
 		}
-		//pwd->lpszReceiveName = "";
 		pwd->hFileReceive = NULL;
 		SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 		
@@ -341,6 +343,7 @@ VOID ReadFromFile(HWND hWnd){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			pwd->NumOfReads++;
+			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("dataToWrite")));
 		} else if(dwSizeOfFile/pwd->NumOfReads >= 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
@@ -351,6 +354,8 @@ VOID ReadFromFile(HWND hWnd){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			CloseFileTransmit(hWnd);
+			pwd->NumOfReads = 0;
+			SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 			MessageBox(hWnd, TEXT("File Read Complete"), 0, MB_OK);
 		}
 
@@ -358,15 +363,15 @@ VOID ReadFromFile(HWND hWnd){
 			DISPLAY_ERROR("Failed to write to file");
 		}*/		
 		
-		//AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, CreateFrame(hWnd, *ReadBuffer, dwBytesRead);
+		//AddToFrameQueue(pwd->FTPBuffHead, pwd->FTPBuffTail, CreateFrame(hWnd, ReadBuffer, dwBytesRead));
 		//				 (FTPhead, FTPtail, CreateFrame(hWnd, *ReadBuffer, dwBytesRead)
 
 
 				
 		frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
-		
+		//WriteToFile(hWnd, &frame);
 		//TODO: Enter FTP crit section
-		AddToFrameQueue(pwd->FTPBuffHead, pwd->FTPBuffTail, frame);
+		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 		//TODO: exit FTP crit section
 
 

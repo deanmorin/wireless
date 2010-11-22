@@ -82,8 +82,10 @@ BOOL AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, FRAME data) {
         return FALSE;
     }
     if (*pHead == NULL) {
+
         *pHead = newNode;
         *pTail = newNode;
+		
         return TRUE;
     }
     (*pTail)->next = newNode;

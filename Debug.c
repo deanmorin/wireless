@@ -11,7 +11,7 @@ VOID MakeDebugFrameOne(HWND hWnd){
 	for (i =0;i<25;i++){
 		data[i] = i+65;
 	}
-	AddToFrameQueue(pwd->FTPBuffHead,pwd->FTPBuffTail,CreateFrame(hWnd,data,25));
+	AddToFrameQueue(&pwd->FTPBuffHead,&pwd->FTPBuffTail,CreateFrame(hWnd,data,25));
 }
 
 
@@ -27,7 +27,7 @@ VOID MakeDebugFrameTwo(HWND hWnd){
 	for (i =0;i<MAX_PAYLOAD_SIZE;i++){
 		data[i] = (i%26)+65;
 	}
-	AddToFrameQueue(pwd->FTPBuffHead,pwd->FTPBuffTail,CreateFrame(hWnd,data,MAX_PAYLOAD_SIZE));
+	AddToFrameQueue(&pwd->FTPBuffHead,&pwd->FTPBuffTail,CreateFrame(hWnd,data,MAX_PAYLOAD_SIZE));
 }
 
 
