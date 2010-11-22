@@ -5,5 +5,6 @@
 
 
 VOID MakeDebugFrameOne(HWND hWnd);
+VOID MakeDebugFrameTwo(HWND hWnd);
 #endif
 
