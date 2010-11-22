@@ -2,8 +2,8 @@
 #define STRICT
 #endif
 
-#ifndef ASSIGN01_H
-#define ASSIGN01_H
+#ifndef MAIN_H
+#define MAIN_H
 
 #include <Windows.h>
 #include <stdio.h>

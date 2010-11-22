@@ -181,7 +181,10 @@ VOID Disconnect(HWND hWnd) {
 
     ResetEvent(hEvent);
     CloseHandle(pwd->hThread);
+	CloseHandle(pwd->hFileThread);
     CloseHandle(pwd->hPort);
+	CloseFileReceive(hWnd);
+	CloseFileTransmit(hWnd);
     pwd->hPort = NULL;
 	
     // enable/disable appropriate menu choices    

@@ -85,12 +85,19 @@ VOID InitTerminal(HWND hWnd) {
     WINDOW_BOTTOM           = LINES_PER_SCRN -1;
 	pwd->wordWrap			= FALSE;
 	pwd->relOrigin			= FALSE;
-
+	pwd->PTFBuffHead = NULL;
+	pwd->PTFBuffTail = NULL;
+	pwd->FTPBuffHead = NULL;
+	pwd->FTPBuffTail = NULL;
     pwd->FTPQueueSize = 0;
     pwd->PTFQueueSize = 0;
 	pwd->bMoreData = TRUE;
 	pwd->NumOfReads = 0;
+
+    pwd->pReadBufHead = NULL;
+    pwd->pReadBufTail = NULL;
     
+
     // initialize a "blank" display buffer
     for (i = 0; i < LINES_PER_SCRN; i++) {
         pwd->displayBuf.rows[i] = (PLINE) calloc(1, sizeof(LINE));
@@ -165,8 +172,9 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
     switch (LOWORD(wParam)) {
                 
         case IDM_CONNECT:       
-            Connect(hWnd);
-			//OpenFileReceive(hWnd);
+            if(OpenFileReceive(hWnd))
+				Connect(hWnd);
+			
             return;
 
         case IDM_DISCONNECT:
@@ -202,18 +210,14 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
 		case IDM_DEBUGGER:       
 			ShowWindow(pwd->hDlgDebug, SW_NORMAL);
             return;
-		/*case ID_TRANSMIT_OPENFILE:
+
+		case ID_OPEN_RECEIVEFILE:
+			//OpenFileReceive(hWnd);
+			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
+			return;
+		case ID_OPEN_TRANSMITFILE:
 			OpenFileTransmit(hWnd);
 			return;
-		case ID_TRANSMIT_READ:
-			ReadFromFile(hWnd);
-			return;
-		case ID_TRANSMIT_SETFTP:
-			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
-			return;
-		case ID_TRANSMIT_SETPTF:
-			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
-			return;*/
         default:
             return;
     }
@@ -467,8 +471,10 @@ BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 			case IDC_BUTTONEOT:
 				return TRUE;
 			case IDC_BUTTONF1:
+				MakeDebugFrameOne( GetParent(hDlg));
 				return TRUE;
 			case IDC_BUTTONF2:
+				MakeDebugFrameTwo( GetParent(hDlg));
 				return TRUE;
 		}
 		return FALSE;

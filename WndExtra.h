@@ -93,9 +93,7 @@ typedef struct wndData {
     HANDLE          hPort;
 	HANDLE			hFileReceive;
 	HANDLE			hFileTransmit;
-	LPTSTR			lpszTransmitName;
-	LPTSTR			lpszReceiveName;
-    LPTSTR          lpszCommName;
+	LPTSTR          lpszCommName;
     COMMCONFIG      cc;
 	BOOL			bMoreData;
     BOOL            bConnected;
@@ -115,13 +113,15 @@ typedef struct wndData {
 	STATSINFO		statsInfo;
     INT             FTPQueueSize;
     INT             PTFQueueSize;
-	PPFRAME_NODE		FTPBuffHead;
-	PPFRAME_NODE		PTFBuffHead;
-	PPFRAME_NODE		FTPBuffTail;
-	PPFRAME_NODE		PTFBuffTail;
+	PFRAME_NODE		FTPBuffHead;
+	PFRAME_NODE		PTFBuffHead;
+	PFRAME_NODE		FTPBuffTail;
+	PFRAME_NODE		PTFBuffTail;
 	INT				NumOfReads;
 	BYTE			TxSequenceNumber;
 	BYTE			RxSequenceNumber;
+    PBYTE_NODE      pReadBufHead;
+    PBYTE_NODE      pReadBufTail;
 } WNDDATA, *PWNDDATA;
 
 #endif

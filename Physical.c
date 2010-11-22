@@ -75,13 +75,10 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     hEvents     = (HANDLE*) malloc(sizeof(HANDLE) * PORT_IO_EVENTS);
     hEvents[0]  = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("disconnected"));
     hEvents[1]  = ol.hEvent;                               // "dataAtPort"
-
-    psi             = (PSTATEINFO) malloc(sizeof(STATEINFO));
-    psi->iState     = STATE_IDLE;
-    DL_STATE        = psi->iState;
-    psi->itoCount   = 0;
-    srand(GetTickCount());
-    psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
+    
+    psi = (PSTATEINFO) malloc(sizeof(STATEINFO));
+    InitStateInfo(psi);
+    DL_STATE = psi->iState;
 
 
     while (pwd->bConnected) {
@@ -121,6 +118,16 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     return 0;
 }
 
+
+VOID InitStateInfo (PSTATEINFO psi) {
+    psi->iState     = STATE_IDLE;
+    psi->itoCount   = 0;
+    srand(GetTickCount());
+    psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
+    psi->iFailedENQCount = 0;    
+}
+
+
 DWORD WINAPI FileIOThreadProc(HWND hWnd) {
     
     PWNDDATA    pwd                 = NULL;
@@ -130,7 +137,7 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
     COMSTAT     cs                  = {0};
     HANDLE*     hEvents             = NULL;
     INT         iEventsSize         = 0;
-	FRAME		tempFrame = {0};
+	PFRAME		tempFrame = {0};
     PSTATEINFO  psi             = NULL;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
@@ -170,17 +177,13 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
         }
         else if (dwEvent == WAIT_OBJECT_0 + 1) {
 			MessageBox(hWnd, TEXT("emptyPTFBuffer"), 0, MB_OK);
-            // empty ptf buffer
-            /*while(ptfQueuesize > 0){
-				getporttofilequeue
-				write data to file
-				display data on screen
-			}*/
-			while(pwd->PTFQueueSize != 0){
-				//tempFrame = RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength);
-				//								  (PTFhead, pwd->PTFQueueSize?)
-				//WriteToFile(hWnd, &tempFrame);
+            //enter PTF crit section
+			while(pwd->FTPQueueSize != 0){
+				tempFrame = RemoveFromFrameQueue(&pwd->PTFBuffHead, 1);
+				pwd->PTFQueueSize--;
+				WriteToFile(hWnd, tempFrame);
 			}
+			//Exit PTF crit section
 			
         }
         /*else if (dwEvent == WAIT_TIMEOUT) {
@@ -203,39 +206,60 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
 
 
 VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
-
-    PWNDDATA    pwd                     = NULL;
-    BYTE        pReadBuf[READ_BUFSIZE]  = {0};
-    DWORD       dwBytesRead             = 0;
-    DWORD       dwQueueSize             = 0;
+    
+    static DWORD    dwQueueSize             = 0;
+    PWNDDATA        pwd                     = NULL;
+    BYTE            pReadBuf[READ_BUFSIZE]  = {0};
+    DWORD           dwBytesRead             = 0;
+    INT             i                       = 0;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
+
     if (!ReadFile(pwd->hPort, pReadBuf, cbInQue, &dwBytesRead, &ol)) {
         // read is incomplete or had an error
         ProcessCommError(pwd->hPort);
         GetOverlappedResult(pwd->hThread, &ol, &dwBytesRead, TRUE);
     }
 
-    if ((psi->iState == STATE_R2  &&  dwBytesRead >= FRAME_SIZE)  ||
-        (psi->iState != STATE_R2  &&  dwBytesRead >= CTRL_FRAME_SIZE)) {
-        // expected amount of bytes were read
-        ProcessRead(hWnd, psi, pReadBuf, dwBytesRead);
-    } else {
-    
-    }
-    // get more bytes y'all ///////////////////////////////////////////////
 
-    /*
-    dwQueueSize = AddToBack(&pHead, pReadBuf, dwBytesRead);
-            
-    if (dwQueueSize >= dwPacketLength) {
-        pcPacket = RemoveFromFront(&pHead, dwPacketLength);
-	 	ProcessPacket(hWnd, pcPacket, dwPacketLength);
-        memset(psReadBuf, 0, READ_BUFSIZE);
-        free(pcPacket);
-	}
-	InvalidateRect(hWnd, NULL, FALSE);
-    */
+    if (dwQueueSize == 0) {
+        // the last port read sent an entire frame to ProcessRead()
+        
+        if (dwBytesRead >= CTRL_FRAME_SIZE) {
+
+            if (ProcessRead(hWnd, psi, pReadBuf, dwBytesRead)) {
+                // read completed successfully
+                return;
+            }
+        } else {
+            // a full frame is not yet at the port
+            for (i = 0; i < dwBytesRead; i++) {
+                AddToByteQueue(&pwd->pReadBufHead, &pwd->pReadBufTail, pReadBuf[i]);
+                dwQueueSize++;
+            }
+        }
+    
+    } else {
+        // the last port read was not finished
+        
+        for (i = 0; i < dwBytesRead; i++) {
+            AddToByteQueue(&pwd->pReadBufHead, &pwd->pReadBufTail, pReadBuf[i]);
+            dwQueueSize++;
+        }
+        if (dwQueueSize >= CTRL_FRAME_SIZE) {
+
+            RemoveFromByteQueue(&pwd->pReadBufHead, dwQueueSize);
+
+            if (ProcessRead(hWnd, psi, pReadBuf, dwBytesRead)) {
+                // read completed successfully
+                dwQueueSize         = 0;
+                DeleteByteQueue(pwd->pReadBufHead);
+                pwd->pReadBufHead   = NULL;
+                pwd->pReadBufHead   = NULL;
+                return;
+            }
+        }        
+    }
     ResetEvent(ol.hEvent);
 }
 

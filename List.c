@@ -33,7 +33,9 @@ BOOL AddToByteQueue(PPBYTE_NODE pHead, PPBYTE_NODE pTail, BYTE data) {
     if ((newNode = (PBYTE_NODE) malloc(sizeof(BYTE_NODE))) == NULL) {
         return FALSE;
     }
-    if (pHead == NULL) {
+    newNode->b = data;
+
+    if (*pHead == NULL) {
         *pHead = newNode;
         *pTail = newNode;
         return TRUE;
@@ -64,15 +66,29 @@ PBYTE RemoveFromByteQueue(PPBYTE_NODE pHead, DWORD dwLength) {
 }
 
 
+VOID DeleteByteQueue(PBYTE_NODE pHead) {
+    PBYTE_NODE  p   = NULL;
+    PBYTE_NODE  q   = NULL;
+        
+    for (p = pHead; p != NULL; p = q) {
+        q = p->next;
+        free(p);
+    }
+}
+
+
 BOOL AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, FRAME data) {
     PFRAME_NODE newNode  = NULL;
     
     if ((newNode = (PFRAME_NODE) malloc(sizeof(FRAME_NODE))) == NULL) {
         return FALSE;
     }
-    if (pHead == NULL) {
+	newNode->f = data;
+    if (*pHead == NULL) {
+
         *pHead = newNode;
         *pTail = newNode;
+		
         return TRUE;
     }
     (*pTail)->next = newNode;
