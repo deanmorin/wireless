@@ -82,7 +82,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     }
 
     hWnd = CreateWindow(szAppName,
-                        TEXT("RFID Reader - Enterprise Edition (Trial Expired)"), 
+                        TEXT("Full-duplex is for amateurs"), 
                         WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU 
                         | WS_MINIMIZEBOX,
                         CW_USEDEFAULT, CW_USEDEFAULT,
@@ -95,7 +95,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 	pwd->hDlgStats = CreateDialog (hInstance, TEXT("Statistics"), hWnd, Stats);
 	pwd->hDlgDebug = CreateDialog (hInstance, TEXT("Debug"), hWnd, Debug);
-	SetTimer(hWnd, TIMER, 1000, (TIMERPROC) NULL);
+	SetTimer(hWnd, TIMER, TIME_LENGTH, (TIMERPROC) NULL);
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 
     while (GetMessage(&msg, NULL, 0, 0)) {
@@ -156,6 +156,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		case WM_TIMER:
 			if (wParam == TIMER) {
 				UpdateStats(hWnd);
+				SendMessage(pwd->hDlgDebug, WM_USER, 0, 0);
 			}
 			return 0;
 

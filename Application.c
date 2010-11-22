@@ -76,6 +76,7 @@ VOID InitTerminal(HWND hWnd) {
     ReleaseDC(hWnd, hdc);
 
     // initialize variables in PWDDATA struct to defaults
+	DL_STATE				= -1;
     pwd->bConnected         = FALSE;
     pwd->psIncompleteEsc    = NULL;
     CHAR_WIDTH              = tm.tmAveCharWidth;
@@ -346,12 +347,58 @@ VOID MakeColumns(HWND hWnd){
 --
 ------------------------------------------------------------------------------*/
 VOID UpdateStats(HWND hWnd) {
-	
+	FLOAT dRate, uRate, tRate, edRate, euRate, etRate;
 	TCHAR text[20];
 	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-	_stprintf(text, _T("%d"), ++pwd->statsInfo.numFiles);
+	
+	_stprintf(text, _T("%d"), NUM_FILES);
 	SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
+
+	_stprintf(text, _T("%d"), SENT_ACK);
+	SetDlgItemText(pwd->hDlgStats, IDC_ACKSENT, text);
+
+	_stprintf(text, _T("%d"), REC_ACK);
+	SetDlgItemText(pwd->hDlgStats, IDC_ACKRECEIVED, text);
+
+	_stprintf(text, _T("%d"), SENT_EOT);
+	SetDlgItemText(pwd->hDlgStats, IDC_EOTSENT, text);
+
+	_stprintf(text, _T("%d"), REC_EOT);
+	SetDlgItemText(pwd->hDlgStats, IDC_EOTRECEIVED, text);
+
+	_stprintf(text, _T("%d"), SENT_RVI);
+	SetDlgItemText(pwd->hDlgStats, IDC_RVISENT, text);
+
+	_stprintf(text, _T("%d"), REC_RVI);
+	SetDlgItemText(pwd->hDlgStats, IDC_RVIRECEIVED, text);
+
+	dRate = DOWN_FRAMES / (FLOAT)TIME_LENGTH;
+	uRate = UP_FRAMES / (FLOAT)TIME_LENGTH;
+	tRate = dRate + uRate;
+	
+	_stprintf(text, _T("%.2f"), dRate);
+	SetDlgItemText(pwd->hDlgStats, IDC_DRATE, text);
+
+	_stprintf(text, _T("%.2f"), uRate);
+	SetDlgItemText(pwd->hDlgStats, IDC_URATE, text);
+
+	_stprintf(text, _T("%.2f"), tRate);
+	SetDlgItemText(pwd->hDlgStats, IDC_TRATE, text);
+
+	edRate = DOWN_FRAMES_ACKD / TIME_LENGTH;
+	euRate = UP_FRAMES_ACKD / TIME_LENGTH;
+	etRate = edRate + euRate;
+
+	_stprintf(text, _T("%.2f"), edRate);
+	SetDlgItemText(pwd->hDlgStats, IDC_EDRATE, text);
+
+	_stprintf(text, _T("%.2f"), euRate);
+	SetDlgItemText(pwd->hDlgStats, IDC_EURATE, text);
+
+	_stprintf(text, _T("%.2f"), etRate);
+	SetDlgItemText(pwd->hDlgStats, IDC_ETRATE, text);
 }
+
 
 /*------------------------------------------------------------------------------
 -- FUNCTION:    Stats
@@ -389,10 +436,87 @@ BOOL CALLBACK Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 }
 
 BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+	static HBITMAP	bmp[16];
+	static UINT		i = 0;
+	HINSTANCE		hInst = (HINSTANCE)GetWindowLong(GetParent(hDlg), GWL_HINSTANCE);
+	PWNDDATA		pwd = (PWNDDATA) GetWindowLongPtr(GetParent(hDlg), 0);
+
 	switch (message)
 	{
 	case WM_INITDIALOG:
+		bmp[0] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_IDLE));
+		bmp[1] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_IDLE2));
+		bmp[2] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R1));
+		bmp[3] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R1_2));
+		bmp[4] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R2));
+		bmp[5] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R2_2));
+		bmp[6] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R3));
+		bmp[7] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R3_2));
+		bmp[8] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R4));
+		bmp[9] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_R4_2));
+		bmp[10] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_T1));
+		bmp[11] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_T1_2));
+		bmp[12] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_T2));
+		bmp[13] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_T2_2));
+		bmp[14] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_T3));
+		bmp[15] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_T3_2));
 		return TRUE;
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+        {
+			case IDC_BUTTONENQ:
+				return TRUE;
+			case IDC_BUTTONACK:
+				return TRUE;
+			case IDC_BUTTONRVI:
+				return TRUE;
+			case IDC_BUTTONEOT:
+				return TRUE;
+			case IDC_BUTTONF1:
+				return TRUE;
+			case IDC_BUTTONF2:
+				return TRUE;
+		}
+		return FALSE;
+	
+	case WM_USER:
+		SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_IDLE, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[0]);
+		SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_R1, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[2]);
+		SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_R2, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[4]);
+		SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_R3, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[6]);
+		SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_R4, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[8]);
+		SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_T1, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[10]);
+		SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_T2, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[12]);
+		SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_T3, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[14]);
+		switch (DL_STATE) {
+			case STATE_IDLE:
+				SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_IDLE, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[1]);
+				break;
+			case STATE_R1:
+				SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_R1, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[3]);
+				break;
+			case STATE_R2:
+				SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_R2, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[5]);
+				break;
+			case STATE_R3:
+				SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_R3, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[7]);
+				break;
+			case STATE_R4:
+				SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_R4, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[9]);
+				break;
+			case STATE_T1:
+				SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_T1, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[11]);
+				break;
+			case STATE_T2:
+				SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_T2, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[13]);
+				break;
+			case STATE_T3:
+				SendDlgItemMessage(pwd->hDlgDebug, IDC_STATIC_T3, STM_SETIMAGE, IMAGE_BITMAP, (WPARAM)bmp[15]);
+				break;
+		}
+		return TRUE;
+
 	case WM_CLOSE:
 		ShowWindow(hDlg, SW_HIDE);
 		return TRUE;
