@@ -137,7 +137,7 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
     COMSTAT     cs                  = {0};
     HANDLE*     hEvents             = NULL;
     INT         iEventsSize         = 0;
-	FRAME		tempFrame = {0};
+	PFRAME		tempFrame = {0};
     PSTATEINFO  psi             = NULL;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
@@ -177,16 +177,10 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
         }
         else if (dwEvent == WAIT_OBJECT_0 + 1) {
 			MessageBox(hWnd, TEXT("emptyPTFBuffer"), 0, MB_OK);
-            // empty ptf buffer
-            /*while(ptfQueuesize > 0){
-				getporttofilequeue
-				write data to file
-				display data on screen
-			}*/
+            
 			while(pwd->PTFQueueSize != 0){
-				//tempFrame = RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength);
-				//								  (PTFhead, pwd->PTFQueueSize?)
-				//WriteToFile(hWnd, &tempFrame);
+				tempFrame = RemoveFromFrameQueue(pwd->PTFBuffHead, pwd->PTFQueueSize);
+				WriteToFile(hWnd, tempFrame);
 			}
 			
         }

@@ -203,24 +203,7 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
 			ShowWindow(pwd->hDlgDebug, SW_NORMAL);
             return;
 
-		case ID_OPEN_TRANSMITFILE:
-			OpenFileTransmit(hWnd);
-			return;
-		case ID_OPEN_WRITE:
-			ReadFromFile(hWnd);
-			return;
-		/*case ID_TRANSMIT_OPENFILE:
-			OpenFileTransmit(hWnd);
-			return;
-		case ID_TRANSMIT_READ:
-			ReadFromFile(hWnd);
-			return;
-		case ID_TRANSMIT_SETFTP:
-			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
-			return;
-		case ID_TRANSMIT_SETPTF:
-			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
-			return;*/
+		
         default:
             return;
     }
