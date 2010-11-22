@@ -4,6 +4,7 @@
 #include "osi.h"
 #include "WndExtra.h"
 #include <tchar.h>
+#include "Debug.h"
 #pragma warning(disable:4996)
 
 static const COLORREF TXT_COLOURS[16] = {RGB(0,0,0),		RGB(128,0,0),

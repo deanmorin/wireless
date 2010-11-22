@@ -459,6 +459,7 @@ BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 			case IDC_BUTTONEOT:
 				return TRUE;
 			case IDC_BUTTONF1:
+				MakeDebugFrameOne( GetParent(hDlg));
 				return TRUE;
 			case IDC_BUTTONF2:
 				return TRUE;

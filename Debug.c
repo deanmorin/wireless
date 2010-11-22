@@ -1,48 +1,33 @@
-//LRESULT CALLBACK DebugProc(HWND hWnd, UINT message,
-//                         WPARAM wParam, LPARAM lParam){
-//
-//	                        
-//    PWNDDATA pwd = {0};
-//    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-//
-//	switch (message) {
-//
-//        case WM_CREATE:
-//             
-//            return 0;
-//                     
-//        case WM_PAINT:
-//            DebugPaint(hWnd);
-//            return 0;
-//
-//        case WM_COMMAND:
-//            
-//            return 0;
-//
-//        case WM_DESTROY:
-//            break;
-//
-//		default:
-//			return DefWindowProc(hWnd, message, wParam, lParam);
-//    }
-//
-//
-//}
-//
-//
-//VOID DebugPaint(HWND hWnd){
-//		                        
-//    PWNDDATA		pwd			= {0};
-//	HDC             hdc         = {0};
-//    PAINTSTRUCT     ps          = {0};
-//    
-//
-//	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-//	hdc = BeginPaint(hWnd, &ps) ;
-//
-//
-//
-//
-//	
-//    EndPaint(hWnd, &ps);
-//}
+#include "Debug.h"
+
+VOID MakeDebugFrameOne(HWND hWnd){
+	int i;
+	BYTE* data = (BYTE*) malloc (sizeof(BYTE)*25);
+	PWNDDATA    pwd                 = NULL;
+
+	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+
+
+	for (i =0;i<25;i++){
+		data[i] = i+65;
+	}
+	AddToFrameQueue(pwd->FTPBuffHead,pwd->FTPBuffTail,CreateFrame(hWnd,data,25));
+}
+
+
+
+VOID MakeDebugFrameTwo(HWND hWnd){
+	int i;
+	BYTE* data = (BYTE*) malloc (sizeof(BYTE)*MAX_PAYLOAD_SIZE);
+	PWNDDATA    pwd                 = NULL;
+
+	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+
+
+	for (i =0;i<MAX_PAYLOAD_SIZE;i++){
+		data[i] = (i%26)+65;
+	}
+	AddToFrameQueue(pwd->FTPBuffHead,pwd->FTPBuffTail,CreateFrame(hWnd,data,MAX_PAYLOAD_SIZE));
+}
+
+
