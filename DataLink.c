@@ -249,7 +249,7 @@ VOID ReadFromFile(HWND hWnd){
 
 	FRAME frame;
 
-	BYTE* ReadBuffer[1019] = {0};
+	BYTE* ReadBuffer = (BYTE*) malloc(sizeof(BYTE) *1019);
 
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 	
@@ -290,6 +290,7 @@ VOID ReadFromFile(HWND hWnd){
 
 				
 		frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
+		
 		//TODO: Enter FTP crit section
 		AddToFrameQueue(pwd->FTPBuffHead, pwd->FTPBuffTail, frame);
 		//TODO: exit FTP crit section

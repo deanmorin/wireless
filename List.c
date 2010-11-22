@@ -81,7 +81,7 @@ BOOL AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, FRAME data) {
 }
 
 
-PBYTE RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength) {
+PFRAME RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength) {
     PFRAME_NODE p       = NULL;
     PFRAME_NODE tracer  = NULL;
     UINT        i       = 0;

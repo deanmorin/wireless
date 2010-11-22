@@ -165,7 +165,7 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
                 
         case IDM_CONNECT:       
             Connect(hWnd);
-			OpenFileReceive(hWnd);
+			OpenFileReceive(hWnd); 
             return;
 
         case IDM_DISCONNECT:
@@ -201,6 +201,13 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
 		case IDM_DEBUGGER:       
 			ShowWindow(pwd->hDlgDebug, SW_NORMAL);
             return;
+
+		case ID_OPEN_TRANSMITFILE:
+			OpenFileTransmit(hWnd);
+			return;
+		case ID_OPEN_WRITE:
+			ReadFromFile(hWnd);
+			return;
 		/*case ID_TRANSMIT_OPENFILE:
 			OpenFileTransmit(hWnd);
 			return;
