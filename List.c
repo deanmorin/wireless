@@ -70,9 +70,11 @@ BOOL AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, FRAME data) {
     if ((newNode = (PFRAME_NODE) malloc(sizeof(FRAME_NODE))) == NULL) {
         return FALSE;
     }
-    if (pHead == NULL) {
+	
+	if (*pHead == NULL) {
         *pHead = newNode;
         *pTail = newNode;
+		
         return TRUE;
     }
     (*pTail)->next = newNode;
