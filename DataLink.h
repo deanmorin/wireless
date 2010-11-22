@@ -48,11 +48,11 @@ typedef struct STATEINFO_tag {
 
 VOID    ProcessTimeout(HWND hWnd, PSTATEINFO psi);
 VOID    ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength);
-VOID    ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
-VOID    ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
-VOID    ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
-VOID    ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
-VOID    ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
+UINT    ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
+UINT    ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
+UINT    ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
+UINT    ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
+UINT    ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    SendFrame(HWND hWnd, PSTATEINFO psi);
 FRAME   CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength);
 BOOL 	OpenFileReceive(HWND hWnd);

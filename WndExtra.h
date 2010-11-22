@@ -120,6 +120,8 @@ typedef struct wndData {
 	INT				NumOfReads;
 	BYTE			TxSequenceNumber;
 	BYTE			RxSequenceNumber;
+    PBYTE_NODE      pReadBufHead;
+    PBYTE_NODE      pReadBufTail;
 } WNDDATA, *PWNDDATA;
 
 #endif

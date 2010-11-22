@@ -35,9 +35,10 @@ typedef struct FRAME_NODE {
 } FRAME_NODE, *PFRAME_NODE, **PPFRAME_NODE;
 
 
-BOOL AddToByteQueue(PPBYTE_NODE pHead, PPBYTE_NODE pTail, BYTE data);
-PBYTE RemoveFromByteQueue(PPBYTE_NODE pHead, DWORD dwLength);
-BOOL AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, FRAME data);
-PFRAME RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength);
+BOOL    AddToByteQueue(PPBYTE_NODE pHead, PPBYTE_NODE pTail, BYTE data);
+PBYTE   RemoveFromByteQueue(PPBYTE_NODE pHead, DWORD dwLength);
+VOID    DeleteByteQueue(PBYTE_NODE pHead);
+BOOL    AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, FRAME data);
+PFRAME  RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength);
 
 #endif
