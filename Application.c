@@ -90,6 +90,8 @@ VOID InitTerminal(HWND hWnd) {
     pwd->PTFQueueSize = 0;
 	pwd->bMoreData = TRUE;
 	pwd->NumOfReads = 0;
+    pwd->pReadBufHead = NULL;
+    pwd->pReadBufTail = NULL;
     
     // initialize a "blank" display buffer
     for (i = 0; i < LINES_PER_SCRN; i++) {

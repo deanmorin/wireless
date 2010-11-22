@@ -9,16 +9,16 @@ VOID ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength) {
 }
 
 
-VOID ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {  
+UINT ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {  
     
-    static VOID(*pReadFunc[READ_STATES])(HWND, PSTATEINFO, BYTE*, DWORD) 
+    static UINT(*pReadFunc[READ_STATES])(HWND, PSTATEINFO, BYTE*, DWORD) 
             = { ReadT1, ReadT3, ReadIDLE, ReadR2 };
     // call the read function related to the current state
     pReadFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
 }
 
 
-VOID ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
+UINT ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     PWNDDATA    pwd = NULL;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
@@ -36,10 +36,11 @@ VOID ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         srand(GetTickCount());
         psi->dwTimeout = TOR0_BASE + rand() % TOR0_RANGE;
     }
+    return CTRL_FRAME_SIZE;
 }
 
 
-VOID ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
+UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     PWNDDATA    pwd = NULL;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
@@ -60,10 +61,11 @@ VOID ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         psi->dwTimeout  = TOR3;
         psi->itoCount  = 0;
     }
+    return CTRL_FRAME_SIZE;
 }
 
 
-VOID ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
+UINT ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     PWNDDATA    pwd = NULL;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
@@ -76,10 +78,11 @@ VOID ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         DL_STATE        = psi->iState;
         psi->dwTimeout  = TOR3;
     }
+    return CTRL_FRAME_SIZE;
 }
 
 
-VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
+UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     PWNDDATA    pwd = NULL;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
@@ -94,26 +97,30 @@ VOID ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         DL_STATE    = psi->iState;
         srand(GetTickCount());
         psi->dwTimeout = TOR0_BASE + rand() % TOR0_RANGE;
-    
-    } else {
-        DOWN_FRAMES++;
+        return CTRL_FRAME_SIZE;
+    } 
+   
+    if (dwLength < FRAME_SIZE) {
+        return 0;   // a full frame has not arrived at the port yet
+    }
+    DOWN_FRAMES++;
 
-        if (crcFast(pReadBuf, dwLength) == 0) { // also check for sequence #     
-            DOWN_FRAMES_ACKD++;
+    if (crcFast(pReadBuf, dwLength) == 0) { // also check for sequence #     
+        DOWN_FRAMES_ACKD++;
 
-            if (pwd->FTPQueueSize) {
-                pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
-                ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
-                SENT_RVI++;
-            } else {
-                pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
-                ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
-                psi->iState = STATE_T1;
-                DL_STATE    = psi->iState;
-                SENT_ACK++;
-            }
+        if (pwd->FTPQueueSize) {
+            pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
+            ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
+            SENT_RVI++;
+        } else {
+            pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
+            ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
+            psi->iState = STATE_T1;
+            DL_STATE    = psi->iState;
+            SENT_ACK++;
         }
     }
+    return FRAME_SIZE;
 }
 
 
