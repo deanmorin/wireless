@@ -372,6 +372,7 @@ VOID ReadFromFile(HWND hWnd){
 		//WriteToFile(hWnd, &frame);
 		//TODO: Enter FTP crit section
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
+		pwd->FTPQueueSize++;
 		//TODO: exit FTP crit section
 
 
