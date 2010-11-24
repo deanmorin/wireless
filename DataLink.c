@@ -116,7 +116,7 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     }
     DOWN_FRAMES++;
 
-    if (crcFast(pReadBuf, dwLength) == 0) {     // CHECK SEQUENCE #
+    if (1){//crcFast(pReadBuf, dwLength) == 0) {     // CHECK SEQUENCE #
         DOWN_FRAMES_ACKD++;
 
         if (pwd->FTPQueueSize) {
