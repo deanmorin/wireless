@@ -48,6 +48,13 @@
 
 
 /*-------------------------------Structures-----------------------------------*/
+typedef struct STATEINFO_tag {
+    INT     iState;
+    DWORD   dwTimeout;
+    INT     itoCount;
+    INT     iFailedENQCount;
+} STATEINFO, *PSTATEINFO;
+
 typedef struct charInfo {
     CHAR    character;
     BYTE    fgColor;
@@ -122,6 +129,7 @@ typedef struct wndData {
 	BYTE			RxSequenceNumber;
     PBYTE_NODE      pReadBufHead;
     PBYTE_NODE      pReadBufTail;
+    BOOL            bDebug;
 } WNDDATA, *PWNDDATA;
 
 #endif

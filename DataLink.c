@@ -10,11 +10,20 @@ VOID ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength) {
 
 
 UINT ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {  
+    static UINT( *pReadFunc[READ_STATES])(HWND, PSTATEINFO, BYTE*, DWORD) 
+            = { ReadT1,  ReadT3,  ReadIDLE,  ReadR2 };
+    static UINT(*pDebugFunc[READ_STATES])(HWND, PSTATEINFO, BYTE*, DWORD)
+            = { DebugT1, DebugT3, DebugIDLE, DebugR2 };
     
-    static UINT(*pReadFunc[READ_STATES])(HWND, PSTATEINFO, BYTE*, DWORD) 
-            = { ReadT1, ReadT3, ReadIDLE, ReadR2 };
+    PWNDDATA pwd = NULL;
+    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    
     // call the read function related to the current state
-    pReadFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
+    if (pwd->bDebug) {
+        pDebugFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
+    } else {
+        pReadFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
+    }
 }
 
 
@@ -133,6 +142,10 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
         pCtrlFrame[CTRL_CHAR_INDEX] = EOT;
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
         SENT_EOT++;
+        srand(GetTickCount());
+        psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
+        psi->iState     = STATE_IDLE;
+        DL_STATE        = psi->iState;
     } else {
         ProcessWrite(hWnd, (BYTE*) &pwd->FTPBuffHead->f, CTRL_FRAME_SIZE); //PEEK NEXT FRAME
         UP_FRAMES++;
@@ -152,7 +165,7 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
         case STATE_IDLE:
             pCtrlFrame[CTRL_CHAR_INDEX] = ENQ;
             ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
-            psi->dwTimeout  = TOR1;
+            psi->dwTimeout  = (pwd->bDebug) ? DTOR : TOR1;
             psi->iState     = STATE_T1;
             DL_STATE        = psi->iState;
             return;
@@ -162,7 +175,9 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
                 DISPLAY_ERROR("Connection cannot be established"); 
             }*/                   // NEED TO SET APPROPRIATE EVENT
             srand(GetTickCount());
-            psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
+            psi->dwTimeout  = (pwd->bDebug) 
+                    ? DTOR      + rand() % TOR0_RANGE
+                    : TOR0_BASE + rand() % TOR0_RANGE;
             psi->iState     = STATE_IDLE;
             DL_STATE        = psi->iState;
             return;
@@ -172,7 +187,9 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
 
             if (++(psi->itoCount) >= MAX_TIMEOUTS) {
                 srand(GetTickCount());
-                psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
+                psi->dwTimeout  = (pwd->bDebug) 
+                        ? DTOR      + rand() % TOR0_RANGE
+                        : TOR0_BASE + rand() % TOR0_RANGE;
                 psi->iState     = STATE_IDLE;
             } else { 
                 psi->iState     = STATE_T3;
@@ -186,7 +203,9 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
 
             if (++(psi->itoCount) >= MAX_TIMEOUTS) {
                 srand(GetTickCount());
-                psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
+                psi->dwTimeout  = (pwd->bDebug) 
+                        ? DTOR      + rand() % TOR0_RANGE
+                        : TOR0_BASE + rand() % TOR0_RANGE;
                 psi->iState     = STATE_IDLE;
                 DL_STATE        = psi->iState;
             } 

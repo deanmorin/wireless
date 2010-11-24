@@ -85,17 +85,17 @@ VOID InitTerminal(HWND hWnd) {
     WINDOW_BOTTOM           = LINES_PER_SCRN -1;
 	pwd->wordWrap			= FALSE;
 	pwd->relOrigin			= FALSE;
-	pwd->PTFBuffHead = NULL;
-	pwd->PTFBuffTail = NULL;
-	pwd->FTPBuffHead = NULL;
-	pwd->FTPBuffTail = NULL;
-    pwd->FTPQueueSize = 0;
-    pwd->PTFQueueSize = 0;
-	pwd->bMoreData = TRUE;
-	pwd->NumOfReads = 0;
-
-    pwd->pReadBufHead = NULL;
-    pwd->pReadBufTail = NULL;
+	pwd->PTFBuffHead        = NULL;
+	pwd->PTFBuffTail        = NULL;
+	pwd->FTPBuffHead        = NULL;
+	pwd->FTPBuffTail        = NULL;
+    pwd->FTPQueueSize       = 0;
+    pwd->PTFQueueSize       = 0;
+	pwd->bMoreData          = TRUE;
+	pwd->NumOfReads         = 0;
+    pwd->pReadBufHead       = NULL;
+    pwd->pReadBufTail       = NULL;
+    pwd->bDebug             = FALSE;
     
 
     // initialize a "blank" display buffer
@@ -435,6 +435,7 @@ BOOL CALLBACK Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 	static HBITMAP	bmp[16];
 	static UINT		i = 0;
+    static BYTE     pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
 	HINSTANCE		hInst = (HINSTANCE)GetWindowLong(GetParent(hDlg), GWL_HINSTANCE);
 	PWNDDATA		pwd = (PWNDDATA) GetWindowLongPtr(GetParent(hDlg), 0);
 
@@ -462,18 +463,53 @@ BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
         {
+            case IDC_DEBUGSTART:
+                if (pwd->bDebug) {
+                    pwd->bDebug = FALSE;
+                    SetDlgItemText(pwd->hDlgDebug, IDC_DEBUGSTART, 
+                               TEXT("Start Debugging"));
+                } else {
+                    pwd->bDebug = TRUE;
+                    SetDlgItemText(pwd->hDlgDebug, IDC_DEBUGSTART, 
+                               TEXT("Stop Debugging"));
+                }
+                return TRUE;
+
 			case IDC_BUTTONENQ:
+                pCtrlFrame[CTRL_CHAR_INDEX] = ENQ;
+                ProcessWrite(GetParent(hDlg), pCtrlFrame, CTRL_FRAME_SIZE);
+                SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("enqPushed")));
 				return TRUE;
-			case IDC_BUTTONACK:
+			
+            case IDC_BUTTONACK:
+                pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
+                ProcessWrite(GetParent(hDlg), pCtrlFrame, CTRL_FRAME_SIZE);
+                SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("ackPushed")));
 				return TRUE;
-			case IDC_BUTTONRVI:
+			
+            case IDC_BUTTONRVI:
+                pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
+                ProcessWrite(GetParent(hDlg), pCtrlFrame, CTRL_FRAME_SIZE);
+                SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("rviPushed")));
 				return TRUE;
-			case IDC_BUTTONEOT:
+			
+            case IDC_BUTTONEOT:
+                pCtrlFrame[CTRL_CHAR_INDEX] = EOT;
+                ProcessWrite(GetParent(hDlg), pCtrlFrame, CTRL_FRAME_SIZE);
+                SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("eotPushed")));
 				return TRUE;
-			case IDC_BUTTONF1:
+			
+            case IDC_BUTTONF1:
+                //pCtrlFrame[CTRL_CHAR_INDEX] = ENQ;
+                //ProcessWrite(GetParent(hDlg), pCtrlFrame, CTRL_FRAME_SIZE);
+                //SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("f1Pushed")));
 				MakeDebugFrameOne( GetParent(hDlg));
 				return TRUE;
-			case IDC_BUTTONF2:
+			
+            case IDC_BUTTONF2:
+                //pCtrlFrame[CTRL_CHAR_INDEX] = ENQ;
+                //ProcessWrite(GetParent(hDlg), pCtrlFrame, CTRL_FRAME_SIZE);
+                //SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("f2Pushed")));
 				MakeDebugFrameTwo( GetParent(hDlg));
 				return TRUE;
 		}

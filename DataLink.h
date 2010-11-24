@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include <math.h>
 #include "crc.h"
+#include "Debug.h"
 #include "WndExtra.h"
 
 #define FULL_BUFFER     32
@@ -18,12 +19,13 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 
 
 // timeout values
-#define TOR0_BASE               4000
-#define TOR0_RANGE              2000
-#define TOR1                    5000
-#define TOR2                    5000
-#define TOR3                    5000
-#define MAX_TIMEOUTS            1//3
+#define TOR0_BASE               400
+#define TOR0_RANGE              200
+#define TOR1                    500
+#define TOR2                    500
+#define TOR3                    500
+#define DTOR                    5000    // timeout for debug mode
+#define MAX_TIMEOUTS            3
 #define TOR2_INCREASE_FACTOR    2
 #define TOR3_INCREASE_FACTOR    2
 
@@ -37,13 +39,6 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define ENQ 0x05
 #define ACK 0x06
 #define RVI 0x13
-
-typedef struct STATEINFO_tag {
-    INT     iState;
-    DWORD   dwTimeout;
-    INT     itoCount;
-    INT     iFailedENQCount;
-} STATEINFO, *PSTATEINFO;
 
 
 VOID    ProcessTimeout(HWND hWnd, PSTATEINFO psi);
@@ -61,4 +56,5 @@ VOID	CloseFileReceive(HWND hWnd);
 VOID	CloseFileTransmit(HWND hWnd);
 VOID	WriteToFile(HWND hWnd, PFRAME frame);
 VOID	ReadFromFile(HWND hWnd);
+
 #endif
