@@ -58,10 +58,11 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {         // last frame acknowledged
         REC_ACK++;
         UP_FRAMES_ACKD++;
-        // pop ack'd frame
-        SendFrame(hWnd, psi);
+        RemoveFromFrameQueue(&pwd->FTPBuffHead, 1); // remove ack'd frame from        
+        pwd->FTPQueueSize--;                        //      the queue
+        SendFrame(hWnd, psi);                       
     } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {  // receiver wants to send
-                                                    // a frame
+                                                    //      a frame
         REC_RVI++;
         pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
@@ -69,7 +70,7 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         psi->iState     = STATE_R2;
         DL_STATE        = psi->iState;
         psi->dwTimeout  = TOR3;
-        psi->itoCount  = 0;
+        psi->itoCount   = 0;
     }
     return CTRL_FRAME_SIZE;
 }
@@ -111,11 +112,11 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     } 
    
     if (dwLength < FRAME_SIZE) {
-        return 0;   // a full frame has not arrived at the port yet
+        return 0;               // a full frame has not arrived at the port yet
     }
     DOWN_FRAMES++;
 
-    if (crcFast(pReadBuf, dwLength) == 0) { // ALSO CHECK FOR SEQUENCE #     
+    if (crcFast(pReadBuf, dwLength) == 0) {     // CHECK SEQUENCE #
         DOWN_FRAMES_ACKD++;
 
         if (pwd->FTPQueueSize) {
@@ -148,7 +149,7 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
         psi->iState     = STATE_IDLE;
         DL_STATE        = psi->iState;
     } else {
-        ProcessWrite(hWnd, (BYTE*) &pwd->FTPBuffHead->f, CTRL_FRAME_SIZE); //PEEK NEXT FRAME
+        ProcessWrite(hWnd, (BYTE*) &pwd->FTPBuffHead->f, CTRL_FRAME_SIZE);
         UP_FRAMES++;
         SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
     }
@@ -225,7 +226,8 @@ FRAME CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength){
 	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
 	myFrame.soh = 0x1;
-	myFrame.sequence = pwd->TxSequenceNumber++;
+	myFrame.sequence = pwd->TxSequenceNumber;
+   pwd->TxSequenceNumber= (pwd->TxSequenceNumber==0)?1:0;
 	myFrame.length = (SHORT)dwLength;
 
 	for (i = 0; i<dwLength;i++) {

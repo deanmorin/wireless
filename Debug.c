@@ -62,10 +62,11 @@ UINT DebugT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {         // last frame acknowledged
         REC_ACK++;
         UP_FRAMES_ACKD++;
-        // pop ack'd frame
-        SendFrame(hWnd, psi);
+        RemoveFromFrameQueue(&pwd->FTPBuffHead, 1); // remove ack'd frame from
+        pwd->FTPQueueSize--;                        //      the queue
+        SendFrame(hWnd, psi);                       
     } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {  // receiver wants to send
-                                                    // a frame
+                                                    //      a frame
         REC_RVI++;
         DL_STATE        = STATE_R4;
         WaitForSingleObject(CreateEvent(NULL, TRUE, FALSE, TEXT("ackPushed")), 
