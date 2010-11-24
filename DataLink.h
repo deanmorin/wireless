@@ -24,7 +24,7 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define TOR1                    500
 #define TOR2                    500
 #define TOR3                    500
-#define DTOR                    5000    // timeout for debug mode
+#define DTOR                    3000    // timeout for debug mode
 #define MAX_TIMEOUTS            3
 #define TOR2_INCREASE_FACTOR    2
 #define TOR3_INCREASE_FACTOR    2

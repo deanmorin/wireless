@@ -38,6 +38,7 @@ UINT ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         psi->iState     = STATE_T3;
         DL_STATE        = psi->iState;
 		psi->dwTimeout  = TOR2;
+        psi->itoCount = 0;
         SendFrame(hWnd, psi);
     } else {
         psi->iState     = STATE_IDLE;
@@ -150,7 +151,6 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
         ProcessWrite(hWnd, (BYTE*) &pwd->FTPBuffHead->f, CTRL_FRAME_SIZE); //PEEK NEXT FRAME
         UP_FRAMES++;
         SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
-		psi->itoCount = 0;
     }
 }
 
@@ -192,7 +192,6 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
                         : TOR0_BASE + rand() % TOR0_RANGE;
                 psi->iState     = STATE_IDLE;
             } else { 
-                psi->iState     = STATE_T3;
                 SendFrame(hWnd, psi);
             }
             DL_STATE = psi->iState;

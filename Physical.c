@@ -240,7 +240,7 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
         }
     
     } else {
-        // the last port read was not finished
+        // the previous port read was not finished
         
         for (i = 0; i < dwBytesRead; i++) {
             AddToByteQueue(&pwd->pReadBufHead, &pwd->pReadBufTail, pReadBuf[i]);

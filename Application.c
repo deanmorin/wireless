@@ -437,7 +437,6 @@ BOOL CALLBACK Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 	static HBITMAP	bmp[16];
 	static UINT		i = 0;
-    static BYTE     pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
 	HINSTANCE		hInst = (HINSTANCE)GetWindowLong(GetParent(hDlg), GWL_HINSTANCE);
 	PWNDDATA		pwd = (PWNDDATA) GetWindowLongPtr(GetParent(hDlg), 0);
 
@@ -478,28 +477,20 @@ BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
                 return TRUE;
 
 			case IDC_BUTTONENQ:
-                pCtrlFrame[CTRL_CHAR_INDEX] = ENQ;
-                ProcessWrite(GetParent(hDlg), pCtrlFrame, CTRL_FRAME_SIZE);
-                SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("enqPushed")));
+                SendDebugCtrlChar(GetParent(hDlg), ENQ, TEXT("enqPushed"));
 				return TRUE;
 			
             case IDC_BUTTONACK:
-                pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
-                ProcessWrite(GetParent(hDlg), pCtrlFrame, CTRL_FRAME_SIZE);
-                SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("ackPushed")));
+                SendDebugCtrlChar(GetParent(hDlg), ACK, TEXT("ackPushed"));
 				return TRUE;
 			
             case IDC_BUTTONRVI:
-                pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
-                ProcessWrite(GetParent(hDlg), pCtrlFrame, CTRL_FRAME_SIZE);
-                SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("rviPushed")));
+                SendDebugCtrlChar(GetParent(hDlg), RVI, TEXT("rviPushed"));
 				return TRUE;
 			
             case IDC_BUTTONEOT:
-                pCtrlFrame[CTRL_CHAR_INDEX] = EOT;
-                ProcessWrite(GetParent(hDlg), pCtrlFrame, CTRL_FRAME_SIZE);
-                SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("eotPushed")));
-				return TRUE;
+                SendDebugCtrlChar(GetParent(hDlg), EOT, TEXT("eotPushed"));
+                return TRUE;
 			
             case IDC_BUTTONF1:
                 //pCtrlFrame[CTRL_CHAR_INDEX] = ENQ;
@@ -559,4 +550,16 @@ BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 		return TRUE;
 	}
 	return FALSE;
+}
+
+VOID SendDebugCtrlChar(HWND hWnd, BYTE ctrlChar, LPCWSTR szEventName) {
+    static BYTE     pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
+    HANDLE          hEvent = 0;
+    
+    pCtrlFrame[CTRL_CHAR_INDEX] = ctrlChar;
+    ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
+    hEvent = CreateEvent(NULL, TRUE, FALSE, szEventName);
+    SetEvent(hEvent);
+    Sleep(0);
+    ResetEvent(hEvent);
 }

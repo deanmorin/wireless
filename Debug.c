@@ -16,7 +16,6 @@ VOID MakeDebugFrameOne(HWND hWnd){
 }
 
 
-
 VOID MakeDebugFrameTwo(HWND hWnd){
 	int i;
 	BYTE* data = (BYTE*) malloc (sizeof(BYTE)*MAX_PAYLOAD_SIZE);
@@ -43,13 +42,13 @@ UINT DebugT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         psi->iFailedENQCount = 0;
         psi->iState     = STATE_T3;
         DL_STATE        = psi->iState;
-		psi->dwTimeout  = TOR2;
+		psi->dwTimeout  = DTOR;
         SendFrame(hWnd, psi);
     } else {
         psi->iState     = STATE_IDLE;
         DL_STATE        = psi->iState;
         srand(GetTickCount());
-        psi->dwTimeout = TOR0_BASE + rand() % TOR0_RANGE;
+        psi->dwTimeout = DTOR + rand() % TOR0_RANGE;
     }
     return CTRL_FRAME_SIZE;
 }
@@ -68,12 +67,13 @@ UINT DebugT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {  // receiver wants to send
                                                     // a frame
         REC_RVI++;
-        pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
-        ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
+        DL_STATE        = STATE_R4;
+        WaitForSingleObject(CreateEvent(NULL, TRUE, FALSE, TEXT("ackPushed")), 
+                                        INFINITE);
         SENT_ACK++;
         psi->iState     = STATE_R2;
         DL_STATE        = psi->iState;
-        psi->dwTimeout  = TOR3;
+        psi->dwTimeout  = DTOR;
         psi->itoCount  = 0;
     }
     return CTRL_FRAME_SIZE;
@@ -86,12 +86,13 @@ UINT DebugIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ENQ) {
-        pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
-        ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
+        DL_STATE        = STATE_R1;
+        WaitForSingleObject(CreateEvent(NULL, TRUE, FALSE, 
+                                            TEXT("ackPushed")), INFINITE);
         SENT_ACK++;
         psi->iState     = STATE_R2;
         DL_STATE        = psi->iState;
-        psi->dwTimeout  = TOR3;
+        psi->dwTimeout  = DTOR;
     }
     return CTRL_FRAME_SIZE;
 }
@@ -111,7 +112,7 @@ UINT DebugR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         psi->iState = STATE_IDLE;
         DL_STATE    = psi->iState;
         srand(GetTickCount());
-        psi->dwTimeout = TOR0_BASE + rand() % TOR0_RANGE;
+        psi->dwTimeout = DTOR + rand() % TOR0_RANGE;
         return CTRL_FRAME_SIZE;
     } 
    
@@ -122,14 +123,15 @@ UINT DebugR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
     if (crcFast(pReadBuf, dwLength) == 0) { // ALSO CHECK FOR SEQUENCE #     
         DOWN_FRAMES_ACKD++;
+        DL_STATE = STATE_R3;
 
         if (pwd->FTPQueueSize) {
-            pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
-            ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
+            WaitForSingleObject(CreateEvent(NULL, TRUE, FALSE, 
+                                            TEXT("rviPushed")), INFINITE);
             SENT_RVI++;
         } else {
-            pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
-            ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
+            WaitForSingleObject(CreateEvent(NULL, TRUE, FALSE, 
+                                            TEXT("ackPushed")), INFINITE);
             psi->iState = STATE_T1;
             DL_STATE    = psi->iState;
             SENT_ACK++;
