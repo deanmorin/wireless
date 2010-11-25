@@ -3,16 +3,14 @@
 
 #include <Windows.h>
 
-
+/*--------------------------------Macros--------------------------------------*/
 #define MAX_PAYLOAD_SIZE	1019
 #define FRAME_SIZE      1024
 
-
+/*-------------------------------Structures-----------------------------------*/
 //pragma pack allow for a structure without padding
 #pragma pack(push)
 #pragma pack(1)
-
-
 typedef struct FRAME {
 	BYTE		soh;
 	BYTE		sequence;
@@ -34,11 +32,11 @@ typedef struct FRAME_NODE {
     FRAME_NODE* next;
 } FRAME_NODE, *PFRAME_NODE, **PPFRAME_NODE;
 
-
+/*---------------------------Function Prototypes------------------------------*/
 BOOL    AddToByteQueue(PPBYTE_NODE pHead, PPBYTE_NODE pTail, BYTE data);
-PBYTE   RemoveFromByteQueue(PPBYTE_NODE pHead, DWORD dwLength);
-VOID    DeleteByteQueue(PBYTE_NODE pHead);
 BOOL    AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, FRAME data);
+VOID    DeleteByteQueue(PBYTE_NODE pHead);
+PBYTE   RemoveFromByteQueue(PPBYTE_NODE pHead, DWORD dwLength);
 PFRAME  RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength);
 
 #endif

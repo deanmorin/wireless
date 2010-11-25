@@ -20,7 +20,6 @@
 --
 -- NOTES:       The main entry point for the program.
 ------------------------------------------------------------------------------*/
-
 #include "Main.h"
 
 /*------------------------------------------------------------------------------
@@ -34,13 +33,13 @@
 --
 -- PROGRAMMER:  Dean Morin
 --
--- INTERFACE:   int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, 
-                                   PSTR szCmdLine, int iCmdShow)
---                          hInstance       - a handle to the current instance
---                          hPrevInstanc    - a handle to the previous instance
---                          szCmdLine       - the command line arguments
---                          iCmdShow        - specifies how the window should 
---                                            be shown
+-- INTERFACE:   WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, 
+                               PSTR szCmdLine, int iCmdShow)
+--                      hInstance       - a handle to the current instance
+--                      hPrevInstanc    - a handle to the previous instance
+--                      szCmdLine       - the command line arguments
+--                      iCmdShow        - specifies how the window should 
+--                                        be shown
 --
 -- RETURNS:     If the function succeeds, terminating when it receives a WM_QUIT 
 --              message, it should return the exit value contained in that 
@@ -115,12 +114,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 --
 -- PROGRAMMER:  Dean Morin
 --
--- INTERFACE:   LRESULT CALLBACK WndProc(HWND hWnd, UNIT message,
---                                       WPARAM wParam, LPARAM)
---                          hWnd    - the handle to the window
---                          message - the message
---                          wParam  - contents vary based on the message
-                            lParam  - contents vary based on the message
+-- INTERFACE:   CALLBACK WndProc(HWND hWnd, UNIT message,
+--                               WPARAM wParam, LPARAM)
+--                      hWnd    - the handle to the window
+--                      message - the message
+--                      wParam  - contents vary based on the message
+                        lParam  - contents vary based on the message
 --
 -- RETURNS:     The return value is the result of the message processing and 
 --              depends on the message sent.

@@ -20,9 +20,9 @@ UINT ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     
     // call the read function related to the current state
     if (pwd->bDebug) {
-        pDebugFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
+        return pDebugFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
     } else {
-        pReadFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
+        return pReadFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
     }
 }
 
@@ -116,7 +116,7 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     }
     DOWN_FRAMES++;
 
-    if (1){//crcFast(pReadBuf, dwLength) == 0) {     // CHECK SEQUENCE #
+    if (crcFast(pReadBuf, dwLength) == 0) {     // CHECK SEQUENCE #
         DOWN_FRAMES_ACKD++;
 
         if (pwd->FTPQueueSize) {

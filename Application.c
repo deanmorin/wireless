@@ -554,6 +554,27 @@ BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 	return FALSE;
 }
 
+/*------------------------------------------------------------------------------
+-- FUNCTION:    SendDebugCtrlChar
+--
+-- DATE:        Nov 24, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Dean Morin
+--
+-- INTERFACE:   SendDebugCtrlChar(HWND hWnd, BYTE ctrlChar, LPCWSTR szEventName)
+--                      hWnd        - a handle to the window
+--                      ctrlChar    - the control character to send
+--                      szEventName - the name of the event to trigger
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Writes the control character, ctrlChar, to the port and signals
+--              the event szEventName.
+------------------------------------------------------------------------------*/
 VOID SendDebugCtrlChar(HWND hWnd, BYTE ctrlChar, LPCWSTR szEventName) {
     static BYTE     pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     HANDLE          hEvent = 0;
