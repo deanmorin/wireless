@@ -19,11 +19,11 @@ UINT ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
     // call the read function related to the current state
-    if (pwd->bDebug) {
-        return pDebugFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
-    } else {
+    //if (pwd->bDebug) {
+    //    return pDebugFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
+    //} else {
         return pReadFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
-    }
+    //}
 }
 
 
@@ -109,7 +109,10 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         srand(GetTickCount());
         psi->dwTimeout = TOR0_BASE + rand() % TOR0_RANGE;
         return CTRL_FRAME_SIZE;
-    } 
+    }
+    if (pReadBuf[0] != SOH) {
+        return INVALID_FRAME;
+    }
    
     if (dwLength < FRAME_SIZE) {
         return 0;               // a full frame has not arrived at the port yet
@@ -291,8 +294,8 @@ VOID CloseFileTransmit(HWND hWnd){
 BOOL OpenFileReceive(HWND hWnd){
 	PWNDDATA pwd = {0};
 	OPENFILENAME ofn;
-	TCHAR szFile[100] = {0};                    // CHANGED FROM char - ALL GOOD
-	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);  // DAN???
+	TCHAR szFile[100] = {0};                  	
+    pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 
 	ZeroMemory(&ofn, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);

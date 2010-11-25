@@ -32,6 +32,7 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 // frame components
 #define CTRL_FRAME_SIZE     1
 #define CTRL_CHAR_INDEX     0
+#define INVALID_FRAME       99
 
 
 #define SOH 0x01
