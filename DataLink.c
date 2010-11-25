@@ -291,8 +291,8 @@ VOID CloseFileTransmit(HWND hWnd){
 BOOL OpenFileReceive(HWND hWnd){
 	PWNDDATA pwd = {0};
 	OPENFILENAME ofn;
-	char szFile[100] = {0};
-	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
+	TCHAR szFile[100] = {0};                    // CHANGED FROM char - ALL GOOD
+	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);  // DAN???
 
 	ZeroMemory(&ofn, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);

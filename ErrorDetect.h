@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "WndExtra.h"
 
+/*---------------------------Function Prototypes------------------------------*/
 BOOL DetectLRCError(CHAR* pcPacket, DWORD dwLength);
 
 #endif

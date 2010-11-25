@@ -14,6 +14,10 @@
 #pragma warning(disable:4002)
 #pragma warning(disable:4996)
 
+/*--------------------------------Macros--------------------------------------*/
+#define WND_CAPTION     TEXT("Dean and the Rockets' Wireless Protocol Testing \
+and Evaluation Facilitator")
+
 /*---------------------------Function Prototypes------------------------------*/
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 

@@ -1,37 +1,34 @@
 /*------------------------------------------------------------------------------
--- SOURCE FILE:     Main.c - Contains the WinMain() and WinProc()
---                                       functions for the Intelligent Terminal
---                                       Emulator.
+-- SOURCE FILE:     Main.c      Contains the WinMain() and WinProc() functions 
+--                              for the program.
 --                      
--- PROGRAM:     RFID Reader - Enterprise Edition
+-- PROGRAM:     Dean and the Rockets' Wireless Protocol Testing and Evaluation 
+--              Facilitator
 --
 -- FUNCTIONS:
 --              int     WINAPI WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 --              LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM) 
 --
 --
--- DATE:        Oct 18, 2010
+-- DATE:        Nov 24, 2010
 --
--- REVISIONS:   Nov 06, 2010
---              Removed any code not needed for the RFID reader.
---              (this file was copied from the Advanced Terminal Emulator Pro).
+-- REVISIONS:   
 --
 -- DESIGNER:    Dean Morin
 --
 -- PROGRAMMER:  Dean Morin
 --
--- NOTES:
--- The main entry point for the program.
+-- NOTES:       The main entry point for the program.
 ------------------------------------------------------------------------------*/
 
 #include "Main.h"
+
 /*------------------------------------------------------------------------------
 -- FUNCTION:    WinMain
 --
--- DATE:        Oct 18, 2010
+-- DATE:        Nov 24, 2010
 --
--- REVISIONS:   Nov 06, 2010
---              Changed the window name.
+-- REVISIONS:
 --
 -- DESIGNER:    Dean Morin
 --
@@ -50,10 +47,9 @@
 --              message's wParam parameter. If the function terminates before 
 --              entering the message loop, it should return zero.
 --
--- NOTES:
---              WinMain is the conventional name used for the application entry
+-- NOTES:       WinMain is the conventional name used for the application entry
 --              point. The standard message loop has been modified to poll the
---              an open serial port if there are no messages on the queue.o
+--              an open serial port if there are no messages on the queue.
 ------------------------------------------------------------------------------*/
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                    PSTR szCmdLine, int iCmdShow) {
@@ -82,7 +78,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     }
 
     hWnd = CreateWindow(szAppName,
-                        TEXT("Full-duplex is for amateurs"), 
+                        WND_CAPTION, 
                         WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU 
                         | WS_MINIMIZEBOX,
                         CW_USEDEFAULT, CW_USEDEFAULT,
@@ -99,11 +95,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 
     while (GetMessage(&msg, NULL, 0, 0)) {
-		if (pwd->hDlgStats == 0 || !IsDialogMessage (pwd->hDlgStats, &msg))
-		 {
-			 TranslateMessage (&msg) ;
-			 DispatchMessage (&msg) ;
-		 }
+		if (pwd->hDlgStats == 0 || !IsDialogMessage (pwd->hDlgStats, &msg)) {
+			 
+            TranslateMessage (&msg);
+			DispatchMessage (&msg);
+		}
     }
     return msg.wParam;
 }
@@ -111,10 +107,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 /*------------------------------------------------------------------------------
 -- FUNCTION:    WndProc
 --
--- DATE:        Oct 18, 2010
+-- DATE:        Nov 24, 2010
 --
--- REVISIONS:   Nov 06, 2010
---              Removed message handling that doesn't apply to this program.
+-- REVISIONS:   
 --
 -- DESIGNER:    Dean Morin
 --
@@ -130,8 +125,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 -- RETURNS:     The return value is the result of the message processing and 
 --              depends on the message sent.
 --
--- NOTES:
---              The standard WndProc function.
+-- NOTES:       The standard WndProc function.
 ------------------------------------------------------------------------------*/
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
    

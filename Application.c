@@ -467,11 +467,11 @@ BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
             case IDC_DEBUGSTART:
                 if (pwd->bDebug) {
                     pwd->bDebug = FALSE;
-                    SetDlgItemText(pwd->hDlgDebug, IDC_DEBUGSTART, 
+                    SetDlgItemText(pwd->hDlgDebug, IDC_DEBUGSTART,
                                TEXT("Start Debugging"));
                 } else {
                     pwd->bDebug = TRUE;
-                    SetDlgItemText(pwd->hDlgDebug, IDC_DEBUGSTART, 
+                    SetDlgItemText(pwd->hDlgDebug, IDC_DEBUGSTART,
                                TEXT("Stop Debugging"));
                 }
                 return TRUE;
@@ -493,10 +493,12 @@ BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
                 return TRUE;
 			
             case IDC_BUTTONF1:
-                //pCtrlFrame[CTRL_CHAR_INDEX] = ENQ;
-                //ProcessWrite(GetParent(hDlg), pCtrlFrame, CTRL_FRAME_SIZE);
-                //SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("f1Pushed")));
-				MakeDebugFrameOne( GetParent(hDlg));
+				MakeDebugFrameOne(GetParent(hDlg));
+                ProcessWrite(GetParent(hDlg), 
+                             (BYTE*) RemoveFromFrameQueue(&pwd->FTPBuffHead, 1), 
+                             1);
+                pwd->FTPQueueSize--;
+                SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("f1Pushed")));
 				return TRUE;
 			
             case IDC_BUTTONF2:
