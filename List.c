@@ -52,7 +52,8 @@ BOOL AddToByteQueue(PPBYTE_NODE pHead, PPBYTE_NODE pTail, BYTE data) {
     if ((newNode = (PBYTE_NODE) malloc(sizeof(BYTE_NODE))) == NULL) {
         return FALSE;
     }
-    newNode->b = data;
+    newNode->b      = data;
+    newNode->next   = NULL;
 
     if (*pHead == NULL) {
         *pHead = newNode;
@@ -142,7 +143,9 @@ BOOL AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, FRAME data) {
     if ((newNode = (PFRAME_NODE) malloc(sizeof(FRAME_NODE))) == NULL) {
         return FALSE;
     }
-	newNode->f = data;
+	newNode->f      = data;
+    newNode->next   = NULL;
+
     if (*pHead == NULL) {
 
         *pHead = newNode;
