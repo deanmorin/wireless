@@ -104,17 +104,17 @@ BOOL Connect(HWND hWnd) {
                                 (LPTHREAD_START_ROUTINE) PortIOThreadProc,
                                 hWnd, 0, &dwThreadid);
 
-    pwd->hFileThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) FileIOThreadProc,
-									hWnd, 0, &dwFileThreadID);
+    /*pwd->hFileThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) FileIOThreadProc,
+									hWnd, 0, &dwFileThreadID);*/
 
     if (pwd->hThread == INVALID_HANDLE_VALUE) {
         DISPLAY_ERROR("Error creating read thread");
         return FALSE;
     }
-	if (pwd->hFileThread == INVALID_HANDLE_VALUE) {
+	/*if (pwd->hFileThread == INVALID_HANDLE_VALUE) {
 		DISPLAY_ERROR("Error creating File IO thread");
 		return FALSE;
-	}
+	}*/
 	
     CUR_FG_COLOR = 7;
     CUR_BG_COLOR = 0;

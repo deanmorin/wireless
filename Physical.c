@@ -178,7 +178,7 @@ DWORD WINAPI FileIOThreadProc(HWND hWnd) {
         else if (dwEvent == WAIT_OBJECT_0 + 1) {
 			MessageBox(hWnd, TEXT("emptyPTFBuffer"), 0, MB_OK);
             //enter PTF crit section
-			while(pwd->FTPQueueSize != 0){
+			while(pwd->PTFQueueSize != 0){
 				tempFrame = RemoveFromFrameQueue(&pwd->PTFBuffHead, 1);
 				pwd->PTFQueueSize--;
 				WriteToFile(hWnd, tempFrame);
