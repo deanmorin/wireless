@@ -426,10 +426,30 @@ VOID UpdateStats(HWND hWnd) {
 --
 ------------------------------------------------------------------------------*/
 BOOL CALLBACK Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(GetParent(hDlg), 0);
+	
 	switch (message)
 	{
 	case WM_INITDIALOG:
 		return TRUE;
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+        {
+			case IDC_CLEAR_STATS:
+				NUM_FILES = 0;
+				SENT_ACK = 0;
+				REC_ACK = 0;
+				SENT_EOT = 0;
+				REC_EOT = 0;
+				SENT_RVI = 0;
+				REC_RVI = 0;
+				DOWN_FRAMES = 0;
+				UP_FRAMES = 0;
+				DOWN_FRAMES_ACKD = 0;
+				UP_FRAMES_ACKD = 0;
+				return TRUE;
+		}
+		return FALSE;
 	case WM_CLOSE:
 		ShowWindow(hDlg, SW_HIDE);
 		return TRUE;
