@@ -33,7 +33,7 @@ UINT ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {
-        REC_ACK++;
+        REC_ACK+=1;
         psi->iFailedENQCount = 0;
         psi->iState     = STATE_T3;
         DL_STATE        = psi->iState;
@@ -56,17 +56,17 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {         // last frame acknowledged
-        REC_ACK++;
-        UP_FRAMES_ACKD++;
+        REC_ACK+=1;
+        UP_FRAMES_ACKD+=1;
         RemoveFromFrameQueue(&pwd->FTPBuffHead, 1); // remove ack'd frame from        
         pwd->FTPQueueSize--;                        //      the queue
         SendFrame(hWnd, psi);                       
     } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {  // receiver wants to send
                                                     //      a frame
-        REC_RVI++;
+        REC_RVI+=1;
         pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
-        SENT_ACK++;
+        SENT_ACK+=1;
         psi->iState     = STATE_R2;
         DL_STATE        = psi->iState;
         psi->dwTimeout  = TOR3;
@@ -84,7 +84,7 @@ UINT ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     if (pReadBuf[CTRL_CHAR_INDEX] == ENQ) {
         pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
-        SENT_ACK++;
+        SENT_ACK+=1;
         psi->iState     = STATE_R2;
         DL_STATE        = psi->iState;
         psi->dwTimeout  = TOR3;
@@ -104,7 +104,7 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     }
 
     if (pReadBuf[CTRL_CHAR_INDEX] == EOT) {
-        REC_EOT++;
+        REC_EOT+=1;
         psi->iState = STATE_IDLE;
         DL_STATE    = psi->iState;
         //srand(GetTickCount());
@@ -118,23 +118,23 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     if (dwLength < FRAME_SIZE) {
         return 0;               // a full frame has not arrived at the port yet
     }
-    DOWN_FRAMES++;
+    DOWN_FRAMES+=1;
 
     if (crcFast(pReadBuf, dwLength) == 0) {     // CHECK SEQUENCE #
-        DOWN_FRAMES_ACKD++;
+        DOWN_FRAMES_ACKD+=1;
 
 		// add to PTF queue
 
         if (pwd->FTPQueueSize) {
             pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
             ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
-            SENT_RVI++;
+            SENT_RVI+=1;
         } else {
             pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
             ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
             psi->iState = STATE_T1;
             DL_STATE    = psi->iState;
-            SENT_ACK++;
+            SENT_ACK+=1;
         }
     }
     return FRAME_SIZE;
@@ -149,14 +149,14 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
     if (pwd->FTPQueueSize == 0) {
         pCtrlFrame[CTRL_CHAR_INDEX] = EOT;
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
-        SENT_EOT++;
+        SENT_EOT+=1;
         //srand(GetTickCount());
         psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
         psi->iState     = STATE_IDLE;
         DL_STATE        = psi->iState;
     } else {
         ProcessWrite(hWnd, (BYTE*) &pwd->FTPBuffHead->f, CTRL_FRAME_SIZE);
-        UP_FRAMES++;
+        UP_FRAMES+=1;
         SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
     }
 }
@@ -362,19 +362,19 @@ VOID ReadFromFile(HWND hWnd){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
-			pwd->NumOfReads++;
+			pwd->NumOfReads+=1;
 			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("dataToWrite")));
 		} else if(pwd->NumOfReads == 0 && dwSizeOfFile < 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
-			pwd->NumOfReads++;
+			pwd->NumOfReads+=1;
 			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("dataToWrite")));
 		} else if(dwSizeOfFile/pwd->NumOfReads >= 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
-			pwd->NumOfReads++;
+			pwd->NumOfReads+=1;
 		} else if(dwSizeOfFile/pwd->NumOfReads > 0){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%pwd->NumOfReads, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
@@ -398,7 +398,7 @@ VOID ReadFromFile(HWND hWnd){
 		//WriteToFile(hWnd, &frame);
 		//TODO: Enter FTP crit section
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
-		pwd->FTPQueueSize++;
+		pwd->FTPQueueSize+=1;
 		//TODO: exit FTP crit section
 
 

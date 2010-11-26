@@ -12,7 +12,7 @@ VOID MakeDebugFrameOne(HWND hWnd){
 		data[i] = i+65;
 	}
 	AddToFrameQueue(&pwd->FTPBuffHead,&pwd->FTPBuffTail,CreateFrame(hWnd,data,25));
-	pwd->FTPQueueSize++;
+	pwd->FTPQueueSize+=1;
 }
 
 
@@ -28,7 +28,7 @@ VOID MakeDebugFrameTwo(HWND hWnd){
 		data[i] = (i%26)+65;
 	}
 	AddToFrameQueue(&pwd->FTPBuffHead,&pwd->FTPBuffTail,CreateFrame(hWnd,data,MAX_PAYLOAD_SIZE));
-	pwd->FTPQueueSize++;
+	pwd->FTPQueueSize+=1;
 }
 
 
@@ -38,7 +38,7 @@ UINT DebugT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {
-        REC_ACK++;
+        REC_ACK+=1;
         psi->iFailedENQCount = 0;
         psi->iState     = STATE_T3;
         DL_STATE        = psi->iState;
@@ -60,18 +60,18 @@ UINT DebugT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {         // last frame acknowledged
-        REC_ACK++;
-        UP_FRAMES_ACKD++;
+        REC_ACK+=1;
+        UP_FRAMES_ACKD+=1;
         RemoveFromFrameQueue(&pwd->FTPBuffHead, 1); // remove ack'd frame from
         pwd->FTPQueueSize--;                        //      the queue
         SendFrame(hWnd, psi);                       
     } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {  // receiver wants to send
                                                     //      a frame
-        REC_RVI++;
+        REC_RVI+=1;
         DL_STATE        = STATE_R4;
         WaitForSingleObject(CreateEvent(NULL, TRUE, FALSE, TEXT("ackPushed")), 
                                         INFINITE);
-        SENT_ACK++;
+        SENT_ACK+=1;
         psi->iState     = STATE_R2;
         DL_STATE        = psi->iState;
         psi->dwTimeout  = DTOR;
@@ -90,7 +90,7 @@ UINT DebugIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         DL_STATE        = STATE_R1;
         WaitForSingleObject(CreateEvent(NULL, TRUE, FALSE, 
                                             TEXT("ackPushed")), INFINITE);
-        SENT_ACK++;
+        SENT_ACK+=1;
         psi->iState     = STATE_R2;
         DL_STATE        = psi->iState;
         psi->dwTimeout  = DTOR;
@@ -109,7 +109,7 @@ UINT DebugR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     }
 
     if (pReadBuf[CTRL_CHAR_INDEX] == EOT) {
-        REC_EOT++;
+        REC_EOT+=1;
         psi->iState = STATE_IDLE;
         DL_STATE    = psi->iState;
         srand(GetTickCount());
@@ -120,22 +120,22 @@ UINT DebugR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     if (dwLength < FRAME_SIZE) {
         return 0;   // a full frame has not arrived at the port yet
     }
-    DOWN_FRAMES++;
+    DOWN_FRAMES+=1;
 
     if (crcFast(pReadBuf, dwLength) == 0) { // ALSO CHECK FOR SEQUENCE #     
-        DOWN_FRAMES_ACKD++;
+        DOWN_FRAMES_ACKD+=1;
         DL_STATE = STATE_R3;
 
         if (pwd->FTPQueueSize) {
             WaitForSingleObject(CreateEvent(NULL, TRUE, FALSE, 
                                             TEXT("rviPushed")), INFINITE);
-            SENT_RVI++;
+            SENT_RVI+=1;
         } else {
             WaitForSingleObject(CreateEvent(NULL, TRUE, FALSE, 
                                             TEXT("ackPushed")), INFINITE);
             psi->iState = STATE_T1;
             DL_STATE    = psi->iState;
-            SENT_ACK++;
+            SENT_ACK+=1;
         }
     }
     return FRAME_SIZE;

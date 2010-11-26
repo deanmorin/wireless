@@ -235,7 +235,7 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
             // a full frame is not yet at the port
             for (i = 0; i < dwBytesRead; i++) {
                 AddToByteQueue(&pwd->pReadBufHead, &pwd->pReadBufTail, pReadBuf[i]);
-                dwQueueSize++;
+                dwQueueSize+=1;
             }
         }
     
@@ -244,7 +244,7 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
         
         for (i = 0; i < dwBytesRead; i++) {
             AddToByteQueue(&pwd->pReadBufHead, &pwd->pReadBufTail, pReadBuf[i]);
-            dwQueueSize++;
+            dwQueueSize+=1;
         }
         if (dwQueueSize >= CTRL_FRAME_SIZE) {
 
