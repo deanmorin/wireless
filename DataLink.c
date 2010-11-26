@@ -100,6 +100,7 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
     if (pwd->PTFQueueSize >= FULL_BUFFER) {
         SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
+		DISPLAY_ERROR("NOT REALY AN ERROR");				/////////////////////////////DELETE
     }
 
     if (pReadBuf[CTRL_CHAR_INDEX] == EOT) {
@@ -121,6 +122,8 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
     if (crcFast(pReadBuf, dwLength) == 0) {     // CHECK SEQUENCE #
         DOWN_FRAMES_ACKD++;
+
+		// add to PTF queue
 
         if (pwd->FTPQueueSize) {
             pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
