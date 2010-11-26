@@ -97,8 +97,6 @@ BOOL Connect(HWND hWnd) {
         DISPLAY_ERROR("Could not set comm timeouts");
         return FALSE;
     }
-    //Initialize Rfid scanner
-	InitRfid(hWnd);
     // create thread for reading
     pwd->hThread = CreateThread(NULL, 0,
                                 (LPTHREAD_START_ROUTINE) PortIOThreadProc,
@@ -241,44 +239,4 @@ VOID SelectPort(HWND hWnd, INT iSelected) {
         case IDM_COM8:  pwd->lpszCommName = TEXT("COM8");   return;        
         case IDM_COM9:  pwd->lpszCommName = TEXT("COM9");   return;
     }
-}
-
-/*------------------------------------------------------------------------------
--- FUNCTION:    InitRfid
---
--- DATE:        Nov 6, 2010
---
--- REVISIONS:   (Date and Description)
---
--- DESIGNER:    Daniel Wright
---
--- PROGRAMMER:  Daniel Wright
---
--- INTERFACE:   VOID InitRfid(HWND hWnd)
---                          hWnd        - the handle to the window
---                          
---
--- RETURNS:     VOID.
---
--- NOTES:
---              Initializes settings for the RFID scanner. Called everytime
---				a connection is made.
-------------------------------------------------------------------------------*/
-VOID InitRfid(HWND hWnd){
-	PWNDDATA pwd;
-	CHAR        psWriteBuf[26]   = {0x30, 0x31, 0x30, 0x41, 0x30, 0x30, 0x30, 0x33, 0x30, 0x31, 0x34,
-									0x33, 0x30, 0x36, 0x30, 0x30, 0x01, 0x0A, 0x00, 0x03, 0x01, 0x43,
-									0x06, 0x00, 0x4C, 0xB3};
-	
-    OVERLAPPED  overlap         = {0};
-    DWORD       dwBytesRead     = 0;
-    UINT        bufLength       = 26;
-	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
-	
-	if (!WriteFile(pwd->hPort, psWriteBuf, bufLength, &dwBytesRead, &overlap)) {
-        if (GetLastError() != ERROR_IO_PENDING) {
-            DISPLAY_ERROR("Failed to initialize RFID reader");
-        }
-    }
-	
 }
