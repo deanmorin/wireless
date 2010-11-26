@@ -96,7 +96,6 @@ VOID InitTerminal(HWND hWnd) {
     pwd->pReadBufHead       = NULL;
     pwd->pReadBufTail       = NULL;
     pwd->bDebug             = FALSE;
-    
 
     // initialize a "blank" display buffer
     for (i = 0; i < LINES_PER_SCRN; i++) {
@@ -141,6 +140,8 @@ VOID InitTerminal(HWND hWnd) {
 */
     //print out headers for Tokens and Values
     MakeColumns(hWnd);
+
+	
 }
 
 /*------------------------------------------------------------------------------
@@ -174,6 +175,8 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
         case IDM_CONNECT:       
             if(OpenFileReceive(hWnd))
 				Connect(hWnd);
+				ShowWindow(pwd->hDlgStats, SW_NORMAL);
+				ShowWindow(pwd->hDlgDebug, SW_NORMAL);
 			
             return;
 
