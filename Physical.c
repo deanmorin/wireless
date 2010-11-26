@@ -225,12 +225,12 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
     if (dwQueueSize == 0) {
         // the last port read sent an entire frame to ProcessRead()
         
-        if (dwBytesRead >= CTRL_FRAME_SIZE) {
-
-            if (ProcessRead(hWnd, psi, pReadBuf, dwBytesRead)) {
-                // read completed successfully
-                return;
-            }
+        if (dwBytesRead >= CTRL_FRAME_SIZE  &&
+			ProcessRead(hWnd, psi, pReadBuf, dwBytesRead)) {
+            
+			// read completed successfully
+            return;
+     
         } else {
             // a full frame is not yet at the port
             for (i = 0; i < dwBytesRead; i++) {
