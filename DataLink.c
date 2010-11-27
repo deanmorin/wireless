@@ -10,7 +10,9 @@ VOID ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength) {
 	
 	ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	SetCommMask(pwd->hPort, EV_TXEMPTY);
-	WaitCommEvent(pwd->hPort, &dwEvent, &ol);
+	if (!WaitCommEvent(pwd->hPort, &dwEvent, &ol)) {
+        ProcessCommError(pwd->hPort);
+    }
     WriteFile(pwd->hPort, pFrame, dwLength, NULL, &ol);
 	dwEvent = WaitForSingleObject(ol.hEvent, INFINITE);
 	ClearCommError(pwd->hPort, &dwError, &cs);
@@ -160,7 +162,7 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
         psi->iState     = STATE_IDLE;
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
     } else {
-        ProcessWrite(hWnd, (BYTE*) &pwd->FTPBuffHead->f, CTRL_FRAME_SIZE);
+        ProcessWrite(hWnd, (BYTE*) &pwd->FTPBuffHead->f, FRAME_SIZE);
         PostMessage(hWnd, WM_STAT, STAT_FRAME, SENT);
         SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
     }
