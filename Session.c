@@ -90,8 +90,11 @@ BOOL Connect(HWND hWnd) {
         DISPLAY_ERROR("Error retrieving comm timeouts");
         return FALSE;   
     }
-    timeOut.ReadIntervalTimeout         = 10;
-    timeOut.WriteTotalTimeoutConstant   = 5000;
+    timeOut.ReadIntervalTimeout         = 50;
+	timeOut.ReadTotalTimeoutConstant	= 10000;
+	timeOut.ReadTotalTimeoutMultiplier	= 50;
+	timeOut.WriteTotalTimeoutMultiplier = 50;
+    timeOut.WriteTotalTimeoutConstant   = 10000;
 
     if (!SetCommTimeouts(pwd->hPort, &timeOut)) {
         DISPLAY_ERROR("Could not set comm timeouts");
