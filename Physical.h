@@ -5,7 +5,7 @@
 #include "osi.h"
 #include "WndExtra.h"
 
-#define READ_BUFSIZE    2048
+#define READ_BUFSIZE    4096
 
 DWORD WINAPI    PortIOThreadProc(HWND hWnd);
 DWORD WINAPI	FileIOThreadProc(HWND hWnd);
