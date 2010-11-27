@@ -617,6 +617,7 @@ VOID UpdateStatStruct(HWND hWnd, WPARAM stat, LPARAM attribute) {
 
         case STAT_STATE:
             DL_STATE = attribute;
+			SendMessage(pwd->hDlgDebug, WM_USER, 0, 0);
             break;
         
         case ACK:
@@ -663,4 +664,5 @@ VOID UpdateStatStruct(HWND hWnd, WPARAM stat, LPARAM attribute) {
             NUM_FILES++;
             break;
     }
+	UpdateStats(hWnd);
 }

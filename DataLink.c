@@ -51,7 +51,6 @@ UINT ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     } else {
         psi->iState     = STATE_IDLE;
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
-        //srand(GetTickCount());
         psi->dwTimeout = TOR0_BASE + rand() % TOR0_RANGE;
     }
     return CTRL_FRAME_SIZE;
@@ -115,7 +114,6 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         PostMessage(hWnd, WM_STAT, EOT, REC);
         psi->iState = STATE_IDLE;
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
-        //srand(GetTickCount());
         psi->dwTimeout = TOR0_BASE + rand() % TOR0_RANGE;
         return CTRL_FRAME_SIZE;
     }
@@ -158,7 +156,6 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
         pCtrlFrame[CTRL_CHAR_INDEX] = EOT;
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
         PostMessage(hWnd, WM_STAT, EOT, SENT);
-        //srand(GetTickCount());
         psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
         psi->iState     = STATE_IDLE;
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
@@ -189,7 +186,6 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
             /*if (++(psi->iFailedENQCount) >= MAX_FAILED_ENQS) {
                 DISPLAY_ERROR("Connection cannot be established"); 
             }*/                   // NEED TO SET APPROPRIATE EVENT
-            //srand(GetTickCount());
             psi->dwTimeout  = (pwd->bDebug) 
                     ? DTOR      + rand() % TOR0_RANGE
                     : TOR0_BASE + rand() % TOR0_RANGE;
@@ -201,7 +197,6 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
             psi->dwTimeout *= TOR2_INCREASE_FACTOR;
 
             if (++(psi->itoCount) >= MAX_TIMEOUTS) {
-                //srand(GetTickCount());
                 psi->dwTimeout  = (pwd->bDebug) 
                         ? DTOR      + rand() % TOR0_RANGE
                         : TOR0_BASE + rand() % TOR0_RANGE;
@@ -216,7 +211,6 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
             psi->dwTimeout *= TOR3_INCREASE_FACTOR;
 
             if (++(psi->itoCount) >= MAX_TIMEOUTS) {
-                //srand(GetTickCount());
                 psi->dwTimeout  = (pwd->bDebug) 
                         ? DTOR      + rand() % TOR0_RANGE
                         : TOR0_BASE + rand() % TOR0_RANGE;

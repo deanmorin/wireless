@@ -90,7 +90,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 	pwd->hDlgStats = CreateDialog (hInstance, TEXT("Statistics"), hWnd, Stats);
 	pwd->hDlgDebug = CreateDialog (hInstance, TEXT("Debug"), hWnd, Debug);
-	SetTimer(hWnd, TIMER, TIME_LENGTH, (TIMERPROC) NULL);
+	//SetTimer(hWnd, TIMER, TIME_LENGTH, (TIMERPROC) NULL);
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 
     while (GetMessage(&msg, NULL, 0, 0)) {
@@ -150,21 +150,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             PerformMenuAction(hWnd, wParam);
             return 0;
 
-		case WM_TIMER:
-			if (wParam == TIMER) {
-				UpdateStats(hWnd);
-				SendMessage(pwd->hDlgDebug, WM_USER, 0, 0);
-			}
-			return 0;
 		
+		
+
+		//case WM_TIMER:
+		//	if (wParam == TIMER) {
+		//		UpdateStats(hWnd);
+		//		SendMessage(pwd->hDlgDebug, WM_USER, 0, 0);
+		//	}
+		//	return 0;
+
+
 		case WM_FILLFTPBUF:
 			ReadFromFile(hWnd);
 			return 0;
-
+		
 		case WM_FILLPTFBUF:
 			WriteToFile(hWnd);
 			return 0;
-        case WM_DESTROY:
+        
+		case WM_DESTROY:
             Disconnect(hWnd);
             PostQuitMessage(0);
             return 0;
