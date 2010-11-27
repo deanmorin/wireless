@@ -68,6 +68,7 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     PSTATEINFO  psi                 = NULL;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
+	srand(GetTickCount());
 
     if ((ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)) == NULL) {
         DISPLAY_ERROR("Error creating event in read thread");
