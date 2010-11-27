@@ -172,11 +172,11 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
     switch (LOWORD(wParam)) {
                 
         case IDM_CONNECT:       
-            if(OpenFileReceive(hWnd))
+            //if(OpenFileReceive(hWnd)) {
 				Connect(hWnd);
 				ShowWindow(pwd->hDlgStats, SW_NORMAL);
 				ShowWindow(pwd->hDlgDebug, SW_NORMAL);
-			
+	//}
             return;
 
         case IDM_DISCONNECT:
