@@ -156,7 +156,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 				SendMessage(pwd->hDlgDebug, WM_USER, 0, 0);
 			}
 			return 0;
+		
+		case WM_FILLFTPBUF:
+			ReadFromFile(hWnd);
+			return 0;
 
+		case WM_FILLPTFBUF:
+			WriteToFile(hWnd);
+			return 0;
         case WM_DESTROY:
             Disconnect(hWnd);
             PostQuitMessage(0);
