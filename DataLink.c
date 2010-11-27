@@ -1,11 +1,19 @@
 #include "DataLink.h"
 
 VOID ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength) {
-    PWNDDATA    pwd = NULL;
-    OVERLAPPED  ol  = {0};
+    PWNDDATA    pwd		= NULL;
+    OVERLAPPED  ol		= {0};
+	DWORD		dwEvent	= 0;
+	DWORD		dwError	= 0;
+	COMSTAT		cs		= {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-
+	
+	ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	SetCommMask(pwd->hPort, EV_TXEMPTY);
+	WaitCommEvent(pwd->hPort, &dwEvent, &ol);
     WriteFile(pwd->hPort, pFrame, dwLength, NULL, &ol);
+	dwEvent = WaitForSingleObject(ol.hEvent, INFINITE);
+	ClearCommError(pwd->hPort, &dwError, &cs);
 }
 
 

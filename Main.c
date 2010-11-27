@@ -140,6 +140,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
         case WM_STAT:
             UpdateStatStruct(hWnd, wParam, lParam);
+			return 0;
                      
         case WM_PAINT:
             Paint(hWnd);
