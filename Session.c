@@ -118,7 +118,6 @@ BOOL Connect(HWND hWnd) {
     CUR_BG_COLOR = 0;
     CUR_STYLE    = 0;
 	BRIGHTNESS	 = 0;
-	pwd->cursorMode = TRUE;
                                 
     // enable/disable appropriate menu choices
     EnableMenuItem(GetMenu(hWnd), IDM_DISCONNECT, MF_ENABLED);

@@ -137,6 +137,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         case WM_CREATE:
             InitTerminal(hWnd);   
             return 0;
+
+        case WM_STAT:
+            UpdateStatStruct(hWnd, wParam, lParam);
                      
         case WM_PAINT:
             Paint(hWnd);

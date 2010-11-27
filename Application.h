@@ -27,5 +27,6 @@ BOOL CALLBACK	Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 VOID			UpdateStats(HWND hWnd);
 VOID            SendDebugCtrlChar(HWND hWnd, BYTE ctrlChar, 
                                   LPCWSTR szEventName);
+VOID            UpdateStatStruct(HWND hWnd, WPARAM stat, LPARAM attribute);
 
 #endif

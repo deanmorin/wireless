@@ -41,6 +41,15 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define ACK 0x06
 #define RVI 0x13
 
+#define SENT    100
+#define REC     101
+
+#define STAT_STATE       299
+#define STAT_FRAME       300
+#define STAT_FRAMEACKD   301
+#define STAT_FILE        302
+#define WM_STAT     WM_USER+1
+
 
 VOID    ProcessTimeout(HWND hWnd, PSTATEINFO psi);
 VOID    ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength);

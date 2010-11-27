@@ -108,14 +108,8 @@ typedef struct wndData {
 	HANDLE			hFileThread;
     DWORD           dwThreadid;
     COMMTIMEOUTS    defaultTimeOuts;
-    CHAR*           psIncompleteEsc;
-    DWORD           dwIncompleteLength;
-    DISPLAYBUF      displayBuf;
-    DWORD           dwEscSeqValues[32];
-	BOOL			cursorMode;
     INT             cyWindowTop;
     INT             cyWindowBottom;
-	BOOL			wordWrap;
 	BOOL			relOrigin;
 	STATSINFO		statsInfo;
     INT             FTPQueueSize;
@@ -130,6 +124,8 @@ typedef struct wndData {
     PBYTE_NODE      pReadBufHead;
     PBYTE_NODE      pReadBufTail;
     BOOL            bDebug;
+    DISPLAYBUF      displayBuf;
+    BOOL            wordWrap;
 } WNDDATA, *PWNDDATA;
 
 #endif

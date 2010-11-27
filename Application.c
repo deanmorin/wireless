@@ -78,7 +78,6 @@ VOID InitTerminal(HWND hWnd) {
     // initialize variables in PWDDATA struct to defaults
 	DL_STATE				= -1;
     pwd->bConnected         = FALSE;
-    pwd->psIncompleteEsc    = NULL;
     CHAR_WIDTH              = tm.tmAveCharWidth;
     CHAR_HEIGHT             = tm.tmHeight;
     CUR_FG_COLOR            = 7;
@@ -608,4 +607,59 @@ VOID SendDebugCtrlChar(HWND hWnd, BYTE ctrlChar, LPCWSTR szEventName) {
     SetEvent(hEvent);
     Sleep(0);
     ResetEvent(hEvent);
+}
+
+VOID UpdateStatStruct(HWND hWnd, WPARAM stat, LPARAM attribute) {
+    PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    
+    switch (stat) {
+
+        case STAT_STATE:
+            DL_STATE = attribute;
+            break;
+        
+        case ACK:
+            if (attribute == SENT) {
+                SENT_ACK++;
+            } else {
+                REC_ACK++;
+            }
+            break;
+
+        case EOT:
+            if (attribute == SENT) {
+                SENT_EOT++;
+            } else {
+                REC_EOT++;
+            }
+            break;
+        
+        case RVI:
+            if (attribute == SENT) {
+                SENT_RVI++;
+            } else {
+                REC_RVI++;
+            }
+            break;
+        
+        case STAT_FRAME:
+            if (attribute == SENT) {
+                DOWN_FRAMES++;
+            } else {
+                UP_FRAMES++;
+            }
+            break;
+
+        case STAT_FRAMEACKD:
+            if (attribute == SENT) {
+                DOWN_FRAMES_ACKD++;
+            } else {
+                UP_FRAMES_ACKD++;
+            }
+            break;
+       
+        case STAT_FILE:
+            NUM_FILES++;
+            break;
+    }
 }
