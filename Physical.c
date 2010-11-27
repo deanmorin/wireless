@@ -213,15 +213,16 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
     DWORD           dwBytesRead             = 0;
     INT             i                       = 0;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-    
+	ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 
-    if (!ReadFile(pwd->hPort, pReadBuf, cbInQue, &dwBytesRead, &ol)) {
+    if (!ReadFile(pwd->hPort, pReadBuf, READ_BUFSIZE, &dwBytesRead, &ol)) {
         // read is incomplete or had an error
         ProcessCommError(pwd->hPort);
         GetOverlappedResult(pwd->hThread, &ol, &dwBytesRead, TRUE);
     }
+	WaitForSingleObject(ol.hEvent, INFINITE);
 
-
+	
     if (dwQueueSize == 0) {
         // the last port read sent an entire frame to ProcessRead()
         

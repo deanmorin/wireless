@@ -135,7 +135,7 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     }
     DOWN_FRAMES+=1;
 
-	for (i = 0; i < FRAME_SIZE; i++) {
+	for (i = 0; i < FRAME_SIZE; i++) {	// TEMP
 		temp[i] = pReadBuf[i];
 	}
 
