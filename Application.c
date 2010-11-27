@@ -172,11 +172,11 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
     switch (LOWORD(wParam)) {
                 
         case IDM_CONNECT:       
-            //if(OpenFileReceive(hWnd)) {
+            if(OpenFileReceive(hWnd)) {
 				Connect(hWnd);
 				ShowWindow(pwd->hDlgStats, SW_NORMAL);
 				ShowWindow(pwd->hDlgDebug, SW_NORMAL);
-	//}
+	}
             return;
 
         case IDM_DISCONNECT:
@@ -216,7 +216,7 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
 		case ID_OPEN_RECEIVEFILE:
 			//OpenFileReceive(hWnd);
 			//SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
-			SendMessage(hWnd, WM_FILLPTFBUF, 0, 0);
+			PostMessage(hWnd, WM_FILLPTFBUF, 0, 0);
 			return;
 		case ID_OPEN_TRANSMITFILE:
 			OpenFileTransmit(hWnd);

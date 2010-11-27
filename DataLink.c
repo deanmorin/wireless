@@ -279,7 +279,7 @@ VOID OpenFileTransmit(HWND hWnd){
 	pwd->NumOfReads = 0;
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 	//SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
-	SendMessage(hWnd, WM_FILLFTPBUF, 0, 0);
+	PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
 	
 	//MessageBox(hWnd, pwd->lpszTransmitName, "File", MB_OK);
 	
