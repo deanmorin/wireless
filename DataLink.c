@@ -1,13 +1,16 @@
 #include "DataLink.h"
 
 VOID ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength) {
-    PWNDDATA    pwd		= NULL;
-    OVERLAPPED  ol		= {0};
-	DWORD		dwEvent	= 0;
-	DWORD		dwError	= 0;
-	COMSTAT		cs		= {0};
+    PWNDDATA    pwd			= NULL;
+    OVERLAPPED  ol			= {0};
+	DWORD		dwEvent		= 0;
+	DWORD		dwError		= 0;
+	DWORD		dwWritten	= 0;
+	COMSTAT		cs			= {0};
+	BYTE		test[1024]	= {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-	
+
+
 	ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	SetCommMask(pwd->hPort, EV_TXEMPTY);
 	if (!WaitCommEvent(pwd->hPort, &dwEvent, &ol)) {
@@ -105,7 +108,11 @@ UINT ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     PWNDDATA    pwd = NULL;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0};
+	int i = 0; // TEMP?///////////////////////
+	BYTE	temp[1024] = {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+
+	
 
     if (pwd->PTFQueueSize >= FULL_BUFFER) {
         SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
@@ -127,6 +134,10 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         return 0;               // a full frame has not arrived at the port yet
     }
     DOWN_FRAMES+=1;
+
+	for (i = 0; i < FRAME_SIZE; i++) {
+		temp[i] = pReadBuf[i];
+	}
 
     if (crcFast(pReadBuf, dwLength) == 0) {     // CHECK SEQUENCE #
         PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, REC);

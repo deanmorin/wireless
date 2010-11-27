@@ -18,6 +18,7 @@ VOID MakeDebugFrameOne(HWND hWnd){
 
 VOID MakeDebugFrameTwo(HWND hWnd){
 	int i;
+	int count = 48;
 	BYTE* data = (BYTE*) malloc (sizeof(BYTE)*MAX_PAYLOAD_SIZE);
 	PWNDDATA    pwd                 = NULL;
 
@@ -25,7 +26,14 @@ VOID MakeDebugFrameTwo(HWND hWnd){
 
 
 	for (i =0;i<MAX_PAYLOAD_SIZE;i++){
-		data[i] = (i%26)+65;
+		if ((i+5) % 16 == 0) {
+			data[i] = count++;
+			if (count == 58) {
+				count = 48;
+			}
+		} else {
+			data[i] = (i%26)+65;
+		}
 	}
 	AddToFrameQueue(&pwd->FTPBuffHead,&pwd->FTPBuffTail,CreateFrame(hWnd,data,MAX_PAYLOAD_SIZE));
 	pwd->FTPQueueSize+=1;
