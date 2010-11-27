@@ -352,7 +352,7 @@ VOID CloseFileReceive(HWND hWnd){
 	}
 }
 
-VOID WriteToFile(HWND hWnd, PFRAME frame){
+VOID WriteToFile(HWND hWnd){
 	PWNDDATA pwd = {0};
 	DWORD dwBytesWritten = 0;
 	PFRAME		tempFrame = {0};
@@ -360,7 +360,7 @@ VOID WriteToFile(HWND hWnd, PFRAME frame){
 	
 	while(pwd->FTPQueueSize != 0){
 				tempFrame = RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);
-				if(!WriteFile(pwd->hFileReceive, frame->payload, frame->length, &dwBytesWritten, NULL)){
+				if(!WriteFile(pwd->hFileReceive, tempFrame->payload, tempFrame->length, &dwBytesWritten, NULL)){
 					DISPLAY_ERROR("Failed to write to file");
 				} else {
 					pwd->FTPQueueSize--;
