@@ -1,6 +1,54 @@
+/*------------------------------------------------------------------------------
+-- SOURCE FILE:     DataLink.c      Implements the half-duplex data link level
+--									protocol, as designed by the class.
+--                      
+-- PROGRAM:     Dean and the Rockets' Wireless Protocol Testing and Evaluation 
+--              Facilitator
+--
+-- FUNCTIONS:
+--              VOID    ProcessTimeout(HWND, PSTATEINFO);
+--				VOID    ProcessWrite(HWND, PBYTE, DWORD);
+--				UINT    ProcessRead(HWND, PSTATEINFO, PBYTE, DWORD);
+--				UINT    ReadIDLE(HWND, PSTATEINFO, PBYTE, DWORD);
+--				UINT    ReadR2(HWND, PSTATEINFO psi, PBYTE, DWORD);
+--				UINT    ReadT1(HWND, PSTATEINFO psi, PBYTE, DWORD);
+--				UINT    ReadT3(HWND, PSTATEINFO, PBYTE, DWORD);
+--				VOID    SendFrame(HWND, PSTATEINFO);
+--
+--
+-- DATE:        Nov 28, 2010
+--
+-- REVISIONS:   
+--
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Dean Morin
+--
+-- NOTES:       COMP 3890 wireless data link protocol implementation.
+------------------------------------------------------------------------------*/
 #include "DataLink.h"
 
-VOID ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength) {
+/*------------------------------------------------------------------------------
+-- FUNCTION:    ProcessWrite
+--
+-- DATE:        Nov 28, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Dean Morin
+--
+-- INTERFACE:   ProcessWrite(HWND hWnd, PBYTE pFrame, DWORD dwLength)
+--                      hWnd			- a handle to the window
+--                      pReadBuf		- a frame to write to the serial port
+--						dwLength	- the length of the frame
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Writes the frame, pFrame, to the serial port.
+------------------------------------------------------------------------------*/
+VOID ProcessWrite(HWND hWnd, PBYTE pFrame, DWORD dwLength) {
     OVERLAPPED  ol			= {0};
 	DWORD		dwWritten	= 0;
     PWNDDATA	pwd			= (PWNDDATA) GetWindowLongPtr(hWnd, 0);
@@ -14,17 +62,64 @@ VOID ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength) {
 	}
 }
 
-
-UINT ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {  
-    static UINT( *pReadFunc[READ_STATES])(HWND, PSTATEINFO, BYTE*, DWORD) 
+/*------------------------------------------------------------------------------
+-- FUNCTION:    ProcessRead
+--
+-- DATE:        Nov 28, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Dean Morin
+--
+-- INTERFACE:   ProcessRead(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, 
+--							DWORD dwLength)
+--                      hWnd			- a handle to the window
+--                      psi			- contains info about the current state of 
+--									  the communication
+--                      pReadBuf		- bytes read from the serial port
+--						dwLength	- the length of pReadBuf
+--
+-- RETURNS:     0 if an incomplete frame was passed to the read function.
+--
+-- NOTES:       Calls a function to process pReadBuf, based on the current
+--				protocol state.
+------------------------------------------------------------------------------*/
+UINT ProcessRead(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {  
+    static UINT( *pReadFunc[READ_STATES])(HWND, PSTATEINFO, PBYTE, DWORD) 
             = { ReadT1,  ReadT3,  ReadIDLE,  ReadR2 };
     PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
     return pReadFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
 }
 
-
-UINT ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
+/*------------------------------------------------------------------------------
+-- FUNCTION:    ReadT1
+--
+-- DATE:        Nov 28, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Dean Morin
+--
+-- INTERFACE:   ReadT1(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, 
+--					   DWORD dwLength)
+--                      hWnd			- a handle to the window
+--                      psi			- contains info about the current state of 
+--									  the communication
+--                      pReadBuf		- bytes read from the serial port
+--						dwLength	- the length of pReadBuf
+--
+-- RETURNS:     A non-zero value to indicate that a complete frame was passed
+--				to the read function.
+--
+-- NOTES:       Transitions to state T3 via T2 if an ACK is received, sending
+--				a frame along the way. Otherwise, returns to IDLE.
+------------------------------------------------------------------------------*/
+UINT ReadT1(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
@@ -45,8 +140,32 @@ UINT ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     return CTRL_FRAME_SIZE;
 }
 
-
-UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
+/*------------------------------------------------------------------------------
+-- FUNCTION:    ReadT3
+--
+-- DATE:        Nov 28, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Dean Morin
+--
+-- INTERFACE:   ReadT3(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, 
+--					   DWORD dwLength)
+--                      hWnd			- a handle to the window
+--                      psi			- contains info about the current state of 
+--									  the communication
+--                      pReadBuf		- bytes read from the serial port
+--						dwLength	- the length of pReadBuf
+--
+-- RETURNS:     A non-zero value to indicate that a complete frame was passed
+--				to the read function.
+--
+-- NOTES:       Sends another frame if an ACK is received, or gives up the line
+--				if an RVI is received.
+------------------------------------------------------------------------------*/
+UINT ReadT3(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
 	HANDLE hMutex = 0;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
@@ -86,8 +205,31 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     return CTRL_FRAME_SIZE;
 }
 
-
-UINT ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
+/*------------------------------------------------------------------------------
+-- FUNCTION:    ReadIDLE
+--
+-- DATE:        Nov 28, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Dean Morin
+--
+-- INTERFACE:   ReadIDLE(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, 
+--						 DWORD dwLength)
+--                      hWnd			- a handle to the window
+--                      psi			- contains info about the current state of 
+--									  the communication
+--                      pReadBuf		- bytes read from the serial port
+--						dwLength	- the length of pReadBuf
+--
+-- RETURNS:     A non-zero value to indicate that a complete frame was passed
+--				to the read function.
+--
+-- NOTES:       ACKs an ENQ, if one is received.
+------------------------------------------------------------------------------*/
+UINT ReadIDLE(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
@@ -102,8 +244,34 @@ UINT ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     return CTRL_FRAME_SIZE;
 }
 
-
-UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
+/*------------------------------------------------------------------------------
+-- FUNCTION:    ReadR2
+--
+-- DATE:        Nov 28, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Dean Morin
+--
+-- INTERFACE:   ReadR2(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, 
+--					   DWORD dwLength)
+--                      hWnd			- a handle to the window
+--                      psi			- contains info about the current state of 
+--									  the communication
+--                      pReadBuf		- bytes read from the serial port
+--						dwLength	- the length of pReadBuf
+--
+-- RETURNS:     0 if an incomplete frame was passed to the read function.
+--
+-- NOTES:       Expects to receive either an EOT or a data frame. If a data
+--				frame is received it is checked for correct sequence number and
+--				CRC, then ACK'd or RVI'd, depending on whether this side has
+--				anything to send. The function returns 0 if a partial data
+--				frame is received.
+------------------------------------------------------------------------------*/
+UINT ReadR2(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
 	HANDLE hMutex = 0;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0};
     PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
@@ -150,7 +318,27 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     return FRAME_SIZE;
 }
 
-
+/*------------------------------------------------------------------------------
+-- FUNCTION:    SendFrame
+--
+-- DATE:        Nov 28, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Dean Morin
+--
+-- INTERFACE:   SendFrame(HWND hWnd, PSTATEINFO psi)
+--                      hWnd		- a handle to the window
+--                      psi		- contains info about the current state of 
+--								  the communication
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Sends a data frame if there is one in the file-to-port queue,
+--				otherwise sends an EOT.
+------------------------------------------------------------------------------*/
 VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
 	HANDLE hMutex = 0;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
@@ -166,14 +354,34 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
 
     } else {
 		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
-        ProcessWrite(hWnd, (BYTE*) &pwd->FTPBuffHead->f, FRAME_SIZE);
+        ProcessWrite(hWnd, (PBYTE) &pwd->FTPBuffHead->f, FRAME_SIZE);
 		ReleaseMutex(hMutex);
 
         PostMessage(hWnd, WM_STAT, STAT_FRAME, SENT);
     }
 }
 
-
+/*------------------------------------------------------------------------------
+-- FUNCTION:    ProcessTimeout
+--
+-- DATE:        Nov 28, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Dean Morin
+--
+-- INTERFACE:   ProcessTimeout(HWND hWnd, PSTATEINFO psi)
+--                      hWnd		- a handle to the window
+--                      psi		- contains info about the current state of 
+--								  the communication
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Sends a data frame if there is one in the file-to-port queue,
+--				otherwise sends an EOT.
+------------------------------------------------------------------------------*/
 VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
@@ -191,7 +399,7 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
         case STATE_T1:
             if (++(psi->iFailedENQCount) >= MAX_FAILED_ENQS) {
 				PostMessage(hWnd, WM_COMMAND, MAKEWPARAM(IDM_DISCONNECT, 0), 0);
-                DISPLAY_ERROR("Connection cannot be established.\nDisconnecting..."); 
+                DISPLAY_ERROR("Connection can not be established.\nDisconnecting..."); 
             }
             psi->dwTimeout  = TOR0;
             psi->iState     = STATE_IDLE;
