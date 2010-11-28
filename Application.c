@@ -668,7 +668,7 @@ VOID UpdateStatStruct(HWND hWnd, WPARAM stat, LPARAM attribute) {
 
         case STAT_FRAMEACKD:
             if (attribute == SENT) {
-				pwd->FTPQueueSize++;
+				pwd->FTPQueueSize--;
                 UP_FRAMES_ACKD++;
             } else {
 				pwd->PTFQueueSize++;
