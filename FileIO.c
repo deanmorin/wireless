@@ -108,20 +108,25 @@ VOID WriteToFile(HWND hWnd){
 	PWNDDATA pwd = {0};
 	DWORD dwBytesWritten = 0;
 	PFRAME		tempFrame = {0};
+	HANDLE		hMutex = {0};
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 	
 	while(pwd->PTFQueueSize != 0){
+		hMutex = CreateMutex(NULL, FALSE, TEXT("PTFMutex"));
 		tempFrame = RemoveFromFrameQueue(&pwd->PTFBuffHead, 1);
+		ReleaseMutex(hMutex);
 		if(tempFrame->length != 0){
 			DisplayFrameInfo(hWnd, *tempFrame);
 			pwd->NumOfFrames++;
 			SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 		}
+		
 		if(!WriteFile(pwd->hFileReceive, tempFrame->payload, tempFrame->length, &dwBytesWritten, NULL)){
 			DISPLAY_ERROR("Failed to write to file");
 		} else {
 			pwd->PTFQueueSize--;
 		}
+		
 	}
 }
 
@@ -131,6 +136,7 @@ VOID ReadFromFile(HWND hWnd){
 	DWORD dwBytesWritten = 0;
 	DWORD	dwSizeOfFile = 0;
    	FRAME frame;
+	HANDLE hMutex = {0};
 
 	BYTE* ReadBuffer = (BYTE*) malloc(sizeof(BYTE) *1019);
 
@@ -167,8 +173,10 @@ VOID ReadFromFile(HWND hWnd){
 		frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
 
 		//TODO: Enter FTP crit section
+		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 		pwd->FTPQueueSize+=1;
+		ReleaseMutex(hMutex);
 		//TODO: exit FTP crit section
 	}
 }
