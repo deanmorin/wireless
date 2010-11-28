@@ -113,11 +113,13 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         return CTRL_FRAME_SIZE;
     }
     if (pReadBuf[0] != SOH) {
+		psi->iState = STATE_IDLE;
+        PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
         return INVALID_FRAME;
     }
    
     if (dwLength < FRAME_SIZE) {
-        return 0;               // a full frame has not arrived at the port yet
+        return UNFINISHED_FRAME;	// a full frame has not arrived at the port yet
     }
     DOWN_FRAMES+=1;
 
