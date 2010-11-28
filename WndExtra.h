@@ -102,10 +102,8 @@ typedef struct wndData {
 	HANDLE			hFileTransmit;
 	LPTSTR          lpszCommName;
     COMMCONFIG      cc;
-	BOOL			bMoreData;
     BOOL            bConnected;
     HANDLE          hThread;
-	HANDLE			hFileThread;
     DWORD           dwThreadid;
     COMMTIMEOUTS    defaultTimeOuts;
     INT             cyWindowTop;
@@ -125,6 +123,7 @@ typedef struct wndData {
     PBYTE_NODE      pReadBufTail;
     BOOL            bDebug;
     DISPLAYBUF      displayBuf;
+	INT				NumOfFrames;
     BOOL            wordWrap;
 } WNDDATA, *PWNDDATA;
 
