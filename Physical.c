@@ -128,99 +128,22 @@ VOID InitStateInfo (PSTATEINFO psi) {
 }
 
 
-DWORD WINAPI FileIOThreadProc(HWND hWnd) {
-    
-    PWNDDATA    pwd                 = NULL;
-    OVERLAPPED  ol                  = {0};
-    DWORD       dwEvent             = 0;
-    DWORD       dwError             = 0;
-    COMSTAT     cs                  = {0};
-    HANDLE*     hEvents             = NULL;
-    INT         iEventsSize         = 0;
-	PFRAME		tempFrame = {0};
-    PSTATEINFO  psi             = NULL;
-    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-    
-    
-   // CreateEvent(NULL, TRUE, FALSE, TEXT("fillFTPBuffer"));         //REMOVE
-    if ((ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)) == NULL) {
-        DISPLAY_ERROR("Error creating event in File I/o thread");
-    }
-	
-    hEvents     = (HANDLE*) malloc(sizeof(HANDLE) * 2);
-    hEvents[0]  = CreateEvent(NULL, TRUE, FALSE, TEXT("fillFTPBuffer"));
-    hEvents[1]  = CreateEvent(NULL, TRUE, FALSE, TEXT("emptyPTFBuffer"));
-    
-
-    psi             = (PSTATEINFO) malloc(sizeof(STATEINFO));
-    psi->iState     = STATE_IDLE;
-    DL_STATE        = psi->iState;
-    psi->dwTimeout  = INFINITE;
-    psi->itoCount   = 0;
-
-    while (pwd->bConnected) {
-        
-        iEventsSize = 2;
-        dwEvent = WaitForMultipleObjects(iEventsSize, hEvents, FALSE, INFINITE);
- 
-        if (dwEvent == WAIT_OBJECT_0) {
-			//MessageBox(hWnd, TEXT("fillFTPBuffer"), 0, MB_OK);
-            // fill ftp buffer
-			/*while(FTPQueueSize < FULL_WRITE_BUFFER && pwd->bMoreData){
-				read data
-				frame data
-				add frame to writeQueue
-			}*/
-			ReadFromFile(hWnd);
-           
-
-        }
-        else if (dwEvent == WAIT_OBJECT_0 + 1) {
-			MessageBox(hWnd, TEXT("emptyPTFBuffer"), 0, MB_OK);
-            //enter PTF crit section
-			while(pwd->PTFQueueSize != 0){
-				tempFrame = RemoveFromFrameQueue(&pwd->PTFBuffHead, 1);
-				pwd->PTFQueueSize--;
-				WriteToFile(hWnd, tempFrame);
-			}
-			//Exit PTF crit section
-			
-        }
-        /*else if (dwEvent == WAIT_TIMEOUT) {
-            // a timeout occured
-            ProcessTimeout(psi);
-        }*/
-        
-        else {
-            // change this to conditionalo before release
-            DISPLAY_ERROR("Invalid event occured in the File I/O thread");
-        }
-		ResetEvent(hEvents[0]);
-		ResetEvent(hEvents[1]);
-    }
-	
-	free(hEvents);
-	CloseHandle(ol.hEvent);
-    return 0;
-}
-
-
 VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
     
     static DWORD    dwQueueSize             = 0;
     PWNDDATA        pwd                     = NULL;
     BYTE            pReadBuf[READ_BUFSIZE]  = {0};
+	PBYTE			pQueue					= NULL;
     DWORD           dwBytesRead             = 0;
     INT             i                       = 0;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-	ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
 
     if (!ReadFile(pwd->hPort, pReadBuf, READ_BUFSIZE, &dwBytesRead, &ol)) {
         // read is incomplete or had an error
         ProcessCommError(pwd->hPort);
         GetOverlappedResult(pwd->hThread, &ol, &dwBytesRead, TRUE);
     }
-	WaitForSingleObject(ol.hEvent, INFINITE);
 
 	
     if (dwQueueSize == 0) {
@@ -236,8 +159,11 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
             // a full frame is not yet at the port
             for (i = 0; i < dwBytesRead; i++) {
                 AddToByteQueue(&pwd->pReadBufHead, &pwd->pReadBufTail, pReadBuf[i]);
-                dwQueueSize+=1;
+				dwQueueSize++;
             }
+			if (dwQueueSize != dwBytesRead) {
+				DISPLAY_ERROR("Port read is out of sync");
+			}
         }
     
     } else {
@@ -245,23 +171,22 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
         
         for (i = 0; i < dwBytesRead; i++) {
             AddToByteQueue(&pwd->pReadBufHead, &pwd->pReadBufTail, pReadBuf[i]);
-            dwQueueSize+=1;
+			dwQueueSize++;
         }
         if (dwQueueSize >= CTRL_FRAME_SIZE) {
 
-            RemoveFromByteQueue(&pwd->pReadBufHead, dwQueueSize);
+            pQueue = RemoveFromByteQueue(&pwd->pReadBufHead, dwQueueSize);
 
-            if (ProcessRead(hWnd, psi, pReadBuf, dwBytesRead)) {
-                // read completed successfully
-                dwQueueSize         = 0;
-                DeleteByteQueue(pwd->pReadBufHead);
-                pwd->pReadBufHead   = NULL;
-                pwd->pReadBufHead   = NULL;
-                return;
-            }
-        }        
+            ProcessRead(hWnd, psi, pQueue, dwQueueSize);
+            // read completed successfully
+            dwQueueSize         = 0;
+            DeleteByteQueue(pwd->pReadBufHead);
+            pwd->pReadBufHead   = NULL;
+            pwd->pReadBufTail   = NULL;
+			for (i = 0; i < dwQueueSize; i++) {
+				free(pQueue);
+			}
     }
-    ResetEvent(ol.hEvent);
 }
 
 /*------------------------------------------------------------------------------
