@@ -39,7 +39,7 @@ UINT ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 		psi->iFailedENQCount		= 0;
 		SendFrame(hWnd, psi);
 
-    } else {	// garbage character was received
+    } else {	// unexpected character was received
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
 		psi->iState     = STATE_IDLE;
         psi->dwTimeout	= TOR0;
@@ -54,15 +54,13 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {
-				// MUTEX //////
 		RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);     
 		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);    
         PostMessage(hWnd, WM_STAT, ACK, REC);
         PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, SENT);
         SendFrame(hWnd, psi);
 
-    } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {  
-		// MUTEX //////
+    } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {
 		RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);
 		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
 		pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
@@ -110,7 +108,7 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         psi->dwTimeout	= TOR0;
         return CTRL_FRAME_SIZE;
     }
-    if (pReadBuf[0] != SOH) {
+    if (pReadBuf[0] != SOH) {		// an unexpected frame arrived
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
 		psi->iState		= STATE_IDLE;
         return INVALID_FRAME;
@@ -123,7 +121,6 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
 	if (crcFast(pReadBuf, dwLength) == 0  &&  pReadBuf[1] == psi->rxSeq) {
 
-		//CreateMutex
 		AddToFrameQueue(&pwd->PTFBuffHead, &pwd->PTFBuffTail, *((PFRAME) pReadBuf));
 		PostMessage(hWnd, WM_EMPTYPTFBUF, 0, 0);
 		PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, REC);
