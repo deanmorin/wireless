@@ -172,7 +172,6 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
         ProcessWrite(hWnd, (BYTE*) &pwd->FTPBuffHead->f, FRAME_SIZE);
         PostMessage(hWnd, WM_STAT, STAT_FRAME, SENT);
 		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
-        //SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
     }
 }
 
@@ -280,17 +279,11 @@ VOID OpenFileTransmit(HWND hWnd){
 
 
 	GetOpenFileName(&ofn);
-	//pwd->lpszTransmitName = ofn.lpstrFile;
 	pwd->hFileTransmit =CreateFile(ofn.lpstrFile, GENERIC_READ | GENERIC_WRITE,
 							FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-							OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+							CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	pwd->NumOfReads = 0;
-	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
-	//SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
 	PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
-	
-	//MessageBox(hWnd, pwd->lpszTransmitName, "File", MB_OK);
-	
 }
 
 VOID CloseFileTransmit(HWND hWnd){
@@ -301,11 +294,9 @@ VOID CloseFileTransmit(HWND hWnd){
 		if(!CloseHandle(pwd->hFileTransmit)){
 			DISPLAY_ERROR("Failed to close Transmit File");
 		}
-		//pwd->lpszTransmitName = "";
 		pwd->hFileTransmit = NULL;
 		pwd->NumOfReads = 0;
 		SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
-		
 	}
 }
 
@@ -330,7 +321,7 @@ BOOL OpenFileReceive(HWND hWnd){
 	
 	pwd->hFileReceive = CreateFile(ofn.lpstrFile, GENERIC_READ | GENERIC_WRITE,
 									FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-									OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+									CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 	return TRUE;
@@ -344,8 +335,7 @@ VOID CloseFileReceive(HWND hWnd){
 			DISPLAY_ERROR("Failed to close Receive File");
 		}
 		pwd->hFileReceive = NULL;
-		SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
-		
+			
 	}
 }
 
@@ -356,22 +346,18 @@ VOID WriteToFile(HWND hWnd){
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 	
 	while(pwd->PTFQueueSize != 0){
-				tempFrame = RemoveFromFrameQueue(&pwd->PTFBuffHead, 1);
-				if(tempFrame->length != 0){
-					DisplayFrameInfo(hWnd, *tempFrame);
-					pwd->NumOfFrames++;
-					SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
-				}
-				if(!WriteFile(pwd->hFileReceive, tempFrame->payload, tempFrame->length, &dwBytesWritten, NULL)){
-					DISPLAY_ERROR("Failed to write to file");
-				} else {
-					
-					pwd->PTFQueueSize--;
-					
-					
-				}
+		tempFrame = RemoveFromFrameQueue(&pwd->PTFBuffHead, 1);
+		if(tempFrame->length != 0){
+			DisplayFrameInfo(hWnd, *tempFrame);
+			pwd->NumOfFrames++;
+			SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
+		}
+		if(!WriteFile(pwd->hFileReceive, tempFrame->payload, tempFrame->length, &dwBytesWritten, NULL)){
+			DISPLAY_ERROR("Failed to write to file");
+		} else {
+			pwd->PTFQueueSize--;
+		}
 	}
-	//PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
 }
 
 VOID ReadFromFile(HWND hWnd){
@@ -385,7 +371,6 @@ VOID ReadFromFile(HWND hWnd){
 
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 	
-
 	dwSizeOfFile = GetFileSize(pwd->hFileTransmit, NULL);
 	while(pwd->FTPQueueSize < FULL_BUFFER && pwd->hFileTransmit != NULL){
 		if(pwd->NumOfReads == 0 && dwSizeOfFile >= 1019){
@@ -413,26 +398,13 @@ VOID ReadFromFile(HWND hWnd){
 			SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 			MessageBox(hWnd, TEXT("File Read Complete"), 0, MB_OK);
 		}
-
-		/*if(!WriteFile(pwd->hFileReceive, ReadBuffer, dwBytesRead, &dwBytesWritten, NULL)){
-			DISPLAY_ERROR("Failed to write to file");
-		}*/		
-		
-		//AddToFrameQueue(pwd->FTPBuffHead, pwd->FTPBuffTail, CreateFrame(hWnd, ReadBuffer, dwBytesRead));
-		//				 (FTPhead, FTPtail, CreateFrame(hWnd, *ReadBuffer, dwBytesRead)
-
-
 				
 		frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
-		//WriteToFile(hWnd, &frame);
+
 		//TODO: Enter FTP crit section
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 		pwd->FTPQueueSize+=1;
 		//TODO: exit FTP crit section
-
-
 	}
-	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
-	
 }
 
