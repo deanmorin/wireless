@@ -281,7 +281,7 @@ VOID OpenFileTransmit(HWND hWnd){
 	GetOpenFileName(&ofn);
 	pwd->hFileTransmit =CreateFile(ofn.lpstrFile, GENERIC_READ | GENERIC_WRITE,
 							FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-							CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+							OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	pwd->NumOfReads = 0;
 	PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
 }
