@@ -119,7 +119,6 @@ typedef struct wndData {
 	PFRAME_NODE		PTFBuffTail;
 	INT				NumOfReads;
 	BYTE			TxSequenceNumber;
-
     PBYTE_NODE      pReadBufHead;
     PBYTE_NODE      pReadBufTail;
     BOOL            bDebug;

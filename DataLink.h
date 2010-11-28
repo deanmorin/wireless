@@ -62,12 +62,5 @@ UINT    ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 UINT    ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 UINT    ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
 VOID    SendFrame(HWND hWnd, PSTATEINFO psi);
-FRAME   CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength);
-BOOL 	OpenFileReceive(HWND hWnd);
-VOID 	OpenFileTransmit(HWND hWnd);
-VOID	CloseFileReceive(HWND hWnd);
-VOID	CloseFileTransmit(HWND hWnd);
-VOID	WriteToFile(HWND hWnd);
-VOID	ReadFromFile(HWND hWnd);
 
 #endif

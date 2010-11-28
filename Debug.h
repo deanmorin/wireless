@@ -1,6 +1,6 @@
 #ifndef DEBUG_H
 #define DEBUG_H
-#include "DataLink.h"
+#include "FileIO.h"
 #include "osi.h"
 #include "WndExtra.h"
 
