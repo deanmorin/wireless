@@ -190,7 +190,7 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
 		pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
 		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
-		PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, SENT);
+		//PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, SENT);
 		PostMessage(hWnd, WM_STAT, RVI, REC);
         PostMessage(hWnd, WM_STAT, ACK, SENT);
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_R2);
