@@ -197,6 +197,18 @@ VOID UpdateDisplayBuf(HWND hWnd, CHAR cCharacter) {
     }
 }
 
+VOID DisplayFrameInfo(HWND hWnd, FRAME frame){
+	PWNDDATA	pwd		= NULL;
+	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+
+	MoveCursor( hWnd, 1, pwd->NumOfFrames + 1, FALSE);
+	UpdateDisplayBuf(hWnd, pwd->NumOfFrames);
+	MoveCursor( hWnd, 17, pwd->NumOfFrames + 1, FALSE);
+	//UpdateDisplayBuf(hWnd, frame.length
+}
+
+
+
 /*------------------------------------------------------------------------------
 -- FUNCTION:    HorizontalTab
 --

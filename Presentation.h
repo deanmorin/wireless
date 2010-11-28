@@ -23,5 +23,6 @@ VOID    ScrollUp(HWND hWnd);
 VOID    SetScrollRegion(HWND hWnd, INT cyTop, INT cyBottom); 
 VOID    UpdateDisplayBuf(HWND hWnd, CHAR cCharacter);
 VOID	ProcessPacket(HWND hWnd, CHAR* pcPacket, DWORD dwLength);
+VOID	DisplayFrameInfo(HWND hWnd, FRAME frame);
 
 #endif

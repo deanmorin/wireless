@@ -90,7 +90,7 @@ VOID InitTerminal(HWND hWnd) {
 	pwd->FTPBuffTail        = NULL;
     pwd->FTPQueueSize       = 0;
     pwd->PTFQueueSize       = 0;
-	pwd->bMoreData          = TRUE;
+	pwd->NumOfFrames        = 0;
 	pwd->NumOfReads         = 0;
     pwd->pReadBufHead       = NULL;
     pwd->pReadBufTail       = NULL;
@@ -214,13 +214,13 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
             return;
 
 		case ID_OPEN_RECEIVEFILE:
-			//OpenFileReceive(hWnd);
-			//SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
-			PostMessage(hWnd, WM_FILLPTFBUF, 0, 0);
+			OpenFileReceive(hWnd);
+			//PostMessage(hWnd, WM_FILLPTFBUF, 0, 0);
 			return;
 		case ID_OPEN_TRANSMITFILE:
 			OpenFileTransmit(hWnd);
 			return;
+		
         default:
             return;
     }
@@ -312,18 +312,23 @@ VOID Paint(HWND hWnd) {
 --
 ------------------------------------------------------------------------------*/
 VOID MakeColumns(HWND hWnd){
-    CHAR temp1[10]= "Token";
-    CHAR temp2[10]= "Value";
+    CHAR temp1[10]= "Frame";
+    CHAR temp2[15]= "Frame Length";
+	CHAR temp3[5]= "CRC";
 	DWORD i;
 
     MoveCursor( hWnd, 1, 1, FALSE);
     for(i=0;i<10;i++){
         UpdateDisplayBuf(hWnd,temp1[i]);
     }
-    MoveCursor( hWnd, 12, 1, FALSE);
-    for(i=0;i<10;i++){
+    MoveCursor( hWnd, 17, 1, FALSE);
+    for(i=0;i<15;i++){
         UpdateDisplayBuf(hWnd,temp2[i]);
-    }    
+    }
+	MoveCursor(hWnd, 24, 1, FALSE);
+	for(i = 0; i<5; i++){
+		UpdateDisplayBuf(hWnd,temp3[i]);
+	}
 }
 
 /*------------------------------------------------------------------------------
