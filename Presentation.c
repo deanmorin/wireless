@@ -210,7 +210,9 @@ VOID DisplayFrameInfo(HWND hWnd, FRAME frame){
 	sprintf(c, "%02x", frame.crc);
 	
 	MoveCursor( hWnd, 1, pwd->NumOfFrames + 2, FALSE);
-	UpdateDisplayBuf(hWnd, *a);
+	for(i = 0; i < 3; i++){
+		UpdateDisplayBuf(hWnd, *a);
+	}
 	MoveCursor( hWnd, 12, pwd->NumOfFrames + 2, FALSE);
 	for(i = 0; i < 4; i++)
 		UpdateDisplayBuf(hWnd, b[i]);

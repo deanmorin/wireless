@@ -222,7 +222,7 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
 
 		case ID_OPEN_RECEIVEFILE:
 			OpenFileReceive(hWnd);
-			//PostMessage(hWnd, WM_FILLPTFBUF, 0, 0);
+			//PostMessage(hWnd, WM_EMPTYPTFBUF, 0, 0);
 			return;
 		case ID_OPEN_TRANSMITFILE:
 			OpenFileTransmit(hWnd);
@@ -668,6 +668,7 @@ VOID UpdateStatStruct(HWND hWnd, WPARAM stat, LPARAM attribute) {
             if (attribute == SENT) {
                 DOWN_FRAMES_ACKD++;
             } else {
+				pwd->PTFQueueSize+=1;
                 UP_FRAMES_ACKD++;
             }
             break;
