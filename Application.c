@@ -321,11 +321,11 @@ VOID MakeColumns(HWND hWnd){
     for(i=0;i<10;i++){
         UpdateDisplayBuf(hWnd,temp1[i]);
     }
-    MoveCursor( hWnd, 17, 1, FALSE);
+    MoveCursor( hWnd, 12, 1, FALSE);
     for(i=0;i<15;i++){
         UpdateDisplayBuf(hWnd,temp2[i]);
     }
-	MoveCursor(hWnd, 24, 1, FALSE);
+	MoveCursor(hWnd, 29, 1, FALSE);
 	for(i = 0; i<5; i++){
 		UpdateDisplayBuf(hWnd,temp3[i]);
 	}
