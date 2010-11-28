@@ -64,7 +64,7 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         PostMessage(hWnd, WM_STAT, ACK, REC);
         PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, SENT);
         RemoveFromFrameQueue(&pwd->FTPBuffHead, 1); // remove ack'd frame from        
-        pwd->FTPQueueSize--;                        //      the queue
+		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);     //      the queue
         SendFrame(hWnd, psi);                       
     } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {  // receiver wants to send
                                                     //      a frame
@@ -135,11 +135,10 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
 
     if (crcFast(pReadBuf, dwLength) == 0) {     // CHECK SEQUENCE #
-        PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, REC);
-
-
+        
+		PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, REC);
 		AddToFrameQueue(&pwd->PTFBuffHead, &pwd->PTFBuffTail, *((PFRAME) pReadBuf));
-		PostMessage(hWnd, WM_FILLPTFBUF, 0, 0);
+		PostMessage(hWnd, WM_EMPTYPTFBUF, 0, 0);
 
         if (pwd->FTPQueueSize) {
             pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
@@ -430,7 +429,6 @@ VOID ReadFromFile(HWND hWnd){
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 		pwd->FTPQueueSize+=1;
 		//TODO: exit FTP crit section
-		PostMessage(hWnd, WM_FILLPTFBUF, 0, 0);
 
 
 	}

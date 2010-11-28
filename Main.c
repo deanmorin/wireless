@@ -165,7 +165,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			ReadFromFile(hWnd);
 			return 0;
 		
-		case WM_FILLPTFBUF:
+		case WM_EMPTYPTFBUF:
 			WriteToFile(hWnd);
 			return 0;
         
