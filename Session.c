@@ -53,13 +53,21 @@
 ------------------------------------------------------------------------------*/
 BOOL Connect(HWND hWnd) {
     
-    PWNDDATA        pwd         = {0};
-    COMMTIMEOUTS    timeOut     = {0};
+    PWNDDATA        pwd			= {0};
+    COMMTIMEOUTS    timeOut		= {0};
     DWORD           dwThreadid  = 0;
-	DWORD			dwFileThreadID = 0;
     DWORD           i           = 0;
-	
+	COMMCONFIG		cc			= {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+
+
+	cc.dwSize	= sizeof(COMMCONFIG);
+	cc.wVersion = 1;
+	GetCommConfig(pwd->hPort, &cc, &cc.dwSize);
+
+    if (!CommConfigDialog(pwd->lpszCommName, hWnd, &cc)) {
+        DISPLAY_ERROR("The comm settings dialogue failed.\nThis port may not exist");
+    }
 
     // open serial port
     pwd->hPort = CreateFile(pwd->lpszCommName,
@@ -105,17 +113,10 @@ BOOL Connect(HWND hWnd) {
                                 (LPTHREAD_START_ROUTINE) PortIOThreadProc,
                                 hWnd, 0, &dwThreadid);
 
-    /*pwd->hFileThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) FileIOThreadProc,
-									hWnd, 0, &dwFileThreadID);*/
-
     if (pwd->hThread == INVALID_HANDLE_VALUE) {
         DISPLAY_ERROR("Error creating read thread");
         return FALSE;
-    }/*
-	if (pwd->hFileThread == INVALID_HANDLE_VALUE) {
-		DISPLAY_ERROR("Error creating File IO thread");
-		return FALSE;
-	}*/
+    }
 	
     CUR_FG_COLOR = 7;
     CUR_BG_COLOR = 0;
