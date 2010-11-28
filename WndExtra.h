@@ -101,7 +101,7 @@ typedef struct wndData {
 	HANDLE			hFileReceive;
 	HANDLE			hFileTransmit;
 	LPTSTR          lpszCommName;
-    COMMCONFIG      cc;
+   // COMMCONFIG      cc;
     BOOL            bConnected;
     HANDLE          hThread;
     DWORD           dwThreadid;

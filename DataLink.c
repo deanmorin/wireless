@@ -110,12 +110,6 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
 	
-
-    if (pwd->PTFQueueSize >= FULL_BUFFER) {
-        SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("emptyPTFBuffer")));
-		DISPLAY_ERROR("NOT REALY AN ERROR");				/////////////////////////////DELETE
-    }
-
     if (pReadBuf[CTRL_CHAR_INDEX] == EOT) {
         PostMessage(hWnd, WM_STAT, EOT, REC);
         psi->iState = STATE_IDLE;
@@ -143,7 +137,9 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     if (crcFast(pReadBuf, dwLength) == 0) {     // CHECK SEQUENCE #
         PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, REC);
 
-		// add to PTF queue
+
+		AddToFrameQueue(&pwd->PTFBuffHead, &pwd->PTFBuffTail, *((PFRAME) pReadBuf));
+		PostMessage(hWnd, WM_FILLPTFBUF, 0, 0);
 
         if (pwd->FTPQueueSize) {
             pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
