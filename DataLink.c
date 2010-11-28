@@ -4,6 +4,8 @@ VOID ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength) {
     PWNDDATA    pwd			= NULL;
     OVERLAPPED  ol			= {0};
 	DWORD		dwWritten	= 0;
+	int i = 0; // TEMP?///////////////////////
+	BYTE	temp[1024] = {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
 
@@ -14,6 +16,11 @@ VOID ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength) {
 	if (dwWritten != dwLength) {
 		DISPLAY_ERROR("Full frame was not written");
 	}
+	for (i = 0; i < dwLength; i++) {	// TEMP
+		temp[i] = pFrame[i];
+	}
+	if (dwWritten > 1)
+		dwWritten = dwWritten;
 }
 
 
@@ -69,6 +76,7 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_R2);
         psi->dwTimeout  = TOR3;
         psi->itoCount   = 0;
+
     } else {
 		psi->iState = STATE_IDLE;
 		PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
@@ -115,6 +123,11 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         psi->dwTimeout = TOR0_BASE + rand() % TOR0_RANGE;
         return CTRL_FRAME_SIZE;
     }
+
+	for (i = 0; i < dwLength; i++) {	// TEMP
+		temp[i] = pReadBuf[i];
+	}
+
     if (pReadBuf[0] != SOH) {
 		psi->iState = STATE_IDLE;
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
@@ -126,9 +139,6 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     }
     DOWN_FRAMES+=1;
 
-	for (i = 0; i < FRAME_SIZE; i++) {	// TEMP
-		temp[i] = pReadBuf[i];
-	}
 
     if (crcFast(pReadBuf, dwLength) == 0) {     // CHECK SEQUENCE #
         PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, REC);
