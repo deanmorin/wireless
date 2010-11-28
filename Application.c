@@ -193,15 +193,17 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
             PostMessage(hWnd, WM_DESTROY, 0, 0);
             return;
 
-        case IDM_COM1:  SelectPort(hWnd, IDM_COM1);  return;
-        case IDM_COM2:  SelectPort(hWnd, IDM_COM2);  return;
-        case IDM_COM3:  SelectPort(hWnd, IDM_COM3);  return;
-        case IDM_COM4:  SelectPort(hWnd, IDM_COM4);  return;
-        case IDM_COM5:  SelectPort(hWnd, IDM_COM5);  return;
-        case IDM_COM6:  SelectPort(hWnd, IDM_COM6);  return;
-        case IDM_COM7:  SelectPort(hWnd, IDM_COM7);  return;
-        case IDM_COM8:  SelectPort(hWnd, IDM_COM8);  return;
-        case IDM_COM9:  SelectPort(hWnd, IDM_COM9);  return;
+        case IDM_COM1:  
+        case IDM_COM2:
+        case IDM_COM3:
+        case IDM_COM4:
+        case IDM_COM5:
+        case IDM_COM6:
+        case IDM_COM7:
+        case IDM_COM8:
+        case IDM_COM9:
+			SelectPort(hWnd, LOWORD(wParam));
+			return;
 
         case IDM_COMMSET:
 			cc.dwSize	= sizeof(COMMCONFIG);

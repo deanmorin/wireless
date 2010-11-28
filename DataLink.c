@@ -42,7 +42,7 @@ UINT ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     } else {	// garbage character was received
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
 		psi->iState     = STATE_IDLE;
-        psi->dwTimeout	= TOR0_BASE + rand() % TOR0_RANGE;
+        psi->dwTimeout	= TOR0;
     }
     return CTRL_FRAME_SIZE;
 }
@@ -53,28 +53,30 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
-    if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {         // last frame acknowledged
+    if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {
+				// MUTEX //////
+		RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);     
+		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);    
         PostMessage(hWnd, WM_STAT, ACK, REC);
         PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, SENT);
-        RemoveFromFrameQueue(&pwd->FTPBuffHead, 1); // remove ack'd frame from        
-		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);     //      the queue
         SendFrame(hWnd, psi);
 
-    } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {  // receiver wants to send
-                                                    //      a frame
-        PostMessage(hWnd, WM_STAT, RVI, REC);
-        pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
+    } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {  
+		// MUTEX //////
+		RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);
+		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
+		pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
+		PostMessage(hWnd, WM_STAT, RVI, REC);
         PostMessage(hWnd, WM_STAT, ACK, SENT);
-        psi->iState     = STATE_R2;
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_R2);
+		psi->iState     = STATE_R2;
         psi->dwTimeout  = TOR3;
         psi->itoCount   = 0;
-		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
 
     } else {
-		psi->iState = STATE_IDLE;
 		PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
+		psi->iState = STATE_IDLE;
 	}
     return CTRL_FRAME_SIZE;
 }
@@ -89,8 +91,8 @@ UINT ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
         PostMessage(hWnd, WM_STAT, ACK, SENT);
+		PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_R2);
         psi->iState     = STATE_R2;
-        PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_R2);
         psi->dwTimeout  = TOR3;
     }
     return CTRL_FRAME_SIZE;
@@ -105,7 +107,7 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         PostMessage(hWnd, WM_STAT, EOT, REC);
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
 		psi->iState		= STATE_IDLE;
-        psi->dwTimeout	= TOR0_BASE + rand() % TOR0_RANGE;
+        psi->dwTimeout	= TOR0;
         return CTRL_FRAME_SIZE;
     }
     if (pReadBuf[0] != SOH) {
@@ -119,9 +121,9 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 	PostMessage(hWnd, WM_STAT, STAT_FRAME, REC);
 
 
-    if (crcFast(pReadBuf, dwLength) == 0) {     // CHECK SEQUENCE # /////////////////
-        
-		// ADD MUTEX /////////////////////////
+	if (crcFast(pReadBuf, dwLength) == 0  &&  pReadBuf[1] == psi->rxSeq) {
+
+		//CreateMutex
 		AddToFrameQueue(&pwd->PTFBuffHead, &pwd->PTFBuffTail, *((PFRAME) pReadBuf));
 		PostMessage(hWnd, WM_EMPTYPTFBUF, 0, 0);
 		PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, REC);
@@ -137,6 +139,7 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
             ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
             PostMessage(hWnd, WM_STAT, ACK, SENT);
         }
+		psi->rxSeq = (psi->rxSeq + 1) % 2;
     }
     return FRAME_SIZE;
 }
@@ -151,10 +154,12 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
         pCtrlFrame[CTRL_CHAR_INDEX] = EOT;
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
         PostMessage(hWnd, WM_STAT, EOT, SENT);
-        psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
-        psi->iState     = STATE_IDLE;
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
+		psi->iState     = STATE_IDLE;
+		psi->dwTimeout  = TOR0;
+
     } else {
+		// MUTEX
         ProcessWrite(hWnd, (BYTE*) &pwd->FTPBuffHead->f, FRAME_SIZE);
         PostMessage(hWnd, WM_STAT, STAT_FRAME, SENT);
     }
@@ -171,18 +176,17 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
         case STATE_IDLE:
             pCtrlFrame[CTRL_CHAR_INDEX] = ENQ;
             ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
-            psi->dwTimeout  = (pwd->bDebug) ? DTOR : TOR1;	// CHANGE BACK ////////////////
+            psi->dwTimeout  = TOR1;
             psi->iState     = STATE_T1;
             PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_T1);
             return;
 
         case STATE_T1:
-            /*if (++(psi->iFailedENQCount) >= MAX_FAILED_ENQS) {
-                DISPLAY_ERROR("Connection cannot be established"); 
-            }*/                   // NEED TO SET APPROPRIATE EVENT
-            psi->dwTimeout  = (pwd->bDebug) 
-                    ? DTOR      + rand() % TOR0_RANGE
-                    : TOR0_BASE + rand() % TOR0_RANGE;
+            if (++(psi->iFailedENQCount) >= MAX_FAILED_ENQS) {
+				PostMessage(hWnd, WM_COMMAND, MAKEWPARAM(IDM_DISCONNECT, 0), 0);
+                DISPLAY_ERROR("Connection cannot be established.\nDisconnecting..."); 
+            }
+            psi->dwTimeout  = TOR0;
             psi->iState     = STATE_IDLE;
             PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
             return;
@@ -191,9 +195,7 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
             psi->dwTimeout *= TOR2_INCREASE_FACTOR;
 
             if (++(psi->itoCount) >= MAX_TIMEOUTS) {
-                psi->dwTimeout  = (pwd->bDebug) 
-                        ? DTOR      + rand() % TOR0_RANGE
-                        : TOR0_BASE + rand() % TOR0_RANGE;
+                psi->dwTimeout  = TOR0;
                 psi->iState     = STATE_IDLE;
             } else { 
                 SendFrame(hWnd, psi);
@@ -205,9 +207,7 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
             psi->dwTimeout *= TOR3_INCREASE_FACTOR;
 
             if (++(psi->itoCount) >= MAX_TIMEOUTS) {
-                psi->dwTimeout  = (pwd->bDebug) 
-                        ? DTOR      + rand() % TOR0_RANGE
-                        : TOR0_BASE + rand() % TOR0_RANGE;
+                psi->dwTimeout  = TOR0;
                 psi->iState     = STATE_IDLE;
                 PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
             } 
