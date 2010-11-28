@@ -207,7 +207,7 @@ VOID DisplayFrameInfo(HWND hWnd, FRAME frame){
 	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 	sprintf(a, "%d", pwd->NumOfFrames);
 	sprintf(b, "%04x", frame.length);
-	sprintf(c, "%02d", frame.crc);
+	sprintf(c, "%02x", frame.crc);
 	
 	MoveCursor( hWnd, 1, pwd->NumOfFrames + 2, FALSE);
 	UpdateDisplayBuf(hWnd, *a);

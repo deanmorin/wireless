@@ -172,7 +172,8 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
     } else {
         ProcessWrite(hWnd, (BYTE*) &pwd->FTPBuffHead->f, FRAME_SIZE);
         PostMessage(hWnd, WM_STAT, STAT_FRAME, SENT);
-        SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
+		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
+        //SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("fillFTPBuffer")));
     }
 }
 
@@ -355,8 +356,8 @@ VOID WriteToFile(HWND hWnd){
 	PFRAME		tempFrame = {0};
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 	
-	while(pwd->FTPQueueSize != 0){
-				tempFrame = RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);
+	while(pwd->PTFQueueSize != 0){
+				tempFrame = RemoveFromFrameQueue(&pwd->PTFBuffHead, 1);
 				if(tempFrame->length != 0){
 					DisplayFrameInfo(hWnd, *tempFrame);
 					pwd->NumOfFrames++;
@@ -366,12 +367,12 @@ VOID WriteToFile(HWND hWnd){
 					DISPLAY_ERROR("Failed to write to file");
 				} else {
 					
-					pwd->FTPQueueSize--;
+					pwd->PTFQueueSize--;
 					
 					
 				}
 	}
-	PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
+	//PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
 }
 
 VOID ReadFromFile(HWND hWnd){

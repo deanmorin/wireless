@@ -7,7 +7,7 @@
 #include "Debug.h"
 #include "WndExtra.h"
 
-#define FULL_BUFFER     32
+//#define FULL_BUFFER     32		///////////////////////////
 #define MAX_FAILED_ENQS 10
 #define READ_STATES     4
 #define PORT_IO_EVENTS  2
