@@ -49,7 +49,7 @@ UINT ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     } else {
         psi->iState     = STATE_IDLE;
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
-        psi->dwTimeout = TOR0_BASE + rand() % TOR0_RANGE;
+        psi->dwTimeout	= TOR0_BASE + rand() % TOR0_RANGE;
     }
     return CTRL_FRAME_SIZE;
 }
@@ -65,7 +65,8 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, SENT);
         RemoveFromFrameQueue(&pwd->FTPBuffHead, 1); // remove ack'd frame from        
 		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);     //      the queue
-        SendFrame(hWnd, psi);                       
+        SendFrame(hWnd, psi);
+
     } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {  // receiver wants to send
                                                     //      a frame
         PostMessage(hWnd, WM_STAT, RVI, REC);
@@ -76,6 +77,7 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_R2);
         psi->dwTimeout  = TOR3;
         psi->itoCount   = 0;
+		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
 
     } else {
 		psi->iState = STATE_IDLE;
@@ -171,7 +173,6 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
     } else {
         ProcessWrite(hWnd, (BYTE*) &pwd->FTPBuffHead->f, FRAME_SIZE);
         PostMessage(hWnd, WM_STAT, STAT_FRAME, SENT);
-		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
     }
 }
 

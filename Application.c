@@ -658,19 +658,19 @@ VOID UpdateStatStruct(HWND hWnd, WPARAM stat, LPARAM attribute) {
         
         case STAT_FRAME:
             if (attribute == SENT) {
-                DOWN_FRAMES++;
-            } else {
                 UP_FRAMES++;
+            } else {
+                DOWN_FRAMES++;
             }
             break;
 
         case STAT_FRAMEACKD:
             if (attribute == SENT) {
 				pwd->FTPQueueSize++;
-                DOWN_FRAMES_ACKD++;
+                UP_FRAMES_ACKD++;
             } else {
 				pwd->PTFQueueSize++;
-                UP_FRAMES_ACKD++;
+                DOWN_FRAMES_ACKD++;
             }
             break;
        

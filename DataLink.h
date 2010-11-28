@@ -19,11 +19,11 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 
 
 // timeout values
-#define TOR0_BASE               1010
-#define TOR0_RANGE              500
-#define TOR1					1000
-#define TOR2                    1000
-#define TOR3                    1000
+#define TOR0_BASE               3010
+#define TOR0_RANGE              1500
+#define TOR1					3000
+#define TOR2                    3000
+#define TOR3                    3000
 #define DTOR                    3000    // timeout for debug mode
 #define MAX_TIMEOUTS            3
 #define TOR2_INCREASE_FACTOR    2
