@@ -3,40 +3,26 @@
 VOID ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength) {
     PWNDDATA    pwd			= NULL;
     OVERLAPPED  ol			= {0};
-	DWORD		dwEvent		= 0;
-	DWORD		dwError		= 0;
 	DWORD		dwWritten	= 0;
-	COMSTAT		cs			= {0};
-	BYTE		test[1024]	= {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
 
-	ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	SetCommMask(pwd->hPort, EV_TXEMPTY);
-	if (!WaitCommEvent(pwd->hPort, &dwEvent, &ol)) {
-        ProcessCommError(pwd->hPort);
-    }
-    WriteFile(pwd->hPort, pFrame, dwLength, NULL, &ol);
-	dwEvent = WaitForSingleObject(ol.hEvent, INFINITE);
-	ClearCommError(pwd->hPort, &dwError, &cs);
+    if (!WriteFile(pwd->hPort, pFrame, dwLength, NULL, &ol)) {
+		ProcessCommError(pwd->hPort);
+		GetOverlappedResult(pwd->hPort, &ol, &dwWritten, TRUE);
+	}
+	if (dwWritten != dwLength) {
+		DISPLAY_ERROR("Full frame was not written");
+	}
 }
 
 
 UINT ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {  
     static UINT( *pReadFunc[READ_STATES])(HWND, PSTATEINFO, BYTE*, DWORD) 
             = { ReadT1,  ReadT3,  ReadIDLE,  ReadR2 };
-    static UINT(*pDebugFunc[READ_STATES])(HWND, PSTATEINFO, BYTE*, DWORD)
-            = { DebugT1, DebugT3, DebugIDLE, DebugR2 };
+    PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
-    PWNDDATA pwd = NULL;
-    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-    
-    // call the read function related to the current state
-    //if (pwd->bDebug) {
-    //    return pDebugFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
-    //} else {
-        return pReadFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
-    //}
+    return pReadFunc[psi->iState](hWnd, psi, pReadBuf, dwLength);
 }
 
 
@@ -190,7 +176,7 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
         case STATE_IDLE:
             pCtrlFrame[CTRL_CHAR_INDEX] = ENQ;
             ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
-            psi->dwTimeout  = (pwd->bDebug) ? DTOR : TOR1;
+            psi->dwTimeout  = (pwd->bDebug) ? DTOR : TOR1;	// CHANGE BACK ////////////////
             psi->iState     = STATE_T1;
             PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_T1);
             return;
