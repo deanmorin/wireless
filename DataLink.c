@@ -176,9 +176,10 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
 		RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);
 		ReleaseMutex(hMutex);
 
-		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);    
+		  
         PostMessage(hWnd, WM_STAT, ACK, REC);
         PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, SENT);
+		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);  
         SendFrame(hWnd, psi);
 
     } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {
@@ -189,8 +190,9 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
 
 		pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
+		PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, SENT);
 		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
-		//PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, SENT);
+		
 		PostMessage(hWnd, WM_STAT, RVI, REC);
         PostMessage(hWnd, WM_STAT, ACK, SENT);
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_R2);
@@ -298,9 +300,9 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
 		hMutex = CreateMutex(NULL, FALSE, TEXT("PTFMutex"));
 		AddToFrameQueue(&pwd->PTFBuffHead, &pwd->PTFBuffTail, *((PFRAME) pReadBuf));
 		ReleaseMutex(hMutex);
-
-		PostMessage(hWnd, WM_EMPTYPTFBUF, 0, 0);
 		PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, REC);
+		PostMessage(hWnd, WM_EMPTYPTFBUF, 0, 0);
+		
 
         if (pwd->FTPQueueSize) {
             pCtrlFrame[CTRL_CHAR_INDEX] = RVI;

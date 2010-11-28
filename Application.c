@@ -653,10 +653,10 @@ VOID UpdateStatStruct(HWND hWnd, WPARAM stat, LPARAM attribute) {
         case RVI:
             if (attribute == SENT) {
                 SENT_RVI++;
-				pwd->FTPQueueSize--;
+				//pwd->FTPQueueSize--;
             } else {
                 REC_RVI++;
-				pwd->PTFQueueSize++;
+				//pwd->PTFQueueSize++;
             }
             break;
         
