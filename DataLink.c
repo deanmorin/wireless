@@ -4,10 +4,7 @@ VOID ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength) {
     PWNDDATA    pwd			= NULL;
     OVERLAPPED  ol			= {0};
 	DWORD		dwWritten	= 0;
-	int i = 0; // TEMP?///////////////////////
-	BYTE	temp[1024] = {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-
 
     if (!WriteFile(pwd->hPort, pFrame, dwLength, NULL, &ol)) {
 		ProcessCommError(pwd->hPort);
@@ -16,11 +13,6 @@ VOID ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength) {
 	if (dwWritten != dwLength) {
 		DISPLAY_ERROR("Full frame was not written");
 	}
-	for (i = 0; i < dwLength; i++) {	// TEMP
-		temp[i] = pFrame[i];
-	}
-	if (dwWritten > 1)
-		dwWritten = dwWritten;
 }
 
 
@@ -40,15 +32,16 @@ UINT ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {
         PostMessage(hWnd, WM_STAT, ACK, REC);
-        psi->iFailedENQCount = 0;
-        psi->iState     = STATE_T3;
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_T3);
-		psi->dwTimeout  = TOR2;
-        psi->itoCount = 0;
-        SendFrame(hWnd, psi);
-    } else {
-        psi->iState     = STATE_IDLE;
+        psi->iState				= STATE_T3;
+		psi->dwTimeout			= TOR2;
+        psi->itoCount			= 0;
+		psi->iFailedENQCount		= 0;
+		SendFrame(hWnd, psi);
+
+    } else {	// garbage character was received
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
+		psi->iState     = STATE_IDLE;
         psi->dwTimeout	= TOR0_BASE + rand() % TOR0_RANGE;
     }
     return CTRL_FRAME_SIZE;
@@ -105,52 +98,43 @@ UINT ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
 
 UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
-    PWNDDATA    pwd = NULL;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0};
-	int i = 0; // TEMP?///////////////////////
-	BYTE	temp[1024] = {0};
-    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-
+    PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 	
     if (pReadBuf[CTRL_CHAR_INDEX] == EOT) {
         PostMessage(hWnd, WM_STAT, EOT, REC);
-        psi->iState = STATE_IDLE;
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
-        psi->dwTimeout = TOR0_BASE + rand() % TOR0_RANGE;
+		psi->iState		= STATE_IDLE;
+        psi->dwTimeout	= TOR0_BASE + rand() % TOR0_RANGE;
         return CTRL_FRAME_SIZE;
     }
-
-	for (i = 0; i < dwLength; i++) {	// TEMP
-		temp[i] = pReadBuf[i];
-	}
-
     if (pReadBuf[0] != SOH) {
-		psi->iState = STATE_IDLE;
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
+		psi->iState		= STATE_IDLE;
         return INVALID_FRAME;
     }
-   
     if (dwLength < FRAME_SIZE) {
         return UNFINISHED_FRAME;	// a full frame has not arrived at the port yet
     }
-    DOWN_FRAMES+=1;
+	PostMessage(hWnd, WM_STAT, STAT_FRAME, REC);
 
 
-    if (crcFast(pReadBuf, dwLength) == 0) {     // CHECK SEQUENCE #
+    if (crcFast(pReadBuf, dwLength) == 0) {     // CHECK SEQUENCE # /////////////////
         
-		PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, REC);
+		// ADD MUTEX /////////////////////////
 		AddToFrameQueue(&pwd->PTFBuffHead, &pwd->PTFBuffTail, *((PFRAME) pReadBuf));
 		PostMessage(hWnd, WM_EMPTYPTFBUF, 0, 0);
+		PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, REC);
 
         if (pwd->FTPQueueSize) {
             pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
             ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
-            PostMessage(hWnd, WM_STAT, RVI, SENT);
+            PostMessage(hWnd, WM_STAT, RVI, SENT);		            
+            PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_T1);
+			psi->iState = STATE_T1;
         } else {
             pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
             ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
-            psi->iState = STATE_T1;
-            PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_T1);
             PostMessage(hWnd, WM_STAT, ACK, SENT);
         }
     }
