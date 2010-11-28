@@ -60,15 +60,6 @@ BOOL Connect(HWND hWnd) {
 	COMMCONFIG		cc			= {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
-
-	cc.dwSize	= sizeof(COMMCONFIG);
-	cc.wVersion = 1;
-	GetCommConfig(pwd->hPort, &cc, &cc.dwSize);
-
-    if (!CommConfigDialog(pwd->lpszCommName, hWnd, &cc)) {
-        DISPLAY_ERROR("The comm settings dialogue failed.\nThis port may not exist");
-    }
-
     // open serial port
     pwd->hPort = CreateFile(pwd->lpszCommName,
                           GENERIC_READ | GENERIC_WRITE, 0,
@@ -86,28 +77,35 @@ BOOL Connect(HWND hWnd) {
     pwd->bConnected = TRUE;
 
 
-    if (!EscapeCommFunction(pwd->hPort, SETRTS)) {
-        DISPLAY_ERROR("Error sending RTS signal");
-    }
-    if (!EscapeCommFunction(pwd->hPort, SETDTR)) {
-        DISPLAY_ERROR("Error sending DTR signal");
+	cc.dwSize	= sizeof(COMMCONFIG);
+	cc.wVersion = 1;
+	GetCommConfig(pwd->hPort, &cc, &cc.dwSize);
+
+    if (!CommConfigDialog(pwd->lpszCommName, hWnd, &cc)) {
+        DISPLAY_ERROR("The comm settings dialogue failed.\nThis port may not exist");
     }
 
+
     // set timeouts for the port
-    if (!GetCommTimeouts(pwd->hPort, &pwd->defaultTimeOuts)) {
+    if (!GetCommTimeouts(pwd->hPort, &timeOut)) {
         DISPLAY_ERROR("Error retrieving comm timeouts");
         return FALSE;   
     }
-    timeOut.ReadIntervalTimeout         = 50;
-	timeOut.ReadTotalTimeoutConstant	= 10000;
-	timeOut.ReadTotalTimeoutMultiplier	= 50;
-	timeOut.WriteTotalTimeoutMultiplier = 50;
-    timeOut.WriteTotalTimeoutConstant   = 10000;
+    timeOut.ReadIntervalTimeout         = MAXDWORD;//50;
+	timeOut.ReadTotalTimeoutConstant	= 0;//10000;
+	timeOut.ReadTotalTimeoutMultiplier	= 0;//50;
+	timeOut.WriteTotalTimeoutMultiplier = 0;//50;
+    timeOut.WriteTotalTimeoutConstant   = 0;//10000;
 
     if (!SetCommTimeouts(pwd->hPort, &timeOut)) {
         DISPLAY_ERROR("Could not set comm timeouts");
         return FALSE;
     }
+	if (!SetCommState(pwd->hPort, &cc.dcb)) {
+		DISPLAY_ERROR("Could not set comm state");
+		return FALSE;
+	}
+	
     // create thread for reading
     pwd->hThread = CreateThread(NULL, 0,
                                 (LPTHREAD_START_ROUTINE) PortIOThreadProc,
@@ -116,6 +114,13 @@ BOOL Connect(HWND hWnd) {
     if (pwd->hThread == INVALID_HANDLE_VALUE) {
         DISPLAY_ERROR("Error creating read thread");
         return FALSE;
+    }
+
+	if (!EscapeCommFunction(pwd->hPort, SETRTS)) {
+        DISPLAY_ERROR("Error sending RTS signal");
+    }
+    if (!EscapeCommFunction(pwd->hPort, SETDTR)) {
+        DISPLAY_ERROR("Error sending DTR signal");
     }
 	
     CUR_FG_COLOR = 7;
@@ -170,10 +175,6 @@ VOID Disconnect(HWND hWnd) {
     pwd->bConnected = FALSE;
     hEvent = CreateEvent(NULL, TRUE, FALSE, TEXT("disconnected"));
 	SetEvent(hEvent);
-   
-    if (!SetCommTimeouts(pwd->hPort, &pwd->defaultTimeOuts)) {
-        DISPLAY_ERROR("Could not reset comm timeouts to defaults");
-    }
 
     // let the read thread finish up
     do {
