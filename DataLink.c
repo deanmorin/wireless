@@ -229,7 +229,7 @@ FRAME CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength){
 
 	myFrame.soh = 0x1;
 	myFrame.sequence = pwd->TxSequenceNumber;
-   pwd->TxSequenceNumber= (pwd->TxSequenceNumber==0)?1:0;
+    pwd->TxSequenceNumber= (pwd->TxSequenceNumber==0)?1:0;
 	myFrame.length = (SHORT)dwLength;
 
 	for (i = 0; i<dwLength;i++) {
