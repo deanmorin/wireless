@@ -5,7 +5,8 @@
 
 /*--------------------------------Macros--------------------------------------*/
 #define MAX_PAYLOAD_SIZE	1019
-#define FRAME_SIZE      1024
+#define FRAME_SIZE			1024
+
 
 /*-------------------------------Structures-----------------------------------*/
 //pragma pack allow for a structure without padding
@@ -31,6 +32,7 @@ typedef struct FRAME_NODE {
     FRAME       f;
     FRAME_NODE* next;
 } FRAME_NODE, *PFRAME_NODE, **PPFRAME_NODE;
+
 
 /*---------------------------Function Prototypes------------------------------*/
 BOOL    AddToByteQueue(PPBYTE_NODE pHead, PPBYTE_NODE pTail, BYTE data);
