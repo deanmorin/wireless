@@ -1,10 +1,9 @@
 #include "DataLink.h"
 
 VOID ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength) {
-    PWNDDATA    pwd			= NULL;
     OVERLAPPED  ol			= {0};
 	DWORD		dwWritten	= 0;
-    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    PWNDDATA	pwd			= (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (!WriteFile(pwd->hPort, pFrame, dwLength, NULL, &ol)) {
 		ProcessCommError(pwd->hPort);
@@ -26,9 +25,8 @@ UINT ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
 
 UINT ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
-    PWNDDATA    pwd = NULL;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
-    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {
         PostMessage(hWnd, WM_STAT, ACK, REC);
@@ -49,19 +47,27 @@ UINT ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
 
 UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
-    PWNDDATA    pwd = NULL;
+	HANDLE hMutex = 0;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
-    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {
-		RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);     
+		
+		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
+		RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);
+		ReleaseMutex(hMutex);
+
 		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);    
         PostMessage(hWnd, WM_STAT, ACK, REC);
         PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, SENT);
         SendFrame(hWnd, psi);
 
     } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {
+
+		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
 		RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);
+		ReleaseMutex(hMutex);
+
 		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
 		pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
@@ -81,9 +87,8 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
 
 UINT ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
-    PWNDDATA    pwd = NULL;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
-    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ENQ) {
         pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
@@ -98,6 +103,7 @@ UINT ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
 
 UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
+	HANDLE hMutex = 0;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0};
     PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 	
@@ -118,10 +124,12 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
     }
 	PostMessage(hWnd, WM_STAT, STAT_FRAME, REC);
 
-
 	if (crcFast(pReadBuf, dwLength) == 0  &&  pReadBuf[1] == psi->rxSeq) {
 
+		hMutex = CreateMutex(NULL, FALSE, TEXT("PTFMutex"));
 		AddToFrameQueue(&pwd->PTFBuffHead, &pwd->PTFBuffTail, *((PFRAME) pReadBuf));
+		ReleaseMutex(hMutex);
+
 		PostMessage(hWnd, WM_EMPTYPTFBUF, 0, 0);
 		PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, REC);
 
@@ -143,9 +151,9 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
 
 VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
-    PWNDDATA    pwd = NULL;
+	HANDLE hMutex = 0;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
-    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pwd->FTPQueueSize == 0) {
         pCtrlFrame[CTRL_CHAR_INDEX] = EOT;
@@ -156,17 +164,18 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
 		psi->dwTimeout  = TOR0;
 
     } else {
-		// MUTEX
+		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
         ProcessWrite(hWnd, (BYTE*) &pwd->FTPBuffHead->f, FRAME_SIZE);
+		ReleaseMutex(hMutex);
+
         PostMessage(hWnd, WM_STAT, STAT_FRAME, SENT);
     }
 }
 
 
 VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
-    PWNDDATA    pwd = NULL;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
-    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     switch (psi->iState) {
         
