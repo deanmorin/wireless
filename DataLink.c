@@ -249,7 +249,7 @@ FRAME CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength){
 VOID OpenFileTransmit(HWND hWnd){
 	PWNDDATA pwd = {0};
 	OPENFILENAME ofn;
-	char szFile[100] = {0};
+	TCHAR szFile[100] = {0};
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 
 	ZeroMemory(&ofn, sizeof(ofn));
