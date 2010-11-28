@@ -32,6 +32,7 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 // frame components
 #define CTRL_FRAME_SIZE     1
 #define CTRL_CHAR_INDEX     0
+#define UNFINISHED_FRAME	0
 #define INVALID_FRAME       99
 
 
@@ -51,6 +52,7 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define WM_STAT				WM_USER+1
 #define WM_FILLFTPBUF		WM_USER+2
 #define WM_FILLPTFBUF		WM_USER+3
+
 
 VOID    ProcessTimeout(HWND hWnd, PSTATEINFO psi);
 VOID    ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength);

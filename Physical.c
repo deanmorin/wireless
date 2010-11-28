@@ -186,6 +186,7 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
 			for (i = 0; i < dwQueueSize; i++) {
 				free(pQueue);
 			}
+		}
     }
 }
 
