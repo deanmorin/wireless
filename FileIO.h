@@ -6,7 +6,7 @@
 #include "WndExtra.h"
 
 
-FRAME   CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength);
+FRAME   CreateFrame(HWND hWnd, PBYTE psBuf, DWORD dwLength);
 BOOL 	OpenFileReceive(HWND hWnd);
 VOID 	OpenFileTransmit(HWND hWnd);
 VOID	CloseFileReceive(HWND hWnd);

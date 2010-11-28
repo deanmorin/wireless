@@ -2,7 +2,7 @@
 
 VOID MakeDebugFrameOne(HWND hWnd){
 	int i;
-	BYTE* data = (BYTE*) malloc (sizeof(BYTE)*25);
+	PBYTE data = (PBYTE) malloc (sizeof(BYTE)*25);
 	PWNDDATA    pwd                 = NULL;
 
 	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
@@ -19,7 +19,7 @@ VOID MakeDebugFrameOne(HWND hWnd){
 VOID MakeDebugFrameTwo(HWND hWnd){
 	int i;
 	int count = 48;
-	BYTE* data = (BYTE*) malloc (sizeof(BYTE)*MAX_PAYLOAD_SIZE);
+	PBYTE data = (PBYTE) malloc (sizeof(BYTE)*MAX_PAYLOAD_SIZE);
 	PWNDDATA    pwd                 = NULL;
 
 	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);

@@ -48,7 +48,7 @@
 --              Initializes the terminal to its default state.
 ------------------------------------------------------------------------------*/
 VOID InitTerminal(HWND hWnd) {
-//BYTE* temp;//for testing out Create Frame
+//PBYTE temp;//for testing out Create Frame
     PWNDDATA    pwd         = {0};
     HDC         hdc         = {0};
     COMMCONFIG  cc          = {0};
@@ -135,7 +135,7 @@ VOID InitTerminal(HWND hWnd) {
 /*
 	//testing out CreateFrame
 	pwd->TxSequenceNumber=1;
-	temp = (BYTE*) calloc(2*256+1,sizeof(BYTE));
+	temp = (PBYTE) calloc(2*256+1,sizeof(BYTE));
 	temp[1] = 0x3;
 	CreateFrame(hWnd,temp,2*256+1);
 */
@@ -532,7 +532,7 @@ BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
             case IDC_BUTTONF1:
 				MakeDebugFrameOne(GetParent(hDlg));
                 ProcessWrite(GetParent(hDlg), 
-                             (BYTE*) RemoveFromFrameQueue(&pwd->FTPBuffHead, 1), 
+                             (PBYTE) RemoveFromFrameQueue(&pwd->FTPBuffHead, 1), 
                              1);
                 pwd->FTPQueueSize--;
                 SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("f1Pushed")));

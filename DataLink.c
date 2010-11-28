@@ -378,8 +378,10 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
 --
 -- RETURNS:     VOID.
 --
--- NOTES:       Sends a data frame if there is one in the file-to-port queue,
---				otherwise sends an EOT.
+-- NOTES:       Sets the new protocol state and timeout, based on the current 
+--				protocol state. If the timeout occured in state T1, it checks
+--				to see if the program's ENQ haven't been answered for a while
+--				and disconnects if this is the case.
 ------------------------------------------------------------------------------*/
 VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 

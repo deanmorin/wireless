@@ -1,6 +1,6 @@
 #include "FileIO.h"
 
-FRAME CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength){
+FRAME CreateFrame(HWND hWnd, PBYTE psBuf, DWORD dwLength){
 	DWORD		i;
 	FRAME myFrame;
 	PWNDDATA    pwd                 = NULL;
@@ -19,8 +19,8 @@ FRAME CreateFrame(HWND hWnd, BYTE* psBuf, DWORD dwLength){
 		myFrame.payload[i++] =0;
 	}
 	myFrame.crc =0;
-	myFrame.crc = crcFast((BYTE*)&myFrame,FRAME_SIZE - sizeof(crc));
-	if(crcFast((BYTE*)&myFrame,FRAME_SIZE)!=0){
+	myFrame.crc = crcFast((PBYTE)&myFrame,FRAME_SIZE - sizeof(crc));
+	if(crcFast((PBYTE)&myFrame,FRAME_SIZE)!=0){
 		DISPLAY_ERROR("Failure Creating Frame");
 	}
 	/*else{
@@ -138,7 +138,7 @@ VOID ReadFromFile(HWND hWnd){
    	FRAME frame;
 	HANDLE hMutex = {0};
 
-	BYTE* ReadBuffer = (BYTE*) malloc(sizeof(BYTE) *1019);
+	PBYTE ReadBuffer = (PBYTE) malloc(sizeof(BYTE) *1019);
 
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 	

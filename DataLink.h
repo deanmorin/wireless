@@ -58,12 +58,12 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 
 /*---------------------------Function Prototypes------------------------------*/
 VOID    ProcessTimeout(HWND hWnd, PSTATEINFO psi);
-VOID    ProcessWrite(HWND hWnd, BYTE* pFrame, DWORD dwLength);
-UINT    ProcessRead(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
-UINT    ReadIDLE(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
-UINT    ReadR2(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
-UINT    ReadT1(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
-UINT    ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength);
+VOID    ProcessWrite(HWND hWnd, PBYTE pFrame, DWORD dwLength);
+UINT    ProcessRead(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength);
+UINT    ReadIDLE(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength);
+UINT    ReadR2(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength);
+UINT    ReadT1(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength);
+UINT    ReadT3(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength);
 VOID    SendFrame(HWND hWnd, PSTATEINFO psi);
 
 #endif
