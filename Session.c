@@ -170,7 +170,6 @@ VOID Disconnect(HWND hWnd) {
     if (pwd->hPort == NULL) {
         return;
     }
-
     // this will end the outer while loop in the read thread
     pwd->bConnected = FALSE;
     hEvent = CreateEvent(NULL, TRUE, FALSE, TEXT("disconnected"));
@@ -181,14 +180,13 @@ VOID Disconnect(HWND hWnd) {
         GetExitCodeThread(pwd->hThread, &dwThreadid);
     } while (dwThreadid == STILL_ACTIVE);
 
-    ResetEvent(hEvent);
+    CloseHandle(hEvent);
     CloseHandle(pwd->hThread);
-	//CloseHandle(pwd->hFileThread);
     CloseHandle(pwd->hPort);
 	CloseFileReceive(hWnd);
 	CloseFileTransmit(hWnd);
     pwd->hPort = NULL;
-	
+
     // enable/disable appropriate menu choices    
     EnableMenuItem(GetMenu(hWnd), IDM_DISCONNECT, MF_GRAYED);
     EnableMenuItem(GetMenu(hWnd), IDM_CONNECT,    MF_ENABLED);

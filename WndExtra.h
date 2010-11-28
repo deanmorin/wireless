@@ -49,7 +49,8 @@
 
 /*-------------------------------Structures-----------------------------------*/
 typedef struct STATEINFO_tag {
-    INT     iState;
+    INT		rxSeq;
+	INT     iState;
     DWORD   dwTimeout;
     INT     itoCount;
     INT     iFailedENQCount;

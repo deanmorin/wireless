@@ -73,8 +73,8 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
         DISPLAY_ERROR("Error creating event in read thread");
     }
     hEvents     = (HANDLE*) malloc(sizeof(HANDLE) * PORT_IO_EVENTS);
-    hEvents[0]  = OpenEvent(DELETE | SYNCHRONIZE, FALSE, TEXT("disconnected"));
-    hEvents[1]  = ol.hEvent;                               // "dataAtPort"
+    hEvents[0]  = CreateEvent(NULL, FALSE, FALSE, TEXT("disconnected"));
+    hEvents[1]  = ol.hEvent;
     
     psi = (PSTATEINFO) malloc(sizeof(STATEINFO));
     InitStateInfo(psi);
@@ -109,22 +109,23 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
         ResetEvent(ol.hEvent);
     }
 
-
     if (!PurgeComm(pwd->hPort, PURGE_RXCLEAR)) {
         DISPLAY_ERROR("Error purging read buffer");
     }
-    free(hEvents);
     CloseHandle(ol.hEvent);
+	CloseHandle(hEvents[0]);
+	free(hEvents);
     return 0;
 }
 
 
 VOID InitStateInfo (PSTATEINFO psi) {
-    psi->iState     = STATE_IDLE;
-    psi->itoCount   = 0;
-    srand(GetTickCount());
-    psi->dwTimeout  = TOR0_BASE + rand() % TOR0_RANGE;
-    psi->iFailedENQCount = 0;    
+	srand(GetTickCount());
+	psi->rxSeq				= 0;
+    psi->iState				= STATE_IDLE;
+    psi->itoCount			= 0;
+    psi->dwTimeout			= TOR0;
+    psi->iFailedENQCount		= 0;    
 }
 
 

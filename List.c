@@ -43,8 +43,7 @@
 --
 -- RETURNS:     FALSE if memory allocation for the new node failed.
 --
--- NOTES:       Adds the new BYTE to the back of the list.wLength be no longer
---              than the list.
+-- NOTES:       Adds the new BYTE to the back of the list.
 ------------------------------------------------------------------------------*/
 BOOL AddToByteQueue(PPBYTE_NODE pHead, PPBYTE_NODE pTail, BYTE data) {
     PBYTE_NODE newNode  = NULL;
@@ -104,7 +103,24 @@ PBYTE RemoveFromByteQueue(PPBYTE_NODE pHead, DWORD dwLength) {
     return removed;
 }
 
-
+/*------------------------------------------------------------------------------
+-- FUNCTION:    DeleteByteQueue
+--
+-- DATE:        Nov 24, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Dean Morin
+--
+-- INTERFACE:   DeleteByteQueue(PBYTE_NODE pHead)
+--                      pHead   - the first node in the queue
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Deletes the queue.
+------------------------------------------------------------------------------*/
 VOID DeleteByteQueue(PBYTE_NODE pHead) {
     PBYTE_NODE  p   = NULL;
     PBYTE_NODE  q   = NULL;
@@ -134,12 +150,15 @@ VOID DeleteByteQueue(PBYTE_NODE pHead) {
 --
 -- RETURNS:     FALSE if memory allocation for the new node failed.
 --
--- NOTES:       Adds the new FRAME to the back of the list.wLength be no longer
---              than the list.
+-- NOTES:       Adds the new FRAME to the back of the list. This function is
+--				thread safe.
 ------------------------------------------------------------------------------*/
 BOOL AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, FRAME data) {
-    PFRAME_NODE newNode  = NULL;
-    
+    PFRAME_NODE newNode = NULL;
+    HANDLE		hMutex	= 0;
+	
+	hMutex = CreateMutex(NULL, FALSE, TEXT("addToFrameQueue"));
+
     if ((newNode = (PFRAME_NODE) malloc(sizeof(FRAME_NODE))) == NULL) {
         return FALSE;
     }
@@ -147,14 +166,14 @@ BOOL AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, FRAME data) {
     newNode->next   = NULL;
 
     if (*pHead == NULL) {
-
         *pHead = newNode;
-        *pTail = newNode;
-		
+        *pTail = newNode;	
         return TRUE;
     }
     (*pTail)->next = newNode;
     *pTail         = newNode;
+
+	ReleaseMutex(hMutex);
     return TRUE;
 }
 
@@ -176,13 +195,17 @@ BOOL AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, FRAME data) {
 -- RETURNS:     A pointer to the first node that was removed.
 --
 -- NOTES:       Removes dwLength nodes from the queue. The function requires 
---              that dwLength be no longer than the list.
+--              that dwLength be no longer than the list. This function is
+--				thread safe.
 ------------------------------------------------------------------------------*/
 PFRAME RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength) {
     PFRAME_NODE p       = NULL;
     PFRAME_NODE tracer  = NULL;
     UINT        i       = 0;
     PFRAME      removed = NULL;
+	HANDLE		hMutex	= 0;
+	
+	hMutex = CreateMutex(NULL, FALSE, TEXT("addToFrameQueue"));
     
     p       = *pHead;
     removed = (PFRAME) malloc(sizeof(FRAME) * dwLength);
@@ -194,5 +217,7 @@ PFRAME RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength) {
         free(tracer);
     }
     *pHead = p;
+
+	ReleaseMutex(hMutex);
     return removed;
 }
