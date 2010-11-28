@@ -167,6 +167,7 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
     
     PWNDDATA    pwd     = NULL;
     DWORD       dwSize  = 0;
+	COMMCONFIG	cc		= {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
     switch (LOWORD(wParam)) {
@@ -200,8 +201,11 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
         case IDM_COM9:  SelectPort(hWnd, IDM_COM9);  return;
 
         case IDM_COMMSET:
-            
-            if (!CommConfigDialog(pwd->lpszCommName, hWnd, &pwd->cc)) {
+			cc.dwSize	= sizeof(COMMCONFIG);
+			cc.wVersion = 1;
+			GetCommConfig(pwd->hPort, &cc, &cc.dwSize);
+
+            if (!CommConfigDialog(pwd->lpszCommName, hWnd, &cc)) {
                 DISPLAY_ERROR("The comm settings dialogue failed.\nThis port may not exist");
             }
 		    return;
