@@ -199,14 +199,27 @@ VOID UpdateDisplayBuf(HWND hWnd, CHAR cCharacter) {
 
 VOID DisplayFrameInfo(HWND hWnd, FRAME frame){
 	PWNDDATA	pwd		= NULL;
-	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+	
+	CHAR* a = (CHAR*)malloc(sizeof(CHAR));
+	CHAR* b = (CHAR*)malloc(sizeof(CHAR));
+	CHAR* c = (CHAR*)malloc(sizeof(CHAR));
+	int i = 0;
 
-	MoveCursor( hWnd, 1, pwd->NumOfFrames + 1, FALSE);
-	
-	MoveCursor( hWnd, 12, pwd->NumOfFrames + 1, FALSE);
-	
-	MoveCursor(hWnd, 29, pwd->NumOfFrames + 1, FALSE);
-	
+	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+	sprintf(a, "%d", pwd->NumOfFrames);
+	sprintf(b, "%02x", frame.length);
+	sprintf(c, "%02x", frame.crc);
+
+	MoveCursor( hWnd, 1, pwd->NumOfFrames + 2, FALSE);
+	UpdateDisplayBuf(hWnd, a[0]);
+	MoveCursor( hWnd, 12, pwd->NumOfFrames + 2, FALSE);
+	for(i = 0; i < 2; i++){
+		UpdateDisplayBuf(hWnd, b[i]);
+	}
+	MoveCursor(hWnd, 29, pwd->NumOfFrames + 2, FALSE);
+	for(i = 0; i < 2; i++){
+		UpdateDisplayBuf(hWnd, c[i]);
+	}
 	
 }
 
