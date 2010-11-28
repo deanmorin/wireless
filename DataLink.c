@@ -66,6 +66,7 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
 
 		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
 		RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);
+		
 		ReleaseMutex(hMutex);
 
 		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);

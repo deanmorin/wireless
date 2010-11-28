@@ -169,6 +169,9 @@ VOID ReadFromFile(HWND hWnd){
 			SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 			MessageBox(hWnd, TEXT("File Read Complete"), 0, MB_OK);
 		}
+		else{
+			return;
+		}
 				
 		frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
 
