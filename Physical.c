@@ -173,7 +173,7 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
             AddToByteQueue(&pwd->pReadBufHead, &pwd->pReadBufTail, pReadBuf[i]);
 			dwQueueSize++;
         }
-        if (dwQueueSize >= CTRL_FRAME_SIZE) {
+        if (dwQueueSize >= FRAME_SIZE) {
 
             pQueue = RemoveFromByteQueue(&pwd->pReadBufHead, dwQueueSize);
 

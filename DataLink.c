@@ -69,7 +69,10 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, BYTE* pReadBuf, DWORD dwLength) {
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_R2);
         psi->dwTimeout  = TOR3;
         psi->itoCount   = 0;
-    }
+    } else {
+		psi->iState = STATE_IDLE;
+		PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
+	}
     return CTRL_FRAME_SIZE;
 }
 
