@@ -164,10 +164,13 @@ VOID ReadFromFile(HWND hWnd){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			pwd->NumOfReads+=1;
-		} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) == 1019){
-
-		
-
+		/*} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) == 1019){
+			frame = CreateNullFrame(hWnd);
+			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
+			pwd->FTPQueueSize+=1;
+			CloseFileTransmit(hWnd);
+			ReleaseMutex(hMutex);
+			return;*/
 		} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) > 0){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%pwd->NumOfReads, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
