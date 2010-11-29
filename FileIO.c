@@ -159,15 +159,19 @@ VOID ReadFromFile(HWND hWnd){
 			}
 			pwd->NumOfReads+=1;
 			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("dataToWrite")));
+
+		// there is more than a full frame left to read from file
 		} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) > 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			pwd->NumOfReads+=1;
+
+		// there is exactly one frame left in the file
 		} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) == 1019){
 
 		
-
+		// there is a partial frame left in the file
 		} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) > 0){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%pwd->NumOfReads, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
