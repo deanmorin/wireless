@@ -48,7 +48,6 @@
 --              Initializes the terminal to its default state.
 ------------------------------------------------------------------------------*/
 VOID InitTerminal(HWND hWnd) {
-//PBYTE temp;//for testing out Create Frame
     PWNDDATA    pwd         = {0};
     HDC         hdc         = {0};
     COMMCONFIG  cc          = {0};
@@ -104,6 +103,7 @@ VOID InitTerminal(HWND hWnd) {
             CHARACTER(j, i).fgColor     = 7;
         }
     }
+
     // set the window size based off of the font size
     GetWindowRect(hWnd, &windowRect);
     GetClientRect(hWnd, &clientRect);
@@ -119,27 +119,10 @@ VOID InitTerminal(HWND hWnd) {
                CHAR_HEIGHT * LINES_PER_SCRN + PADDING * 2 + lyDiff,
                TRUE);
 
-    // set default comm settings
-    
-	//pwd->cc.dwSize = sizeof(COMMCONFIG);
-    //Connect(hWnd);
-    //GetCommConfig(pwd->hPort, &pwd->cc, &pwd->cc.dwSize);
-    //Disconnect(hWnd);
-    //FillMemory(&pwd->cc.dcb, sizeof(DCB), 0);
-    //pwd->cc.dcb.DCBlength = sizeof(DCB);
-    //BuildCommDCB((LPCWSTR)"96,N,8,1", &pwd->cc.dcb);
-	
-
 	//create tables for crc
 	crcInit();
-/*
-	//testing out CreateFrame
-	pwd->TxSequenceNumber=1;
-	temp = (PBYTE) calloc(2*256+1,sizeof(BYTE));
-	temp[1] = 0x3;
-	CreateFrame(hWnd,temp,2*256+1);
-*/
-    //print out headers for Tokens and Values
+
+    //print out headers for terminal
     MakeColumns(hWnd);
 
 	
@@ -295,7 +278,6 @@ VOID Paint(HWND hWnd) {
                     (LPCWSTR) a, 1);
         }
     }
-	
     EndPaint(hWnd, &ps);
 }
 

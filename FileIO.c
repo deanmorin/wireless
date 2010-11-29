@@ -181,6 +181,17 @@ VOID ReadFromFile(HWND hWnd){
 		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 		pwd->FTPQueueSize+=1;
+
+
+		/*if(dwSizeOfFile/1019 == pwd->NumOfReads){
+			frame = CreateNullFrame(hWnd);
+			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
+			pwd->FTPQueueSize+=1;
+			CloseFileTransmit(hWnd);
+			ReleaseMutex(hMutex);
+			return;
+		}*/
+
 		ReleaseMutex(hMutex);
 		//if(dwSizeOfFile/pwd->NumOfReads == 1019)
 			//return;

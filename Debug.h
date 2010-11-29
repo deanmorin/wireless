@@ -7,10 +7,6 @@
 
 
 /*---------------------------Function Prototypes------------------------------*/
-UINT    DebugT1(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength);
-UINT    DebugT3(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength);
-UINT    DebugIDLE(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength);
-UINT    DebugR2(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength);
 VOID    MakeDebugFrameOne(HWND hWnd);
 VOID    MakeDebugFrameTwo(HWND hWnd);
 VOID    MakeDebugFrameThree(HWND hWnd);
