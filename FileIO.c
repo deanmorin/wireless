@@ -168,9 +168,14 @@ VOID ReadFromFile(HWND hWnd){
 			pwd->NumOfReads+=1;
 
 		// there is exactly one frame left in the file
-		} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) == 1019){
+		/*} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) == 1019){
+			frame = CreateNullFrame(hWnd);
+			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
+			pwd->FTPQueueSize+=1;
+			CloseFileTransmit(hWnd);
+			ReleaseMutex(hMutex);
+			return;*/
 
-		
 		// there is a partial frame left in the file
 		} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) > 0){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%pwd->NumOfReads, &dwBytesRead, NULL)){
