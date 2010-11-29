@@ -401,14 +401,21 @@ VOID UpdateStats(HWND hWnd) {
 		lastdFrames = DOWN_FRAMES;
 		lastuFrames = UP_FRAMES;
 
-		dRate = (DOWN_FRAMES * 1024 * 8) / totalTime;
-		uRate = (UP_FRAMES * 1024 * 8) / totalTime;
-		tRate = dRate + uRate;
-	
-		edRate = (DOWN_FRAMES_ACKD * 1019 * 8) / totalTime;
-		euRate = (UP_FRAMES_ACKD * 1019 * 8) / totalTime;
-		etRate = edRate + euRate;
 	}
+	
+	dRate = (DOWN_FRAMES * 1024 * 8) / totalTime;
+	uRate = (UP_FRAMES * 1024 * 8) / totalTime;
+	tRate = dRate + uRate;
+
+	edRate = (DOWN_FRAMES_ACKD * 1019 * 8) / totalTime;
+	euRate = (UP_FRAMES_ACKD * 1019 * 8) / totalTime;
+	etRate = edRate + euRate;
+
+	_stprintf(text, _T("%d"), UP_FRAMES);
+	SetDlgItemText(pwd->hDlgStats, IDC_FRAMESENT, text);
+
+	_stprintf(text, _T("%d"), DOWN_FRAMES);
+	SetDlgItemText(pwd->hDlgStats, IDC_FRAMEREC, text);
 
 	_stprintf(text, _T("%.2f"), dRate);
 	SetDlgItemText(pwd->hDlgStats, IDC_DRATE, text);
