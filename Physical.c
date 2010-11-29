@@ -16,9 +16,14 @@
 --
 -- DATE:        Oct 13, 2010
 --
--- REVISIONS:   Nov 05, 2010
---              Modified ReadThreadProc to work more appropriately for the RFID
---              reader. Added RequestPacket()
+-- REVISIONS:   Nov 05, 2010	 - Modified ReadThreadProc to work more
+--					appropriately for the RFID reader. 
+--					Added RequestPacket().
+--				Nov 29, 2010 - Renamed ReadThreadProc() to 
+--					PortIOThreadProc(), and modified it to work more
+--					appropriately for the wireless protocol tester.
+--					Removed RequestPacket().
+--					Added InitStateInfo().
 --
 -- DESIGNER:    Dean Morin
 --
