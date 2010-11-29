@@ -46,7 +46,6 @@
 #define SENT_RVI            pwd->statsInfo.sentRVI
 #define REC_RVI             pwd->statsInfo.recRVI
 
-
 /*-------------------------------Structures-----------------------------------*/
 typedef struct STATEINFO_tag {
     INT		rxSeq;

@@ -364,9 +364,16 @@ VOID UpdateStats(HWND hWnd) {
 	static FLOAT totalTime = 0;
 	FLOAT dRate, uRate, tRate, edRate, euRate, etRate;
 	TCHAR text[20];
+	static ULONGLONG lastTime = 0;
+	ULONGLONG thisTime;
 	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 	
-	totalTime += TIME_LENGTH;
+	if (lastTime == 0)
+		lastTime = GetTickCount64();
+	thisTime = GetTickCount64();
+	totalTime = thisTime - lastTime;
+	lastTime = thisTime;
+	
 	_stprintf(text, _T("%d"), NUM_FILES);
 	SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
 
@@ -531,18 +538,14 @@ BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 			
             case IDC_BUTTONF1:
 				MakeDebugFrameOne(GetParent(hDlg));
-                ProcessWrite(GetParent(hDlg), 
-                             (PBYTE) RemoveFromFrameQueue(&pwd->FTPBuffHead, 1), 
-                             1);
-                pwd->FTPQueueSize--;
-                SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("f1Pushed")));
 				return TRUE;
 			
             case IDC_BUTTONF2:
-                //pCtrlFrame[CTRL_CHAR_INDEX] = ENQ;
-                //ProcessWrite(GetParent(hDlg), pCtrlFrame, CTRL_FRAME_SIZE);
-                //SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("f2Pushed")));
-				MakeDebugFrameTwo( GetParent(hDlg));
+				MakeDebugFrameTwo(GetParent(hDlg));
+				return TRUE;
+
+			case IDC_BUTTONF3:
+				MakeDebugFrameThree(GetParent(hDlg));
 				return TRUE;
 		}
 		return FALSE;
@@ -653,7 +656,7 @@ VOID UpdateStatStruct(HWND hWnd, WPARAM stat, LPARAM attribute) {
         case RVI:
             if (attribute == SENT) {
                 SENT_RVI++;
-				//pwd->FTPQueueSize--;
+				//pwd->FTPQueueSize--;	
             } else {
                 REC_RVI++;
 				//pwd->PTFQueueSize++;
