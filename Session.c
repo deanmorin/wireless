@@ -185,6 +185,8 @@ VOID Disconnect(HWND hWnd) {
     CloseHandle(pwd->hPort);
 	CloseFileReceive(hWnd);
 	CloseFileTransmit(hWnd);
+	DeleteFrameQueue(pwd->FTPBuffHead);
+	DeleteFrameQueue(pwd->PTFBuffHead);
     pwd->hPort = NULL;
 
     // enable/disable appropriate menu choices    

@@ -212,3 +212,13 @@ PFRAME RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength) {
 
     return removed;
 }
+
+VOID DeleteFrameQueue(PFRAME_NODE pHead) {
+    PFRAME_NODE  p   = NULL;
+    PFRAME_NODE  q   = NULL;
+        
+    for (p = pHead; p != NULL; p = q) {
+        q = p->next;
+        free(p);
+    }
+}
