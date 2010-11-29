@@ -42,7 +42,7 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define EOT 0x04
 #define ENQ 0x05
 #define ACK 0x06
-#define RVI 0x13
+#define RVI 0x11
 
 // messages and message parameters
 #define SENT    100
