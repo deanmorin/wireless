@@ -159,19 +159,16 @@ VOID ReadFromFile(HWND hWnd){
 			}
 			pwd->NumOfReads+=1;
 			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("dataToWrite")));
-		} else if(dwSizeOfFile/pwd->NumOfReads > 1019){
+		} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) > 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			pwd->NumOfReads+=1;
-		} else if(dwSizeOfFile/pwd->NumOfReads == 1019){
-			frame = CreateNullFrame(hWnd);
-			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
-			pwd->FTPQueueSize+=1;
-			CloseFileTransmit(hWnd);
-			ReleaseMutex(hMutex);
-			return;
-		} else if(dwSizeOfFile/pwd->NumOfReads > 0){
+		} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) == 1019){
+
+		
+
+		} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) > 0){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%pwd->NumOfReads, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
@@ -189,6 +186,7 @@ VOID ReadFromFile(HWND hWnd){
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 		pwd->FTPQueueSize+=1;
 
+
 		/*if(dwSizeOfFile/1019 == pwd->NumOfReads){
 			frame = CreateNullFrame(hWnd);
 			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
@@ -197,7 +195,10 @@ VOID ReadFromFile(HWND hWnd){
 			ReleaseMutex(hMutex);
 			return;
 		}*/
+
 		ReleaseMutex(hMutex);
+		//if(dwSizeOfFile/pwd->NumOfReads == 1019)
+			//return;
 	}
 }
 
