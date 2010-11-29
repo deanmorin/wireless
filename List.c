@@ -213,6 +213,24 @@ PFRAME RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength) {
     return removed;
 }
 
+/*------------------------------------------------------------------------------
+-- FUNCTION:    DeleteFrameQueue
+--
+-- DATE:        Nov 24, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Daniel Wright
+--
+-- INTERFACE:   DeleteFrameQueue(PFRAME_NODE pHead)
+--                      pHead   - the first node in the queue
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Deletes the queue.
+------------------------------------------------------------------------------*/
 VOID DeleteFrameQueue(PFRAME_NODE pHead) {
     PFRAME_NODE  p   = NULL;
     PFRAME_NODE  q   = NULL;
