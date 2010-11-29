@@ -344,15 +344,38 @@ VOID MakeColumns(HWND hWnd){
 ------------------------------------------------------------------------------*/
 VOID UpdateStats(HWND hWnd) {
 	static FLOAT totalTime = 0;
-	FLOAT dRate, uRate, tRate, edRate, euRate, etRate;
+	FLOAT dRate = 0, uRate = 0, tRate = 0, edRate = 0, euRate = 0, etRate = 0;
 	TCHAR text[20];
-	static ULONG lastTime = 0;
-	ULONG thisTime;
+	static FLOAT lastTime = 0;
+	FLOAT thisTime;
 	static INT lastdFrames = 0, lastuFrames = 0;
 
 	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-	
-	_stprintf(text, _T("%d"), NUM_FILES);
+
+	if (lastTime == 0) lastTime = GetTickCount() / 1000.0; 
+	thisTime = (GetTickCount() / 1000.0);
+	totalTime = thisTime - lastTime;
+	lastTime = thisTime;
+
+	if (UP_FRAMES != lastuFrames || DOWN_FRAMES != lastdFrames) {
+		if (totalTime == 0) {
+			uRate = 0;
+			dRate = 0;
+			edRate = 0;
+			euRate = 0;
+		} else {
+			uRate = ((UP_FRAMES - lastuFrames) * 1024 * 8) / totalTime;
+			dRate = ((DOWN_FRAMES - lastdFrames) * 1024 * 8) / totalTime;
+			edRate = ((DOWN_FRAMES_ACKD - lastdFrames) * 1019 * 8) / totalTime;
+			euRate = ((UP_FRAMES_ACKD - lastuFrames) * 1019 * 8) / totalTime;
+		}
+		lastuFrames = UP_FRAMES;
+		lastdFrames = DOWN_FRAMES;
+	}
+
+	//_stprintf(text, _T("%d"), NUM_FILES);
+	//SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
+	_stprintf(text, _T("%.2f"), totalTime);
 	SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
 
 	_stprintf(text, _T("%d"), SENT_ACK);
@@ -372,25 +395,13 @@ VOID UpdateStats(HWND hWnd) {
 
 	_stprintf(text, _T("%d"), REC_RVI);
 	SetDlgItemText(pwd->hDlgStats, IDC_RVIRECEIVED, text);
-
 	
-	if (DOWN_FRAMES != lastdFrames || UP_FRAMES != lastuFrames) {
-		if (lastTime == 0)
-			lastTime = GetTickCount();
-		thisTime = GetTickCount();
-		totalTime = thisTime - lastTime;
-		lastTime = thisTime;
-		lastdFrames = DOWN_FRAMES;
-		lastuFrames = UP_FRAMES;
-
-	}
-	
-	dRate = (DOWN_FRAMES * 1024 * 8) / totalTime;
-	uRate = (UP_FRAMES * 1024 * 8) / totalTime;
+	//dRate = (DOWN_FRAMES * 1024 * 8) / totalTime;
+	//uRate = (UP_FRAMES * 1024 * 8) / totalTime;
 	tRate = dRate + uRate;
 
-	edRate = (DOWN_FRAMES_ACKD * 1019 * 8) / totalTime;
-	euRate = (UP_FRAMES_ACKD * 1019 * 8) / totalTime;
+	//edRate = (DOWN_FRAMES_ACKD * 1019 * 8) / totalTime;
+	//euRate = (UP_FRAMES_ACKD * 1019 * 8) / totalTime;
 	etRate = edRate + euRate;
 
 	_stprintf(text, _T("%d"), UP_FRAMES);
