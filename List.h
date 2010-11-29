@@ -40,6 +40,6 @@ BOOL    AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, FRAME data);
 VOID    DeleteByteQueue(PBYTE_NODE pHead);
 PBYTE   RemoveFromByteQueue(PPBYTE_NODE pHead, DWORD dwLength);
 PFRAME  RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength);
-VOID	DeleteFrameQueue(PFRAME_NODE pHead)
+VOID	DeleteFrameQueue(PFRAME_NODE pHead);
 
 #endif
