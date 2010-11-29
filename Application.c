@@ -364,13 +364,13 @@ VOID UpdateStats(HWND hWnd) {
 	static FLOAT totalTime = 0;
 	FLOAT dRate, uRate, tRate, edRate, euRate, etRate;
 	TCHAR text[20];
-	static ULONGLONG lastTime = 0;
-	ULONGLONG thisTime;
+	static ULONG lastTime = 0;
+	ULONG thisTime;
 	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 	
 	if (lastTime == 0)
-		lastTime = GetTickCount64();
-	thisTime = GetTickCount64();
+		lastTime = GetTickCount();
+	thisTime = GetTickCount();
 	totalTime = thisTime - lastTime;
 	lastTime = thisTime;
 	
