@@ -122,9 +122,9 @@ VOID InitTerminal(HWND hWnd) {
     // set default comm settings
     
 	//pwd->cc.dwSize = sizeof(COMMCONFIG);
-    Connect(hWnd);
+    //Connect(hWnd);
     //GetCommConfig(pwd->hPort, &pwd->cc, &pwd->cc.dwSize);
-    Disconnect(hWnd);
+    //Disconnect(hWnd);
     //FillMemory(&pwd->cc.dcb, sizeof(DCB), 0);
     //pwd->cc.dcb.DCBlength = sizeof(DCB);
     //BuildCommDCB((LPCWSTR)"96,N,8,1", &pwd->cc.dcb);

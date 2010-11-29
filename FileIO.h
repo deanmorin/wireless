@@ -8,12 +8,12 @@
 
 /*---------------------------Function Prototypes------------------------------*/
 FRAME   CreateFrame(HWND hWnd, PBYTE psBuf, DWORD dwLength);
-BOOL 	OpenFileReceive(HWND hWnd);
-VOID 	OpenFileTransmit(HWND hWnd);
+FRAME	CreateNullFrame(HWND hWnd);
 VOID	CloseFileReceive(HWND hWnd);
 VOID	CloseFileTransmit(HWND hWnd);
-VOID	WriteToFile(HWND hWnd);
+BOOL 	OpenFileReceive(HWND hWnd);
+VOID 	OpenFileTransmit(HWND hWnd);
 VOID	ReadFromFile(HWND hWnd);
-FRAME	CreateNullFrame(HWND hWnd);
+VOID	WriteToFile(HWND hWnd);
 
 #endif

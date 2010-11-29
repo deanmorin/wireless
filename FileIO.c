@@ -173,20 +173,17 @@ VOID ReadFromFile(HWND hWnd){
 				
 		frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
 
-		//TODO: Enter FTP crit section
 		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 		pwd->FTPQueueSize+=1;
-		ReleaseMutex(hMutex);
 		if(dwSizeOfFile/1019 == pwd->NumOfReads){
 			frame = CreateNullFrame(hWnd);
-			hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
 			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 			pwd->FTPQueueSize+=1;
 			ReleaseMutex(hMutex);
 			return;
 		}
-		//TODO: exit FTP crit section
+		ReleaseMutex(hMutex);
 	}
 }
 
