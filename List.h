@@ -7,7 +7,6 @@
 #define MAX_PAYLOAD_SIZE	1019
 #define FRAME_SIZE			1024
 
-
 /*-------------------------------Structures-----------------------------------*/
 //pragma pack allow for a structure without padding
 #pragma pack(push)

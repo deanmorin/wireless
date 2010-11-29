@@ -1,72 +1,80 @@
 /*------------------------------------------------------------------------------
 -- SOURCE FILE:     Physical.c - Contains all the OSI "physical layer"
---                               functions for the RFID reader. 
+--                               functions for the wireless protocol tester. 
 --                               The definitions for the OSI layers
 --                               have been loosened somewhat, since the purpose 
 --                               is to organize the functions intuitively, 
 --                               rather than pedantically.
 --                      
--- PROGRAM:     RFID Reader - Enterprise Edition
+-- PROGRAM:     Dean and the Rockets' Wireless Protocol Testing and Evaluation 
+--              Facilitator
 --
 -- FUNCTIONS:
---              DWORD WINAPI    ReadThreadProc(HWND);
---				VOID	        RequestPacket(HWND hWnd);
---              VOID            ProcessCommError(HANDLE);
+--              DWORD WINAPI    PortIOThreadProc(HWND);
+--				VOID	InitStateInfo(PSTATEINFO);
+--              VOID    ProcessCommError(HANDLE);
+--				VOID	ReadFromPort(HWND, PSTATEINFO, OVERLAPPED, DWORD)
 --
 --
 -- DATE:        Oct 13, 2010
 --
--- REVISIONS:   Nov 05, 2010
---              Modified ReadThreadProc to work more appropriately for the RFID
---              reader. Added RequestPacket()
+-- REVISIONS:   Nov 05, 2010	
+--				Modified ReadThreadProc to work more appropriately for the RFID 
+--				reader. Added RequestPacket().
+--				
+--				Nov 29, 2010
+--				Renamed ReadThreadProc() to PortIOThreadProc(), and modified it 
+--				to work more appropriately for the wireless protocol tester.
+--				Removed RequestPacket(). Added InitStateInfo().
 --
 -- DESIGNER:    Dean Morin
 --
 -- PROGRAMMER:  Dean Morin, Daniel Wright
 --
 -- NOTES:
--- Contains physical level functions for the RFID reader.
+-- Contains physical level functions for the wireless protocol reader.
 ------------------------------------------------------------------------------*/
 
 #include "Physical.h"
 
 /*------------------------------------------------------------------------------
--- FUNCTION:    ReadThreadProc
+-- FUNCTION:    PortIOThreadProc
 --
 -- DATE:        Oct 13, 2010
 --
 -- REVISIONS:   Nov 05, 2010
 --              Modified the function to also listen for a "disconnect" event,
---              and to break in that case.
---              ProcessRead() is now called once a complete packet is confirmed
---              (as opposed to sending the contents of the buffer to 
---              ProcessRead() as soon as they arrive).
+--              and to break in that case. ProcessRead() is now called once a 
+--				complete packet is confirmed (as opposed to sending the 
+--				contents of the buffer to ProcessRead() as soon as they arrive).
+--
+--				Nov 29, 2010
+--				Renamed function from ReadThreadProc(). The event handling is
+--				from the original function, but the response to each event has
+--				changed.
 --
 -- DESIGNER:    Dean Morin
 --
 -- PROGRAMMER:  Dean Morin, Daniel Wright
 --
--- INTERFACE:   DWORD WINAPI ReadThreadProc(HWND hWnd)
---                          hWnd - the handle to the window
+-- INTERFACE:   DWORD WINAPI PortIOThreadProc(HWND hWnd)
+--                      hWnd - the handle to the window
 --
 -- RETURNS:     0 because threads are required to return a DWORD.
 --
 -- NOTES:
 --              While connected, this thread will loop and wait for characters
---              to arrive at the port. Once the EV_RXCHAR event is triggered,
---              ReadFile() is called to get however many characters have arrived
---              at the port by that time. This function uses overlapped I/O.
+--              to arrive at the port, or for a timeout to occur, then call the
+--				appropriate function. This function uses overlapped I/O.
 ------------------------------------------------------------------------------*/
 DWORD WINAPI PortIOThreadProc(HWND hWnd) {
-    
-    PWNDDATA    pwd                 = NULL;
-    OVERLAPPED  ol                  = {0};
-    DWORD       dwEvent             = 0;
-    DWORD       dwError             = 0;
-    COMSTAT     cs                  = {0};
-    HANDLE*     hEvents             = NULL;
-    PSTATEINFO  psi                 = NULL;
-    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    OVERLAPPED  ol		= {0};
+    DWORD       dwEvent = 0;
+    DWORD       dwError = 0;
+    COMSTAT     cs      = {0};
+    HANDLE*     hEvents = NULL;
+    PSTATEINFO  psi     = NULL;
+    PWNDDATA	pwd		= (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
 
     if ((ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)) == NULL) {
@@ -118,7 +126,26 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
     return 0;
 }
 
-
+/*------------------------------------------------------------------------------
+-- FUNCTION:    InitStateInfo
+--
+-- DATE:        Nov 29, 2010
+--
+-- REVISIONS:   (Date and Description)
+--
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Dean Morin
+--
+-- INTERFACE:   VOID InitStateInfo(PSTATEINFO psi)
+--                      psi			- contains info about the current state of 
+--									  the communication
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:
+--              Initializes the protocol state info to its default values.
+------------------------------------------------------------------------------*/
 VOID InitStateInfo (PSTATEINFO psi) {
 	srand(GetTickCount());
 	psi->rxSeq				= 0;
@@ -128,7 +155,35 @@ VOID InitStateInfo (PSTATEINFO psi) {
     psi->iFailedENQCount		= 0;    
 }
 
-
+/*------------------------------------------------------------------------------
+-- FUNCTION:    ReadFromPort
+--
+-- DATE:        Nov 29, 2010
+--
+-- REVISIONS:   (Date and Description)
+--
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Dean Morin
+--
+-- INTERFACE:   VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, 
+--								  DWORD cbInQue)
+--						hWnd	- a handle to the window
+--                      psi		- contains info about the current state of the 
+--								  communication
+--						ol		- the overlapped structure used to wait for 
+--								  characters at the serial port
+--						cbinQue	- the number of characters that are at the port
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:
+--              Reads from the serial port and calls ProcessRead(). If
+--				ProcessRead() returns a zero, it means that only a partial
+--				frame was passed. In that case, it waits for more characters
+--				to arrive at the port, then appends these new characters to the
+--				the partial frame, and calls ProcessRead() again.
+------------------------------------------------------------------------------*/
 VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
     
     static DWORD    dwQueueSize             = 0;
@@ -146,7 +201,7 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
         GetOverlappedResult(pwd->hThread, &ol, &dwBytesRead, TRUE);
     }
 
-	
+
     if (dwQueueSize == 0) {
         // the last port read sent an entire frame to ProcessRead()
         
@@ -203,7 +258,7 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
 -- PROGRAMMER:  Dean Morin
 --
 -- INTERFACE:   VOID ProcessCommError(HANDLE hPort)
---                          hPort - the handle to the open port
+--                      hPort - the handle to the open port
 --
 -- RETURNS:     VOID.
 --

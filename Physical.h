@@ -12,8 +12,8 @@
 /*---------------------------Function Prototypes------------------------------*/
 DWORD WINAPI    PortIOThreadProc(HWND hWnd);
 DWORD WINAPI	FileIOThreadProc(HWND hWnd);
+VOID    InitStateInfo (PSTATEINFO psi);
 VOID    ProcessCommError(HANDLE hPort);
 VOID    ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue);
-VOID    InitStateInfo (PSTATEINFO psi);
 
 #endif

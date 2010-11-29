@@ -25,7 +25,6 @@
 -- are the functions that deal with setting up connections and configuring the
 -- port.
 ------------------------------------------------------------------------------*/
-
 #include "Session.h"
 
 /*------------------------------------------------------------------------------

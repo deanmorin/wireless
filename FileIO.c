@@ -143,24 +143,41 @@ VOID ReadFromFile(HWND hWnd){
 	
 	dwSizeOfFile = GetFileSize(pwd->hFileTransmit, NULL);
 	while(pwd->FTPQueueSize < FULL_BUFFER && pwd->hFileTransmit != NULL){
+		
+		// haven't read yet, and file is at least a full frame
 		if(pwd->NumOfReads == 0 && dwSizeOfFile >= 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			pwd->NumOfReads+=1;
 			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("dataToWrite")));
+		
+		// haven't read yet, and file is less than a full frame
 		} else if(pwd->NumOfReads == 0 && dwSizeOfFile < 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			pwd->NumOfReads+=1;
 			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("dataToWrite")));
-		} else if(dwSizeOfFile/pwd->NumOfReads >= 1019){
+
+		// there is more than a full frame left to read from file
+		} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) > 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			pwd->NumOfReads+=1;
-		} else if(dwSizeOfFile/pwd->NumOfReads > 0){
+
+		// there is exactly one frame left in the file
+		/*} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) == 1019){
+			frame = CreateNullFrame(hWnd);
+			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
+			pwd->FTPQueueSize+=1;
+			CloseFileTransmit(hWnd);
+			ReleaseMutex(hMutex);
+			return;*/
+
+		// there is a partial frame left in the file
+		} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) > 0){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%pwd->NumOfReads, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
@@ -168,25 +185,29 @@ VOID ReadFromFile(HWND hWnd){
 			//MessageBox(hWnd, TEXT("File Read Complete"), 0, MB_OK);
 		}
 		else{
+
 			return;
 		}
 				
 		frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
 
-		//TODO: Enter FTP crit section
 		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 		pwd->FTPQueueSize+=1;
-		ReleaseMutex(hMutex);
-		if(dwSizeOfFile/1019 == pwd->NumOfReads){
+
+
+		/*if(dwSizeOfFile/1019 == pwd->NumOfReads){
 			frame = CreateNullFrame(hWnd);
-			hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
 			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 			pwd->FTPQueueSize+=1;
+			CloseFileTransmit(hWnd);
 			ReleaseMutex(hMutex);
 			return;
-		}
-		//TODO: exit FTP crit section
+		}*/
+
+		ReleaseMutex(hMutex);
+		//if(dwSizeOfFile/pwd->NumOfReads == 1019)
+			//return;
 	}
 }
 

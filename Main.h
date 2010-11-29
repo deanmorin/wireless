@@ -31,10 +31,7 @@
 #include <stdio.h>
 #include "Menu.h"
 #include "osi.h"
-#include "ErrorDetect.h"
 #include "crc.h"
-#pragma warning(disable:4002)
-#pragma warning(disable:4996)
 
 /*--------------------------------Macros--------------------------------------*/
 #define WND_CAPTION     TEXT("Dean and the Rockets' Wireless Protocol Testing \
