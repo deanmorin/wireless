@@ -143,12 +143,16 @@ VOID ReadFromFile(HWND hWnd){
 	
 	dwSizeOfFile = GetFileSize(pwd->hFileTransmit, NULL);
 	while(pwd->FTPQueueSize < FULL_BUFFER && pwd->hFileTransmit != NULL){
+		
+		// haven't read yet, and file is at least a full frame
 		if(pwd->NumOfReads == 0 && dwSizeOfFile >= 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			pwd->NumOfReads+=1;
 			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("dataToWrite")));
+		
+		// haven't read yet, and file is less than a full frame
 		} else if(pwd->NumOfReads == 0 && dwSizeOfFile < 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
