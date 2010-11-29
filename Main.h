@@ -31,7 +31,6 @@
 #include <stdio.h>
 #include "Menu.h"
 #include "osi.h"
-#include "ErrorDetect.h"
 #include "crc.h"
 
 /*--------------------------------Macros--------------------------------------*/
