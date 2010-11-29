@@ -61,7 +61,6 @@ VOID CloseFileTransmit(HWND hWnd){
 		}
 		pwd->hFileTransmit = NULL;
 		pwd->NumOfReads = 0;
-		SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 	}
 }
 
@@ -166,8 +165,7 @@ VOID ReadFromFile(HWND hWnd){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			CloseFileTransmit(hWnd);
-			SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
-			MessageBox(hWnd, TEXT("File Read Complete"), 0, MB_OK);
+			//MessageBox(hWnd, TEXT("File Read Complete"), 0, MB_OK);
 		}
 		else{
 			return;
@@ -180,6 +178,19 @@ VOID ReadFromFile(HWND hWnd){
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 		pwd->FTPQueueSize+=1;
 		ReleaseMutex(hMutex);
+		if(dwSizeOfFile/1019 == pwd->NumOfReads){
+			frame = CreateNullFrame(hWnd);
+			hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
+			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
+			pwd->FTPQueueSize+=1;
+			ReleaseMutex(hMutex);
+			return;
+		}
 		//TODO: exit FTP crit section
 	}
+}
+
+FRAME CreateNullFrame(HWND hWnd){
+	FRAME nullFrame = CreateFrame(hWnd, 0, 0);
+	return nullFrame;
 }

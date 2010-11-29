@@ -364,9 +364,16 @@ VOID UpdateStats(HWND hWnd) {
 	static FLOAT totalTime = 0;
 	FLOAT dRate, uRate, tRate, edRate, euRate, etRate;
 	TCHAR text[20];
+	static ULONGLONG lastTime = 0;
+	ULONGLONG thisTime;
 	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 	
-	totalTime += TIME_LENGTH;
+	if (lastTime == 0)
+		lastTime = GetTickCount64();
+	thisTime = GetTickCount64();
+	totalTime = thisTime - lastTime;
+	lastTime = thisTime;
+	
 	_stprintf(text, _T("%d"), NUM_FILES);
 	SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
 
