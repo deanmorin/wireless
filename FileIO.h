@@ -13,5 +13,5 @@ VOID	CloseFileReceive(HWND hWnd);
 VOID	CloseFileTransmit(HWND hWnd);
 VOID	WriteToFile(HWND hWnd);
 VOID	ReadFromFile(HWND hWnd);
-
+FRAME	CreateNullFrame(HWND hWnd);
 #endif
