@@ -554,6 +554,10 @@ BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 			case IDC_BUTTONF3:
 				MakeDebugFrameThree(GetParent(hDlg));
 				return TRUE;
+
+            case IDC_BUTTONF4:
+                pwd->FTPQueueSize--;
+                return TRUE;
 		}
 		return FALSE;
 	
