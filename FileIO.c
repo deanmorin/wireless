@@ -112,6 +112,7 @@ VOID WriteToFile(HWND hWnd){
 	
 	while(pwd->PTFQueueSize != 0){
 		hMutex = CreateMutex(NULL, FALSE, TEXT("PTFMutex"));
+		WaitForSingleObject(hMutex,INFINITE);
 		tempFrame = RemoveFromFrameQueue(&pwd->PTFBuffHead, 1);
 		ReleaseMutex(hMutex);
 		if(tempFrame->length != 0){
@@ -192,6 +193,7 @@ VOID ReadFromFile(HWND hWnd){
 		frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
 
 		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
+		WaitForSingleObject(hMutex,INFINITE);
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 		pwd->FTPQueueSize+=1;
 

@@ -197,7 +197,7 @@ PFRAME RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength) {
     PFRAME_NODE tracer  = NULL;
     UINT        i       = 0;
     PFRAME      removed = NULL;
-	HANDLE		hMutex	= 0;
+	
 	
     p       = *pHead;
     removed = (PFRAME) malloc(sizeof(FRAME) * dwLength);
