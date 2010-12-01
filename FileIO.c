@@ -151,15 +151,13 @@ VOID ReadFromFile(HWND hWnd){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			pwd->NumOfReads+=1;
-			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("dataToWrite")));
 		
 		// haven't read yet, and file is less than a full frame
 		} else if(pwd->NumOfReads == 0 && dwSizeOfFile < 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
-			pwd->NumOfReads+=1;
-			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("dataToWrite")));
+            CloseFileTransmit(hWnd);
 
 		// there is more than a full frame left to read from file
 		} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) > 1019){
@@ -184,9 +182,9 @@ VOID ReadFromFile(HWND hWnd){
 			}
 			CloseFileTransmit(hWnd);
 			//MessageBox(hWnd, TEXT("File Read Complete"), 0, MB_OK);
-		}
-		else{
-
+		
+        } else{
+            DISPLAY_ERROR("Dan says that this may happen"); //////////
 			return;
 		}
 				
