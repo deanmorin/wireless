@@ -7,8 +7,10 @@
 
 
 /*---------------------------Function Prototypes------------------------------*/
+BOOL CALLBACK   Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 VOID    MakeDebugFrameOne(HWND hWnd);
 VOID    MakeDebugFrameTwo(HWND hWnd);
 VOID    MakeDebugFrameThree(HWND hWnd);
+VOID    SendDebugCtrlChar(HWND hWnd, BYTE ctrlChar, LPCWSTR szEventName);
 
 #endif

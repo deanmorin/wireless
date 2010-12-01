@@ -176,9 +176,8 @@ UINT ReadT3(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
 		RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);
 		ReleaseMutex(hMutex);
 
-		  
         PostMessage(hWnd, WM_STAT, ACK, REC);
-        PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, SENT);
+        SendMessage(hWnd, WM_STAT, STAT_FRAMEACKD, SENT);
 		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);  
         SendFrame(hWnd, psi);
 
