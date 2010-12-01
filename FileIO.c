@@ -135,7 +135,6 @@ VOID ReadFromFile(HWND hWnd){
 	DWORD dwBytesRead = 0;
 	DWORD dwBytesWritten = 0;
 	DWORD	dwSizeOfFile = 0;
-	BOOL	eof	= FALSE;
    	FRAME frame;
 	HANDLE hMutex = {0};
 
@@ -143,34 +142,51 @@ VOID ReadFromFile(HWND hWnd){
 
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
 	
-	if (!(dwSizeOfFile = GetFileSize(pwd->hFileTransmit, NULL))) {
-		return;
-	}
-
+	dwSizeOfFile = GetFileSize(pwd->hFileTransmit, NULL);
 	while(pwd->FTPQueueSize < FULL_BUFFER && pwd->hFileTransmit != NULL){
 		
-		if(dwSizeOfFile - (++(pwd->NumOfReads) * 1019) > 1019){
+		// haven't read yet, and file is at least a full frame
+		if(pwd->NumOfReads == 0 && dwSizeOfFile >= 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
+			pwd->NumOfReads+=1;
+			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("dataToWrite")));
+		
+		// haven't read yet, and file is less than a full frame
+		} else if(pwd->NumOfReads == 0 && dwSizeOfFile < 1019){
+			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile, &dwBytesRead, NULL)){
+				DISPLAY_ERROR("Failed to read from file");
+			}
+			pwd->NumOfReads+=1;
+			SetEvent(CreateEvent(NULL, FALSE, FALSE, TEXT("dataToWrite")));
 
-		} else if(dwSizeOfFile - (++(pwd->NumOfReads) * 1019) == 1019){
+		// there is more than a full frame left to read from file
+		} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) > 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
+			pwd->NumOfReads+=1;
+
+		// there is exactly one frame left in the file
+		/*} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) == 1019){
+			frame = CreateNullFrame(hWnd);
+			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
+			pwd->FTPQueueSize+=1;
 			CloseFileTransmit(hWnd);
-			eof = TRUE;
-			return;
+			ReleaseMutex(hMutex);
+			return;*/
 
-		} else if(dwSizeOfFile - (++(pwd->NumOfReads) * 1019) > 0){
+		// there is a partial frame left in the file
+		} else if(dwSizeOfFile - (pwd->NumOfReads * 1019) > 0){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%pwd->NumOfReads, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			CloseFileTransmit(hWnd);
 			//MessageBox(hWnd, TEXT("File Read Complete"), 0, MB_OK);
-		
-		} else {
-			DISPLAY_ERROR("Problem reading transmit file");
+		}
+		else{
+
 			return;
 		}
 				
@@ -181,12 +197,19 @@ VOID ReadFromFile(HWND hWnd){
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 		pwd->FTPQueueSize+=1;
 
-		if (eof) {
+
+		/*if(dwSizeOfFile/1019 == pwd->NumOfReads){
 			frame = CreateNullFrame(hWnd);
 			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 			pwd->FTPQueueSize+=1;
-		}
+			CloseFileTransmit(hWnd);
+			ReleaseMutex(hMutex);
+			return;
+		}*/
+
 		ReleaseMutex(hMutex);
+		//if(dwSizeOfFile/pwd->NumOfReads == 1019)
+			//return;
 	}
 }
 
