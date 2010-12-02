@@ -128,11 +128,9 @@ VOID WriteToFile(HWND hWnd){
 			pwd->PTFQueueSize--;
 		}
 		
-		if(tempFrame->length != MAX_PAYLOAD_SIZE ){
-			
+		if(tempFrame->length != MAX_PAYLOAD_SIZE ){		
 			CloseFileReceive(hWnd);
 			OpenFileReceive(hWnd);
-		
 		}
 	}
 }
@@ -167,6 +165,7 @@ VOID ReadFromFile(HWND hWnd){
 			CloseFileTransmit(hWnd);
 			++pwd->NumOfReads;
 			
+
 			frame = CreateNullFrame(hWnd);
 			MessageBox(hWnd, TEXT("Transmit File Buffering Complete"), 0, MB_OK);
 
@@ -180,8 +179,6 @@ VOID ReadFromFile(HWND hWnd){
 			MessageBox(hWnd, TEXT("Transmit File Buffering Complete"), 0, MB_OK);
 		} 
 				
-		
-
 		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
 		WaitForSingleObject(hMutex,INFINITE);
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);

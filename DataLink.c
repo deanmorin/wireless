@@ -317,7 +317,12 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
             ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
             PostMessage(hWnd, WM_STAT, ACK, SENT);
         }
-		psi->rxSeq = (psi->rxSeq + 1) % 2;
+		dwLength = *((PSHORT) (pReadBuf + 2));
+		if (*((PSHORT) (pReadBuf + 2)) != MAX_PAYLOAD_SIZE) {
+			psi->rxSeq = 0;	
+		} else {
+			psi->rxSeq = (psi->rxSeq + 1) % 2;
+		}
     }
     return FRAME_SIZE;
 }
