@@ -126,12 +126,13 @@ VOID WriteToFile(HWND hWnd){
 		} else {
 			pwd->PTFQueueSize--;
 		}
+		/*
 		if(tempFrame->length != MAX_PAYLOAD_SIZE ){
 			
 			//CloseFileReceive(hWnd);
 			//OpenFileReceive(hWnd);
 		
-		}
+		}*/
 	}
 }
 
@@ -155,33 +156,35 @@ VOID ReadFromFile(HWND hWnd){
 	while(pwd->FTPQueueSize < FULL_BUFFER && pwd->hFileTransmit != NULL){
 
 		// file is at least a full frame
-		if((dwSizeOfFile - (++(pwd->NumOfReads) * 1019)) > 1019){
+		if((i =dwSizeOfFile - ((pwd->NumOfReads) * 1019)) > 0){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
+			++pwd->NumOfReads;
 
 		// there is exactly one frame left in the file
-		} else if((dwSizeOfFile - ((pwd->NumOfReads) * 1019)) == 1019){
+		} else if((dwSizeOfFile - ((pwd->NumOfReads) * 1019)) == 0){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			CloseFileTransmit(hWnd);
-			eof = TRUE;
+			++pwd->NumOfReads;
+			if (eof) {
+			frame = CreateNullFrame(hWnd);
+			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
+			pwd->FTPQueueSize+=1;
+		}
 			return;
 
 		// haven't read yet, and file is less than a full frame
-		} else if((dwSizeOfFile - ((pwd->NumOfReads) * 1019)) > 0){
+		} else {
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%MAX_PAYLOAD_SIZE, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			CloseFileTransmit(hWnd);
-			
-			//MessageBox(hWnd, TEXT("File Read Complete"), 0, MB_OK);
-		
-		} else {
-			DISPLAY_ERROR("Problem reading transmit file");
-			return;
-		}
+			++pwd->NumOfReads;	
+			MessageBox(hWnd, TEXT("Transmit File Buffering Complete"), 0, MB_OK);
+		} 
 				
 		frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
 
@@ -190,11 +193,7 @@ VOID ReadFromFile(HWND hWnd){
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 		pwd->FTPQueueSize+=1;
 
-		if (eof) {
-			frame = CreateNullFrame(hWnd);
-			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
-			pwd->FTPQueueSize+=1;
-		}
+		
 		ReleaseMutex(hMutex);
 	}
 }
