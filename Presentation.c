@@ -200,23 +200,30 @@ VOID UpdateDisplayBuf(HWND hWnd, CHAR cCharacter) {
 VOID DisplayFrameInfo(HWND hWnd, FRAME frame){
 	PWNDDATA	pwd		= NULL;
 	
-	CHAR* a = (CHAR*)malloc(sizeof(CHAR));
+	int a ;
 	CHAR* b = (CHAR*)malloc(sizeof(CHAR)*4);
 	CHAR* c = (CHAR*)malloc(sizeof(CHAR));
 	int i = 0;
+	int j;
+	SetScrollRegion(hWnd,2,LINES_PER_SCRN);
+	ScrollUp(hWnd);
+
 	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-	sprintf(a, "%d", pwd->NumOfFrames);
+	a= pwd->NumOfFrames;
 	sprintf(b, "%04x", frame.length);
 	sprintf(c, "%02x", frame.crc);
 	
-	MoveCursor( hWnd, 1, pwd->NumOfFrames + 2, FALSE);
+	MoveCursor( hWnd, 3,  2, FALSE);
 	for(i = 0; i < 3; i++){
-		UpdateDisplayBuf(hWnd, *a);
+		j=(a)%(10);
+		a /=10;
+		UpdateDisplayBuf(hWnd, j+48);
+		X -=2;
 	}
-	MoveCursor( hWnd, 12, pwd->NumOfFrames + 2, FALSE);
+	MoveCursor( hWnd, 12,  2, FALSE);
 	for(i = 0; i < 4; i++)
 		UpdateDisplayBuf(hWnd, b[i]);
-	MoveCursor(hWnd, 29, pwd->NumOfFrames + 2, FALSE);
+	MoveCursor(hWnd, 29,  2, FALSE);
 	for(i = 0; i < 3; i++){
 		UpdateDisplayBuf(hWnd, c[i]);
 	}
