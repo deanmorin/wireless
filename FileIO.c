@@ -126,13 +126,13 @@ VOID WriteToFile(HWND hWnd){
 		} else {
 			pwd->PTFQueueSize--;
 		}
-		/*
+		
 		if(tempFrame->length != MAX_PAYLOAD_SIZE ){
 			
-			//CloseFileReceive(hWnd);
-			//OpenFileReceive(hWnd);
+			CloseFileReceive(hWnd);
+			OpenFileReceive(hWnd);
 		
-		}*/
+		}
 	}
 }
 
