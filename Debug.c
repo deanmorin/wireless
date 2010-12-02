@@ -68,11 +68,13 @@ BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 
 			case IDC_BUTTONF3:
 				MakeDebugFrameThree(GetParent(hDlg));
+				MakeDebugFrameThree(GetParent(hDlg));
 				return TRUE;
 
             case IDC_BUTTONF4:
-                RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);
-                pwd->FTPQueueSize--;
+                RemoveFromFrameQueue(&pwd->FTPBuffHead, 2);
+                pwd->FTPQueueSize -= 2;
+				SendMessage(GetParent(hDlg), WM_FILLFTPBUF, 0, 0); 
                 return TRUE;
 		}
 		return FALSE;

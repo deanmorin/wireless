@@ -155,28 +155,22 @@ VOID ReadFromFile(HWND hWnd){
 
 	while(pwd->FTPQueueSize < FULL_BUFFER && pwd->hFileTransmit != NULL){
 
-		// file is at least a full frame
 		if((i =dwSizeOfFile - ((pwd->NumOfReads) * 1019)) > 0){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			++pwd->NumOfReads;
 
-		// there is exactly one frame left in the file
 		} else if((dwSizeOfFile - ((pwd->NumOfReads) * 1019)) == 0){
-			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
-				DISPLAY_ERROR("Failed to read from file");
-			}
 			CloseFileTransmit(hWnd);
 			++pwd->NumOfReads;
-			if (eof) {
+			
 			frame = CreateNullFrame(hWnd);
 			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 			pwd->FTPQueueSize+=1;
-		}
+		
 			return;
 
-		// haven't read yet, and file is less than a full frame
 		} else {
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%MAX_PAYLOAD_SIZE, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
@@ -193,7 +187,6 @@ VOID ReadFromFile(HWND hWnd){
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 		pwd->FTPQueueSize+=1;
 
-		
 		ReleaseMutex(hMutex);
 	}
 }
