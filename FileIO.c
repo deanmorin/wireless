@@ -163,7 +163,7 @@ VOID ReadFromFile(HWND hWnd){
 			return;
 
 		} else if((dwSizeOfFile - ((pwd->NumOfReads) * 1019)) > 0){
-			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%pwd->NumOfReads, &dwBytesRead, NULL)){
+			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%FRAME_SIZE, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			CloseFileTransmit(hWnd);
