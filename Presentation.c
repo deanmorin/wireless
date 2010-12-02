@@ -227,6 +227,7 @@ VOID DisplayFrameInfo(HWND hWnd, FRAME frame){
 	for(i = 0; i < 3; i++){
 		UpdateDisplayBuf(hWnd, c[i]);
 	}
+	InvalidateRect(hWnd,NULL,FALSE);
 	
 }
 
