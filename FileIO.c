@@ -49,6 +49,7 @@ VOID OpenFileTransmit(HWND hWnd){
 							OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	pwd->NumOfReads = 0;
 	PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
+	pwd->TxSequenceNumber = 0;
 }
 
 VOID CloseFileTransmit(HWND hWnd){
@@ -167,7 +168,7 @@ VOID ReadFromFile(HWND hWnd){
 			++pwd->NumOfReads;
 			
 			frame = CreateNullFrame(hWnd);
-			
+			MessageBox(hWnd, TEXT("Transmit File Buffering Complete"), 0, MB_OK);
 
 		} else {
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%MAX_PAYLOAD_SIZE, &dwBytesRead, NULL)){
