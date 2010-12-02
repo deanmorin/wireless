@@ -138,7 +138,7 @@ VOID ReadFromFile(HWND hWnd){
 	BOOL	eof	= FALSE;
    	FRAME frame;
 	HANDLE hMutex = {0};
-
+	int i;
 	PBYTE ReadBuffer = (PBYTE) malloc(sizeof(BYTE) *1019);
 
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
@@ -149,12 +149,12 @@ VOID ReadFromFile(HWND hWnd){
 
 	while(pwd->FTPQueueSize < FULL_BUFFER && pwd->hFileTransmit != NULL){
 		
-		if(dwSizeOfFile - (++(pwd->NumOfReads) * 1019) > 1019){
+		if((i =dwSizeOfFile - (++(pwd->NumOfReads) * 1019)) > 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 
-		} else if(dwSizeOfFile - (++(pwd->NumOfReads) * 1019) == 1019){
+		} else if((dwSizeOfFile - ((pwd->NumOfReads) * 1019)) == 1019){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
@@ -162,11 +162,12 @@ VOID ReadFromFile(HWND hWnd){
 			eof = TRUE;
 			return;
 
-		} else if(dwSizeOfFile - (++(pwd->NumOfReads) * 1019) > 0){
+		} else if((dwSizeOfFile - ((pwd->NumOfReads) * 1019)) > 0){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%pwd->NumOfReads, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			CloseFileTransmit(hWnd);
+			
 			//MessageBox(hWnd, TEXT("File Read Complete"), 0, MB_OK);
 		
 		} else {
