@@ -15,7 +15,7 @@
 --
 -- REVISIONS:   Nov 06, 2010
 --              Removed SetBell(), added MakeColumns().
---
+--				
 -- DESIGNER:    Dean Morin
 --
 -- PROGRAMMER:  Dean Morin
@@ -295,7 +295,8 @@ VOID Paint(HWND hWnd) {
 -- INTERFACE:   VOID MakeColumns(HWND hWnd)
 --                              hWnd - handle to the window
 --
---
+-- REVISIONS:	Daniel Wright - Dec 2, 2010
+--					Modified to display columns for wireless protocol.
 -- RETURNS:     VOID.
 --
 -- NOTES:

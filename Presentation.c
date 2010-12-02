@@ -21,6 +21,7 @@
 --                              CHAR* pcData, DWORD dwDataLength)
 --				VOID	ProcessPacket(HWND hWnd, CHAR* pcPacket, 
 --                                    DWORD dwLength);
+--				VOID 	DisplayFrameInfo(HWND hWnd, FRAME frame);
 --
 -- DATE:        Oct 19, 2010
 --
@@ -196,7 +197,26 @@ VOID UpdateDisplayBuf(HWND hWnd, CHAR cCharacter) {
         X++;
     }
 }
-
+/*------------------------------------------------------------------------------
+-- FUNCTION:    DisplayFrameInfo
+--
+-- DATE:        Dec 2, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Daniel Wright
+--
+-- PROGRAMMER:  Daniel Wright
+--
+-- INTERFACE:   DisplayFrameInfo(HWND hWnd, FRAME frame)
+--                      hWnd			- a handle to the window
+--						frame			- frame to display information about
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Uses GetOpenFileName to get the name of the file to be
+--				transmitted and opens it.
+------------------------------------------------------------------------------*/
 VOID DisplayFrameInfo(HWND hWnd, FRAME frame){
 	PWNDDATA	pwd		= NULL;
 	
