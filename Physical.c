@@ -229,7 +229,7 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
             AddToByteQueue(&pwd->pReadBufHead, &pwd->pReadBufTail, pReadBuf[i]);
 			dwQueueSize++;
         }
-		// checks for 1 byte read, incase the tx side is out of sync
+		// checks for 1 byte read, in case the tx side is out of sync
         if (dwQueueSize >= FRAME_SIZE  ||  dwBytesRead == CTRL_FRAME_SIZE) {
 
             pQueue = RemoveFromByteQueue(&pwd->pReadBufHead, dwQueueSize);
