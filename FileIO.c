@@ -128,9 +128,9 @@ VOID WriteToFile(HWND hWnd){
 		}
 		/*
 		if(tempFrame->length != MAX_PAYLOAD_SIZE ){
-
-			CloseFileReceive(hWnd);
-			OpenFileReceive(hWnd);
+			
+			//CloseFileReceive(hWnd);
+			//OpenFileReceive(hWnd);
 		
 		}*/
 	}
@@ -154,31 +154,36 @@ VOID ReadFromFile(HWND hWnd){
 	}
 
 	while(pwd->FTPQueueSize < FULL_BUFFER && pwd->hFileTransmit != NULL){
-		//  file is at least a full frame
+
+		// file is at least a full frame
 		if((i =dwSizeOfFile - ((pwd->NumOfReads) * 1019)) > 0){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			++pwd->NumOfReads;
-			// there is exactly one frame left in the file
+
+		// there is exactly one frame left in the file
 		} else if((dwSizeOfFile - ((pwd->NumOfReads) * 1019)) == 0){
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, 1019, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			CloseFileTransmit(hWnd);
 			++pwd->NumOfReads;
-			eof = TRUE;
+			if (eof) {
+			frame = CreateNullFrame(hWnd);
+			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
+			pwd->FTPQueueSize+=1;
+		}
 			return;
-			// haven't read yet, and file is less than a full frame
+
+		// haven't read yet, and file is less than a full frame
 		} else {
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%MAX_PAYLOAD_SIZE, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			CloseFileTransmit(hWnd);
-			++pwd->NumOfReads;
-			
-			//MessageBox(hWnd, TEXT("File Read Complete"), 0, MB_OK);
-		
+			++pwd->NumOfReads;	
+			MessageBox(hWnd, TEXT("Transmit File Buffering Complete"), 0, MB_OK);
 		} 
 				
 		frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
@@ -188,11 +193,7 @@ VOID ReadFromFile(HWND hWnd){
 		AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
 		pwd->FTPQueueSize+=1;
 
-		if (eof) {
-			frame = CreateNullFrame(hWnd);
-			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
-			pwd->FTPQueueSize+=1;
-		}
+		
 		ReleaseMutex(hMutex);
 	}
 }
