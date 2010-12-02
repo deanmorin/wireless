@@ -160,13 +160,14 @@ VOID ReadFromFile(HWND hWnd){
 				DISPLAY_ERROR("Failed to read from file");
 			}
 			++pwd->NumOfReads;
+			frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
 
 		} else if((dwSizeOfFile - ((pwd->NumOfReads) * 1019)) == 0){
 			CloseFileTransmit(hWnd);
 			++pwd->NumOfReads;
 			
 			frame = CreateNullFrame(hWnd);
-		
+			
 
 		} else {
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%MAX_PAYLOAD_SIZE, &dwBytesRead, NULL)){
@@ -174,10 +175,11 @@ VOID ReadFromFile(HWND hWnd){
 			}
 			CloseFileTransmit(hWnd);
 			++pwd->NumOfReads;	
+			frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
 			MessageBox(hWnd, TEXT("Transmit File Buffering Complete"), 0, MB_OK);
 		} 
 				
-		frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
+		
 
 		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
 		WaitForSingleObject(hMutex,INFINITE);
