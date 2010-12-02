@@ -166,10 +166,7 @@ VOID ReadFromFile(HWND hWnd){
 			++pwd->NumOfReads;
 			
 			frame = CreateNullFrame(hWnd);
-			AddToFrameQueue(&pwd->FTPBuffHead, &pwd->FTPBuffTail, frame);
-			pwd->FTPQueueSize+=1;
 		
-			return;
 
 		} else {
 			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%MAX_PAYLOAD_SIZE, &dwBytesRead, NULL)){
