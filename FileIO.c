@@ -327,13 +327,19 @@ VOID ReadFromFile(HWND hWnd){
 			MessageBox(hWnd, TEXT("Transmit File Buffering Complete"), 0, MB_OK);
 
 		} else {
-			if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%MAX_PAYLOAD_SIZE, &dwBytesRead, NULL)){
+			
+			CloseFileTransmit(hWnd);
+			MessageBox(hWnd, TEXT("Transmit File Buffering Complete"), 0, MB_OK);
+			return;
+			
+			/*if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%MAX_PAYLOAD_SIZE, &dwBytesRead, NULL)){
 				DISPLAY_ERROR("Failed to read from file");
 			}
-			CloseFileTransmit(hWnd);
+			
 			++pwd->NumOfReads;	
 			frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
-			MessageBox(hWnd, TEXT("Transmit File Buffering Complete"), 0, MB_OK);
+			*/
+			
 		} 
 				
 		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
