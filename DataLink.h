@@ -21,15 +21,15 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define STATE_R4    103
 
 // timeout values
-#define TOR0_BASE               1001
-#define TOR0_RANGE              500
+#define TOR0_BASE               0
+#define TOR0_RANGE              2000
 #define TOR0					TOR0_BASE + rand() % TOR0_RANGE
 #define TOR1					1000
 #define TOR2                    1000
-#define TOR3                    1000
+#define TOR3                    1500
 #define MAX_TIMEOUTS            3
-#define TOR2_INCREASE_FACTOR    2
-#define TOR3_INCREASE_FACTOR    2
+#define TOR2_INCREASE_FACTOR    1
+#define TOR3_INCREASE_FACTOR    1
 
 // frame components
 #define CTRL_FRAME_SIZE     1
