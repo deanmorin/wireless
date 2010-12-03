@@ -353,8 +353,10 @@ VOID UpdateStats(HWND hWnd) {
 
 	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
-	if (lastTime == 0) lastTime = GetTickCount() / 1000.0; 
-	thisTime = (GetTickCount() / 1000.0);
+	if (lastTime == 0) {
+		lastTime = (FLOAT) (GetTickCount() / 1000.0); 
+	}
+	thisTime = (FLOAT) (GetTickCount() / 1000.0);
 	totalTime = thisTime - lastTime;
 	lastTime = thisTime;
 

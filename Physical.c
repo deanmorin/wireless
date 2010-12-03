@@ -191,7 +191,7 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
     BYTE            pReadBuf[READ_BUFSIZE]  = {0};
 	PBYTE			pQueue					= NULL;
     DWORD           dwBytesRead             = 0;
-    INT             i                       = 0;
+    DWORD           i                       = 0;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
 
