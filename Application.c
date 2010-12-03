@@ -485,6 +485,7 @@ BOOL CALLBACK Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 				UP_FRAMES = 0;
 				DOWN_FRAMES_ACKD = 0;
 				UP_FRAMES_ACKD = 0;
+				UpdateStats(GetParent(hDlg));
 				return TRUE;
 		}
 		return FALSE;
