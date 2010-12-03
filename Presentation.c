@@ -1,8 +1,9 @@
 /*------------------------------------------------------------------------------
 -- SOURCE FILE:     Presentation.c - Contains all the OSI "presentation layer"
---                                   functions for the RFID reader.
+--                                   functions for the program.
 --
--- PROGRAM:     RFID Reader - Enterprise Edition
+-- PROGRAM:     Dean and the Rockets' Wireless Protocol Testing and Evaluation 
+--              Facilitator
 --
 -- FUNCTIONS:
 --              VOID    UpdateDisplayBuf(HWND hWnd, CHAR cCharacter);
@@ -30,11 +31,10 @@
 -- PROGRAMMER:  Dean Morin
 --
 -- NOTES:
--- Contains presentation level functions for the RFID reader.
+-- Contains presentation level functions for the program.
 -- These are the functions that process the characters both typed and received
 -- into meaningful data.
 ------------------------------------------------------------------------------*/
-
 #include "Presentation.h"
 
 /*------------------------------------------------------------------------------

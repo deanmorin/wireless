@@ -1,27 +1,29 @@
 /*------------------------------------------------------------------------------
 -- SOURCE FILE:     Session.c   - Contains all the OSI "session layer"
---                                functions for the RFID reader.
+--                                functions for the program.
 --
--- PROGRAM:     RFID Reader - Enterprise Edition
+-- PROGRAM:     Dean and the Rockets' Wireless Protocol Testing and Evaluation 
+--              Facilitator
 --
 -- FUNCTIONS:
 --              BOOL    Connect(HWND);
 --              VOID    Disconnect(HWND);
 --              VOID    SelectPort(HWND, INT);
---				VOID	InitRfid(HWND);
 --
 -- DATE:        Oct 19, 2010
 --
 -- REVISIONS:   Nov 06, 2010
 --              Dean    - Modified Disconnect() to be more event driven.
 --              Daniel  - Added InitRfid() and updated Connect.
+--				Dec 02, 2010
+--				Dean	- Removed InitTerminal()
 --
 -- DESIGNER:    Dean Morin, Daniel Wright
 --
 -- PROGRAMMER:  Dean Morin, Daniel Wright
 --
 -- NOTES:
--- Contains session level functions for the RFID reader. These
+-- Contains session level functions for the program. These
 -- are the functions that deal with setting up connections and configuring the
 -- port.
 ------------------------------------------------------------------------------*/
@@ -90,11 +92,11 @@ BOOL Connect(HWND hWnd) {
         DISPLAY_ERROR("Error retrieving comm timeouts");
         return FALSE;   
     }
-    timeOut.ReadIntervalTimeout         = MAXDWORD;//50;
-	timeOut.ReadTotalTimeoutConstant	= 0;//10000;
-	timeOut.ReadTotalTimeoutMultiplier	= 0;//50;
-	timeOut.WriteTotalTimeoutMultiplier = 0;//50;
-    timeOut.WriteTotalTimeoutConstant   = 0;//10000;
+    timeOut.ReadIntervalTimeout         = MAXDWORD;
+	timeOut.ReadTotalTimeoutConstant	= 0;
+	timeOut.ReadTotalTimeoutMultiplier	= 0;
+	timeOut.WriteTotalTimeoutMultiplier = 0;
+    timeOut.WriteTotalTimeoutConstant   = 0;
 
     if (!SetCommTimeouts(pwd->hPort, &timeOut)) {
         DISPLAY_ERROR("Could not set comm timeouts");

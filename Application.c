@@ -1,8 +1,9 @@
 /*------------------------------------------------------------------------------
 -- SOURCE FILE:     Application.c - Contains all the OSI "application layer"
---                                  functions for the RFID reader.
+--                                  functions for the program.
 --
--- PROGRAM:     RFID Reader - Enterprise Edition
+-- PROGRAM:     Dean and the Rockets' Wireless Protocol Testing and Evaluation 
+--              Facilitator
 --
 -- FUNCTIONS:
 --				BOOL CALLBACK UpdateStats(HWND)
@@ -16,19 +17,18 @@
 --
 -- DATE:        Oct 19, 2010
 --
--- REVISIONS:   Nov 06, 2010
---              Removed SetBell(), added MakeColumns().
+-- REVISIONS:   Nov 06, 2010 - removed SetBell(), added MakeColumns()
+--				Dec 02, 2010 - added stats functions
 --				
 -- DESIGNER:    Dean Morin
 --
 -- PROGRAMMER:  Dean Morin
 --
 -- NOTES:
--- Contains application level functions for the RFID reader. These
+-- Contains application level functions for the program. These
 -- are the functions that deal with the program display, as well as initializing
 -- the program.
 ------------------------------------------------------------------------------*/
-
 #include "Application.h"
 
 /*------------------------------------------------------------------------------
