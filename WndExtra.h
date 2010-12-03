@@ -69,6 +69,17 @@ typedef struct charInfo {
     BYTE    style;
 } CHARINFO;
 
+typedef struct DTRInfo {
+    FLOAT dRate;
+	FLOAT uRate;
+	FLOAT edRate;
+	FLOAT euRate;
+	FLOAT odRate;
+	FLOAT ouRate;
+	FLOAT oedRate;
+	FLOAT oeuRate;
+} DTRINFO;
+
 typedef struct statsInfo {
     INT dlState;
     INT	numFiles;

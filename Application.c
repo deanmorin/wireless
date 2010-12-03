@@ -11,6 +11,7 @@
 --              VOID    InitTerminal(HWND)
 --              VOID    Paint(HWND)
 --              VOID    PerformMenuAction(HWND, WPARAM)
+--				VOID	PrintStats(HWND hWnd, DTRINFO dtrInfo)
 --              VOID    MakeColumns(VOID)
 --				VOID	UpdateStatStruct(HWND, WPARAM, LPARAM)
 --
@@ -337,57 +338,106 @@ VOID MakeColumns(HWND hWnd){
 --
 -- RETURNS:     VOID
 -- 
--- NOTES:	Updates the statistics box values.
+-- NOTES:	Updates the data rate statistics.
 --              
 --
 ------------------------------------------------------------------------------*/
 VOID UpdateStats(HWND hWnd) {
-    static FLOAT totalTime = 0;
-    static FLOAT dRate = 0, uRate = 0, tRate = 0, edRate = 0, euRate = 0, etRate = 0;
-    TCHAR text[20];
-    static FLOAT lastTime = 0;
+    static FLOAT totalTime = 0, lastTime = 0, firstTime = 0, overallTime = 0;
     FLOAT thisTime;
     static INT lastdFrames = 0, lastuFrames = 0, lastedFrames = 0, lasteuFrames = 0;
     static INT count = 0;
-    INT framesDiscarded = 0;
-
-    PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+	static DTRINFO dtrInfo;
+	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+	
+	dtrInfo.dRate = 0;
+	dtrInfo.uRate = 0;
+	dtrInfo.edRate = 0;
+	dtrInfo.euRate = 0;
+	dtrInfo.odRate = 0;
+	dtrInfo.ouRate = 0;
+	dtrInfo.oedRate = 0;
+	dtrInfo.oeuRate = 0;
 
     if (lastTime == 0) {
         lastTime = (FLOAT) (GetTickCount() / 1000.0); 
     }
+	if (firstTime == 0) {
+		firstTime = (FLOAT) (GetTickCount() / 1000.0); 
+	}
+	overallTime = (FLOAT) (GetTickCount() / 1000.0) - firstTime; 
     thisTime = (FLOAT) (GetTickCount() / 1000.0);
     totalTime = thisTime - lastTime;
     lastTime = thisTime;
 
+	dtrInfo.odRate = (UP_FRAMES * 1024 * 8) / overallTime;
+	dtrInfo.ouRate = (DOWN_FRAMES * 1024 * 8) / overallTime;
+	dtrInfo.oedRate = (DOWN_FRAMES_ACKD * 1024 * 8) / overallTime;
+	dtrInfo.oeuRate = (UP_FRAMES_ACKD * 1024 * 8) / overallTime;
+
     if (UP_FRAMES != lastuFrames || DOWN_FRAMES != lastdFrames) {
         if (count++ == 0) {
-            uRate = 0;
-            dRate = 0;
-            edRate = 0;
-            euRate = 0;
+            dtrInfo.uRate = 0;
+            dtrInfo.dRate = 0;
+            dtrInfo.edRate = 0;
+            dtrInfo.euRate = 0;
+			dtrInfo.ouRate = 0;
+            dtrInfo.odRate = 0;
+            dtrInfo.oedRate = 0;
+            dtrInfo.oeuRate = 0;
         } else if (totalTime != 0) {
             if ((UP_FRAMES - lastuFrames)!= 0) {
-                uRate = ((UP_FRAMES - lastuFrames) * 1024 * 8) / totalTime;
+                dtrInfo.uRate = ((UP_FRAMES - lastuFrames) * 1024 * 8) / totalTime;
                 lastuFrames = UP_FRAMES;
             }
             if ((DOWN_FRAMES - lastdFrames)!= 0) {
-                dRate = ((DOWN_FRAMES - lastdFrames) * 1024 * 8) / totalTime;
+                dtrInfo.dRate = ((DOWN_FRAMES - lastdFrames) * 1024 * 8) / totalTime;
                 lastdFrames = DOWN_FRAMES;
             }
             if ((DOWN_FRAMES_ACKD - lastedFrames)!= 0) {
-                edRate = ((DOWN_FRAMES_ACKD - lastedFrames) * 1019 * 8) / totalTime;
+                dtrInfo.edRate = ((DOWN_FRAMES_ACKD - lastedFrames) * 1019 * 8) / totalTime;
                 lastedFrames = DOWN_FRAMES_ACKD;
             }
             if ((UP_FRAMES_ACKD - lasteuFrames)!= 0) {
-                euRate = ((UP_FRAMES_ACKD - lasteuFrames) * 1019 * 8) / totalTime;
+                dtrInfo.euRate = ((UP_FRAMES_ACKD - lasteuFrames) * 1019 * 8) / totalTime;
                 lasteuFrames = UP_FRAMES_ACKD;
             }
         }
     }
-    _stprintf(text, _T("%d"), NUM_FILES);
-    SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
+	PrintStats(hWnd,dtrInfo);
+}
 
+/*------------------------------------------------------------------------------
+-- FUNCTION:    PrintStats
+--
+-- DATE:        Dec 02, 2010
+--
+-- REVISIONS:   
+--
+-- DESIGNER: 	Marcel Vangrootheest
+--
+-- PROGRAMMER:  Marcel Vangrootheest
+--
+-- INTERFACE:   BOOL CALLBACK PrintStats(HWND hWnd)
+--                              hWnd  - handle to the window
+--								dRate - download rate
+--								uRate - upload rate
+--								edRate - effective download rate
+--								euRate - effective upload rate
+--
+-- RETURNS:     VOID
+-- 
+-- NOTES:	Updates the statistics in the Dialog window.
+--              
+--
+------------------------------------------------------------------------------*/
+VOID PrintStats(HWND hWnd, DTRINFO dtrInfo) {
+    TCHAR text[20];
+	FLOAT tRate = 0, etRate = 0;
+	INT framesDiscarded = 0, framesResent = 0;
+    PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+
+	
     _stprintf(text, _T("%d"), SENT_ACK);
     SetDlgItemText(pwd->hDlgStats, IDC_ACKSENT, text);
 
@@ -405,9 +455,6 @@ VOID UpdateStats(HWND hWnd) {
 
     _stprintf(text, _T("%d"), REC_RVI);
     SetDlgItemText(pwd->hDlgStats, IDC_RVIRECEIVED, text);
-    
-    tRate = dRate + uRate;
-    etRate = edRate + euRate;
 
     _stprintf(text, _T("%d"), UP_FRAMES);
     SetDlgItemText(pwd->hDlgStats, IDC_FRAMESENT, text);
@@ -415,29 +462,38 @@ VOID UpdateStats(HWND hWnd) {
     _stprintf(text, _T("%d"), DOWN_FRAMES);
     SetDlgItemText(pwd->hDlgStats, IDC_FRAMEREC, text);
 
-    _stprintf(text, _T("%.2f"), dRate);
+    _stprintf(text, _T("%.2f"), dtrInfo.dRate);
     SetDlgItemText(pwd->hDlgStats, IDC_DRATE, text);
 
-    _stprintf(text, _T("%.2f"), uRate);
+    _stprintf(text, _T("%.2f"), dtrInfo.uRate);
     SetDlgItemText(pwd->hDlgStats, IDC_URATE, text);
-
-    _stprintf(text, _T("%.2f"), tRate);
-    SetDlgItemText(pwd->hDlgStats, IDC_TRATE, text);
     
-    _stprintf(text, _T("%.2f"), edRate);
+    _stprintf(text, _T("%.2f"), dtrInfo.edRate);
     SetDlgItemText(pwd->hDlgStats, IDC_EDRATE, text);
 
-    _stprintf(text, _T("%.2f"), euRate);
+    _stprintf(text, _T("%.2f"), dtrInfo.euRate);
     SetDlgItemText(pwd->hDlgStats, IDC_EURATE, text);
 
-    _stprintf(text, _T("%.2f"), etRate);
-    SetDlgItemText(pwd->hDlgStats, IDC_ETRATE, text);
+	_stprintf(text, _T("%.2f"), dtrInfo.odRate);
+    SetDlgItemText(pwd->hDlgStats, IDC_ODRATE, text);
+
+    _stprintf(text, _T("%.2f"), dtrInfo.ouRate);
+    SetDlgItemText(pwd->hDlgStats, IDC_OURATE, text);
+    
+    _stprintf(text, _T("%.2f"), dtrInfo.oedRate);
+    SetDlgItemText(pwd->hDlgStats, IDC_EODRATE, text);
+
+    _stprintf(text, _T("%.2f"), dtrInfo.oeuRate);
+    SetDlgItemText(pwd->hDlgStats, IDC_EOURATE, text);
 
     framesDiscarded = DOWN_FRAMES - DOWN_FRAMES_ACKD;
     _stprintf(text, _T("%d"), framesDiscarded);
     SetDlgItemText(pwd->hDlgStats, IDC_FRAME_DISCARDED, text);
-}
 
+	framesResent = UP_FRAMES - UP_FRAMES_ACKD;
+    _stprintf(text, _T("%d"), framesResent);
+    SetDlgItemText(pwd->hDlgStats, IDC_FRAMES_RESENT, text);
+}
 
 /*------------------------------------------------------------------------------
 -- FUNCTION:    Stats
