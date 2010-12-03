@@ -18,11 +18,11 @@
 #pragma pack(push)
 #pragma pack(1)
 typedef struct FRAME {
-	BYTE		soh;
-	BYTE		sequence;
-	SHORT		length;
-	BYTE		payload[MAX_PAYLOAD_SIZE];
-	BYTE		crc;
+    BYTE		soh;
+    BYTE		sequence;
+    SHORT		length;
+    BYTE		payload[MAX_PAYLOAD_SIZE];
+    BYTE		crc;
 } FRAME, *PFRAME;
 #pragma pack(pop)
 

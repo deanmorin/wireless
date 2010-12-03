@@ -50,16 +50,16 @@
 ------------------------------------------------------------------------------*/
 VOID ProcessWrite(HWND hWnd, PBYTE pFrame, DWORD dwLength) {
     OVERLAPPED  ol			= {0};
-	DWORD		dwWritten	= 0;
+    DWORD		dwWritten	= 0;
     PWNDDATA	pwd			= (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (!WriteFile(pwd->hPort, pFrame, dwLength, NULL, &ol)) {
-		ProcessCommError(pwd->hPort);
-		GetOverlappedResult(pwd->hPort, &ol, &dwWritten, TRUE);
-	}
-	if (dwWritten != dwLength) {
-		DISPLAY_ERROR("Full frame was not written");
-	}
+        ProcessCommError(pwd->hPort);
+        GetOverlappedResult(pwd->hPort, &ol, &dwWritten, TRUE);
+    }
+    if (dwWritten != dwLength) {
+        DISPLAY_ERROR("Full frame was not written");
+    }
 }
 
 /*------------------------------------------------------------------------------
@@ -127,14 +127,14 @@ UINT ReadT1(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
         PostMessage(hWnd, WM_STAT, ACK, REC);
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_T3);
         psi->iState				= STATE_T3;
-		psi->dwTimeout			= TOR2;
+        psi->dwTimeout			= TOR2;
         psi->itoCount			= 0;
-		psi->iFailedENQCount		= 0;
-		SendFrame(hWnd, psi);
+        psi->iFailedENQCount		= 0;
+        SendFrame(hWnd, psi);
 
     } else {	// unexpected character was received
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
-		psi->iState     = STATE_IDLE;
+        psi->iState     = STATE_IDLE;
         psi->dwTimeout	= TOR0;
     }
     return CTRL_FRAME_SIZE;
@@ -166,45 +166,45 @@ UINT ReadT1(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
 --				if an RVI is received.
 ------------------------------------------------------------------------------*/
 UINT ReadT3(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
-	HANDLE hMutex = 0;
+    HANDLE hMutex = 0;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     if (pReadBuf[CTRL_CHAR_INDEX] == ACK) {
-		
-		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
-		WaitForSingleObject(hMutex,INFINITE);
-		RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);
-		ReleaseMutex(hMutex);
+        
+        hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
+        WaitForSingleObject(hMutex,INFINITE);
+        RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);
+        ReleaseMutex(hMutex);
 
         PostMessage(hWnd, WM_STAT, ACK, REC);
         SendMessage(hWnd, WM_STAT, STAT_FRAMEACKD, SENT);
-		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);  
+        PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);  
         SendFrame(hWnd, psi);
 
     } else if (pReadBuf[CTRL_CHAR_INDEX] == RVI) {
 
-		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
-		WaitForSingleObject(hMutex,INFINITE);
-		RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);
-		ReleaseMutex(hMutex);
+        hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
+        WaitForSingleObject(hMutex,INFINITE);
+        RemoveFromFrameQueue(&pwd->FTPBuffHead, 1);
+        ReleaseMutex(hMutex);
 
-		pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
+        pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
-		SendMessage(hWnd, WM_STAT, STAT_FRAMEACKD, SENT);
-		PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
-		
-		PostMessage(hWnd, WM_STAT, RVI, REC);
+        SendMessage(hWnd, WM_STAT, STAT_FRAMEACKD, SENT);
+        PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
+        
+        PostMessage(hWnd, WM_STAT, RVI, REC);
         PostMessage(hWnd, WM_STAT, ACK, SENT);
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_R2);
-		psi->iState     = STATE_R2;
+        psi->iState     = STATE_R2;
         psi->dwTimeout  = TOR3;
         psi->itoCount   = 0;
 
     } else {
-		PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
-		psi->iState = STATE_IDLE;
-	}
+        PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
+        psi->iState = STATE_IDLE;
+    }
     return CTRL_FRAME_SIZE;
 }
 
@@ -240,7 +240,7 @@ UINT ReadIDLE(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
         pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
         PostMessage(hWnd, WM_STAT, ACK, SENT);
-		PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_R2);
+        PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_R2);
         psi->iState     = STATE_R2;
         psi->dwTimeout  = TOR3;
     }
@@ -275,54 +275,54 @@ UINT ReadIDLE(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
 --				frame is received.
 ------------------------------------------------------------------------------*/
 UINT ReadR2(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
-	HANDLE hMutex = 0;
+    HANDLE hMutex = 0;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0};
     PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-	
+    
     if (pReadBuf[CTRL_CHAR_INDEX] == EOT) {
         PostMessage(hWnd, WM_STAT, EOT, REC);
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
-		psi->iState		= STATE_IDLE;
+        psi->iState		= STATE_IDLE;
         psi->dwTimeout	= TOR0;
         return CTRL_FRAME_SIZE;
     }
     if (pReadBuf[0] != SOH) {		// an unexpected frame arrived
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
-		psi->iState		= STATE_IDLE;
+        psi->iState		= STATE_IDLE;
         return INVALID_FRAME;
     }
     if (dwLength < FRAME_SIZE) {
         return UNFINISHED_FRAME;	// a full frame has not arrived at the port yet
     }
-	PostMessage(hWnd, WM_STAT, STAT_FRAME, REC);
+    PostMessage(hWnd, WM_STAT, STAT_FRAME, REC);
 
-	if (crcFast(pReadBuf, dwLength) == 0  &&  pReadBuf[1] == psi->rxSeq) {
+    if (crcFast(pReadBuf, dwLength) == 0  &&  pReadBuf[1] == psi->rxSeq) {
 
-		hMutex = CreateMutex(NULL, FALSE, TEXT("PTFMutex"));
-		WaitForSingleObject(hMutex,INFINITE);
-		AddToFrameQueue(&pwd->PTFBuffHead, &pwd->PTFBuffTail, *((PFRAME) pReadBuf));
-		ReleaseMutex(hMutex);
-		PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, REC);
-		PostMessage(hWnd, WM_EMPTYPTFBUF, 0, 0);
-		
+        hMutex = CreateMutex(NULL, FALSE, TEXT("PTFMutex"));
+        WaitForSingleObject(hMutex,INFINITE);
+        AddToFrameQueue(&pwd->PTFBuffHead, &pwd->PTFBuffTail, *((PFRAME) pReadBuf));
+        ReleaseMutex(hMutex);
+        PostMessage(hWnd, WM_STAT, STAT_FRAMEACKD, REC);
+        PostMessage(hWnd, WM_EMPTYPTFBUF, 0, 0);
+        
 
         if (pwd->FTPQueueSize) {
             pCtrlFrame[CTRL_CHAR_INDEX] = RVI;
             ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
             PostMessage(hWnd, WM_STAT, RVI, SENT);		            
             PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_T1);
-			psi->iState = STATE_T1;
+            psi->iState = STATE_T1;
         } else {
             pCtrlFrame[CTRL_CHAR_INDEX] = ACK;
             ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
             PostMessage(hWnd, WM_STAT, ACK, SENT);
         }
-		dwLength = *((PSHORT) (pReadBuf + 2));
-		if (*((PSHORT) (pReadBuf + 2)) != MAX_PAYLOAD_SIZE) {
-			psi->rxSeq = 0;	
-		} else {
-			psi->rxSeq = (psi->rxSeq + 1) % 2;
-		}
+        dwLength = *((PSHORT) (pReadBuf + 2));
+        if (*((PSHORT) (pReadBuf + 2)) != MAX_PAYLOAD_SIZE) {
+            psi->rxSeq = 0;	
+        } else {
+            psi->rxSeq = (psi->rxSeq + 1) % 2;
+        }
     }
     return FRAME_SIZE;
 }
@@ -349,7 +349,7 @@ UINT ReadR2(HWND hWnd, PSTATEINFO psi, PBYTE pReadBuf, DWORD dwLength) {
 --				otherwise sends an EOT.
 ------------------------------------------------------------------------------*/
 VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
-	HANDLE hMutex = 0;
+    HANDLE hMutex = 0;
     static BYTE pCtrlFrame[CTRL_FRAME_SIZE] = {0}; 
     PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
@@ -358,14 +358,14 @@ VOID SendFrame(HWND hWnd, PSTATEINFO psi) {
         ProcessWrite(hWnd, pCtrlFrame, CTRL_FRAME_SIZE);
         PostMessage(hWnd, WM_STAT, EOT, SENT);
         PostMessage(hWnd, WM_STAT, STAT_STATE, STATE_IDLE);
-		psi->iState     = STATE_IDLE;
-		psi->dwTimeout  = TOR0;
+        psi->iState     = STATE_IDLE;
+        psi->dwTimeout  = TOR0;
 
     } else {
-		hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
-		WaitForSingleObject(hMutex,INFINITE);
+        hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
+        WaitForSingleObject(hMutex,INFINITE);
         ProcessWrite(hWnd, (PBYTE) &pwd->FTPBuffHead->f, FRAME_SIZE);
-		ReleaseMutex(hMutex);
+        ReleaseMutex(hMutex);
 
         PostMessage(hWnd, WM_STAT, STAT_FRAME, SENT);
     }
@@ -410,7 +410,7 @@ VOID ProcessTimeout(HWND hWnd, PSTATEINFO psi) {
 
         case STATE_T1:
             if (++(psi->iFailedENQCount) >= MAX_FAILED_ENQS) {
-				PostMessage(hWnd, WM_COMMAND, MAKEWPARAM(IDM_DISCONNECT, 0), 0);
+                PostMessage(hWnd, WM_COMMAND, MAKEWPARAM(IDM_DISCONNECT, 0), 0);
                 DISPLAY_ERROR("Connection can not be established.\nDisconnecting..."); 
             }
             psi->dwTimeout  = TOR0;

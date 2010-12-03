@@ -69,15 +69,15 @@ VOID UpdateDisplayBuf(HWND hWnd, CHAR cCharacter) {
      
     CHARACTER(X, Y).character   = cCharacter;
     CHARACTER(X, Y).fgColor     = CUR_FG_COLOR;
-	CHARACTER(X, Y).bgColor     = CUR_BG_COLOR;
-	CHARACTER(X, Y).style	    = CUR_STYLE;
+    CHARACTER(X, Y).bgColor     = CUR_BG_COLOR;
+    CHARACTER(X, Y).style	    = CUR_STYLE;
     
     if (X >= CHARS_PER_LINE - 1) { 
         if (pwd->wordWrap == FALSE) {
-			return;
-		}
-		X = 0;
-		if (Y < LINES_PER_SCRN - 1) { 
+            return;
+        }
+        X = 0;
+        if (Y < LINES_PER_SCRN - 1) { 
             Y++;
         } else {
             ScrollDown(hWnd);
@@ -107,37 +107,37 @@ VOID UpdateDisplayBuf(HWND hWnd, CHAR cCharacter) {
 --				transmitted and opens it.
 ------------------------------------------------------------------------------*/
 VOID DisplayFrameInfo(HWND hWnd, FRAME frame){
-	PWNDDATA	pwd		= NULL;
-	
-	int a ;
-	CHAR* b = (CHAR*)malloc(sizeof(CHAR)*4);
-	CHAR* c = (CHAR*)malloc(sizeof(CHAR));
-	int i = 0;
-	int j;
-	SetScrollRegion(hWnd,2,LINES_PER_SCRN);
-	ScrollUp(hWnd);
+    PWNDDATA	pwd		= NULL;
+    
+    int a ;
+    CHAR* b = (CHAR*)malloc(sizeof(CHAR)*4);
+    CHAR* c = (CHAR*)malloc(sizeof(CHAR));
+    int i = 0;
+    int j;
+    SetScrollRegion(hWnd,2,LINES_PER_SCRN);
+    ScrollUp(hWnd);
 
-	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-	a= pwd->NumOfFrames;
-	sprintf(b, "%04x", frame.length);
-	sprintf(c, "%02x", frame.crc);
-	
-	MoveCursor( hWnd, 3,  2, FALSE);
-	for(i = 0; i < 3; i++){
-		j=(a)%(10);
-		a /=10;
-		UpdateDisplayBuf(hWnd, j+48);
-		X -=2;
-	}
-	MoveCursor( hWnd, 12,  2, FALSE);
-	for(i = 0; i < 4; i++)
-		UpdateDisplayBuf(hWnd, b[i]);
-	MoveCursor(hWnd, 29,  2, FALSE);
-	for(i = 0; i < 3; i++){
-		UpdateDisplayBuf(hWnd, c[i]);
-	}
-	InvalidateRect(hWnd,NULL,FALSE);
-	
+    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    a= pwd->NumOfFrames;
+    sprintf(b, "%04x", frame.length);
+    sprintf(c, "%02x", frame.crc);
+    
+    MoveCursor( hWnd, 3,  2, FALSE);
+    for(i = 0; i < 3; i++){
+        j=(a)%(10);
+        a /=10;
+        UpdateDisplayBuf(hWnd, j+48);
+        X -=2;
+    }
+    MoveCursor( hWnd, 12,  2, FALSE);
+    for(i = 0; i < 4; i++)
+        UpdateDisplayBuf(hWnd, b[i]);
+    MoveCursor(hWnd, 29,  2, FALSE);
+    for(i = 0; i < 3; i++){
+        UpdateDisplayBuf(hWnd, c[i]);
+    }
+    InvalidateRect(hWnd,NULL,FALSE);
+    
 }
 
 

@@ -59,7 +59,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     WNDCLASSEX      wndclass    = {0};
     PWNDDATA        pwd         = NULL;
 
-	wndclass.cbSize			= sizeof(WNDCLASSEX);
+    wndclass.cbSize			= sizeof(WNDCLASSEX);
     wndclass.style          = CS_HREDRAW | CS_VREDRAW;
     wndclass.lpfnWndProc    = WndProc;
     wndclass.cbClsExtra     = 0;
@@ -70,7 +70,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     wndclass.hbrBackground  = (HBRUSH) GetStockObject(BLACK_BRUSH);
     wndclass.lpszMenuName   = TEXT("MYMENU");
     wndclass.lpszClassName  = szAppName;
-	wndclass.hIconSm		= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON2));
+    wndclass.hIconSm		= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON2));
 
     if (!RegisterClassEx(&wndclass)) {
         MessageBox(NULL, TEXT("Upgrade your OS! Seriously!"),
@@ -89,17 +89,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     ShowWindow(hWnd, iCmdShow);
     UpdateWindow(hWnd);
 
-	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-	pwd->hDlgStats = CreateDialog (hInstance, TEXT("Statistics"), hWnd, Stats);
-	pwd->hDlgDebug = CreateDialog (hInstance, TEXT("Debug"), hWnd, Debug);
-	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
+    pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    pwd->hDlgStats = CreateDialog (hInstance, TEXT("Statistics"), hWnd, Stats);
+    pwd->hDlgDebug = CreateDialog (hInstance, TEXT("Debug"), hWnd, Debug);
+    SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 
     while (GetMessage(&msg, NULL, 0, 0)) {
-		if (pwd->hDlgStats == 0 || !IsDialogMessage (pwd->hDlgStats, &msg)) {
-			 
+        if (pwd->hDlgStats == 0 || !IsDialogMessage (pwd->hDlgStats, &msg)) {
+             
             TranslateMessage (&msg);
-			DispatchMessage (&msg);
-		}
+            DispatchMessage (&msg);
+        }
     }
     return msg.wParam;
 }
@@ -131,7 +131,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
    
     PWNDDATA pwd = {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
-	
+    
 
     switch (message) {
 
@@ -141,7 +141,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
         case WM_STAT:
             UpdateStatStruct(hWnd, wParam, lParam);
-			return 0;
+            return 0;
                      
         case WM_PAINT:
             Paint(hWnd);
@@ -151,20 +151,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             PerformMenuAction(hWnd, wParam);
             return 0;
 
-		case WM_FILLFTPBUF:
-			ReadFromFile(hWnd);
-			return 0;
-		
-		case WM_EMPTYPTFBUF:
-			WriteToFile(hWnd);
-			return 0;
+        case WM_FILLFTPBUF:
+            ReadFromFile(hWnd);
+            return 0;
         
-		case WM_DESTROY:
+        case WM_EMPTYPTFBUF:
+            WriteToFile(hWnd);
+            return 0;
+        
+        case WM_DESTROY:
             Disconnect(hWnd);
             PostQuitMessage(0);
             return 0;
 
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
     }
 }

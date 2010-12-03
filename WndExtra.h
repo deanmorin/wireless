@@ -56,7 +56,7 @@
 /*-------------------------------Structures-----------------------------------*/
 typedef struct STATEINFO_tag {
     INT		rxSeq;
-	INT     iState;
+    INT     iState;
     DWORD   dwTimeout;
     INT     itoCount;
     INT     iFailedENQCount;
@@ -71,17 +71,17 @@ typedef struct charInfo {
 
 typedef struct statsInfo {
     INT dlState;
-	INT	numFiles;
-	INT upFrames;
-	INT downFrames;
+    INT	numFiles;
+    INT upFrames;
+    INT downFrames;
     INT upFramesACKd;
     INT downFramesACKd;
-	INT sentACK;
-	INT recACK;
-	INT sentEOT;
-	INT recEOT;
-	INT sentRVI;
-	INT recRVI;
+    INT sentACK;
+    INT recACK;
+    INT sentEOT;
+    INT recEOT;
+    INT sentRVI;
+    INT recRVI;
 } STATSINFO;
 
 typedef struct line {
@@ -95,38 +95,38 @@ typedef struct displayBuf {
     INT     cxCursor;
     INT     cyCursor;
     HFONT	hFont;
-	BYTE    fgColor;
+    BYTE    fgColor;
     BYTE    bgColor;
     BYTE    style;
-	BYTE	brightness;
+    BYTE	brightness;
 } DISPLAYBUF;
 
 typedef struct wndData {
-	HWND			hDlgStats;
-	HWND			hDlgDebug;
+    HWND			hDlgStats;
+    HWND			hDlgDebug;
     HANDLE          hPort;
-	HANDLE			hFileReceive;
-	HANDLE			hFileTransmit;
-	LPTSTR          lpszCommName;
+    HANDLE			hFileReceive;
+    HANDLE			hFileTransmit;
+    LPTSTR          lpszCommName;
     BOOL            bConnected;
     HANDLE          hThread;
     DWORD           dwThreadid;
     INT             cyWindowTop;
     INT             cyWindowBottom;
-	STATSINFO		statsInfo;
+    STATSINFO		statsInfo;
     INT             FTPQueueSize;
     INT             PTFQueueSize;
-	PFRAME_NODE		FTPBuffHead;
-	PFRAME_NODE		PTFBuffHead;
-	PFRAME_NODE		FTPBuffTail;
-	PFRAME_NODE		PTFBuffTail;
-	INT				NumOfReads;
-	BYTE			TxSequenceNumber;
+    PFRAME_NODE		FTPBuffHead;
+    PFRAME_NODE		PTFBuffHead;
+    PFRAME_NODE		FTPBuffTail;
+    PFRAME_NODE		PTFBuffTail;
+    INT				NumOfReads;
+    BYTE			TxSequenceNumber;
     PBYTE_NODE      pReadBufHead;
     PBYTE_NODE      pReadBufTail;
     BOOL            bDebug;
     DISPLAYBUF      displayBuf;
-	INT				NumOfFrames;
+    INT				NumOfFrames;
     BOOL            wordWrap;
 } WNDDATA, *PWNDDATA;
 

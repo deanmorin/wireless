@@ -72,27 +72,27 @@ VOID InitTerminal(HWND hWnd) {
 
     // get text attributes and store values into the window extra struct
     hdc = GetDC(hWnd);
-	pwd->displayBuf.hFont = (HFONT) GetStockObject(OEM_FIXED_FONT);
+    pwd->displayBuf.hFont = (HFONT) GetStockObject(OEM_FIXED_FONT);
     SelectObject(hdc, pwd->displayBuf.hFont);
     GetTextMetrics(hdc, &tm);
     ReleaseDC(hWnd, hdc);
 
     // initialize variables in PWDDATA struct to defaults
-	DL_STATE				= -1;
+    DL_STATE				= -1;
     pwd->bConnected         = FALSE;
     CHAR_WIDTH              = tm.tmAveCharWidth;
     CHAR_HEIGHT             = tm.tmHeight;
     CUR_FG_COLOR            = 7;
     WINDOW_BOTTOM           = LINES_PER_SCRN -1;
-	pwd->wordWrap			= FALSE;
-	pwd->PTFBuffHead        = NULL;
-	pwd->PTFBuffTail        = NULL;
-	pwd->FTPBuffHead        = NULL;
-	pwd->FTPBuffTail        = NULL;
+    pwd->wordWrap			= FALSE;
+    pwd->PTFBuffHead        = NULL;
+    pwd->PTFBuffTail        = NULL;
+    pwd->FTPBuffHead        = NULL;
+    pwd->FTPBuffTail        = NULL;
     pwd->FTPQueueSize       = 0;
     pwd->PTFQueueSize       = 0;
-	pwd->NumOfFrames        = 0;
-	pwd->NumOfReads         = 0;
+    pwd->NumOfFrames        = 0;
+    pwd->NumOfReads         = 0;
     pwd->pReadBufHead       = NULL;
     pwd->pReadBufTail       = NULL;
     pwd->bDebug             = FALSE;
@@ -121,13 +121,13 @@ VOID InitTerminal(HWND hWnd) {
                CHAR_HEIGHT * LINES_PER_SCRN + PADDING * 2 + lyDiff,
                TRUE);
 
-	//create tables for crc
-	crcInit();
+    //create tables for crc
+    crcInit();
 
     //print out headers for terminal
     MakeColumns(hWnd);
 
-	
+    
 }
 
 /*------------------------------------------------------------------------------
@@ -154,7 +154,7 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
     
     PWNDDATA    pwd     = NULL;
     DWORD       dwSize  = 0;
-	COMMCONFIG	cc		= {0};
+    COMMCONFIG	cc		= {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     
     switch (LOWORD(wParam)) {
@@ -162,16 +162,16 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
         case IDM_CONNECT:       
 
             if(OpenFileReceive(hWnd)) {
-				Connect(hWnd);
-				ShowWindow(pwd->hDlgStats, SW_NORMAL);
-				ShowWindow(pwd->hDlgDebug, SW_NORMAL);
-			}
+                Connect(hWnd);
+                ShowWindow(pwd->hDlgStats, SW_NORMAL);
+                ShowWindow(pwd->hDlgDebug, SW_NORMAL);
+            }
             return;
 
         case IDM_DISCONNECT:
             Disconnect(hWnd);
-			CloseFileReceive(hWnd);
-			CloseFileTransmit(hWnd);
+            CloseFileReceive(hWnd);
+            CloseFileTransmit(hWnd);
             return;
 
         case IDM_EXIT:
@@ -187,29 +187,29 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
         case IDM_COM7:
         case IDM_COM8:
         case IDM_COM9:
-			SelectPort(hWnd, LOWORD(wParam));
-			return;
+            SelectPort(hWnd, LOWORD(wParam));
+            return;
 
         case IDM_COMMSET:
-			cc.dwSize	= sizeof(COMMCONFIG);
-			cc.wVersion = 1;
-			GetCommConfig(pwd->hPort, &cc, &cc.dwSize);
+            cc.dwSize	= sizeof(COMMCONFIG);
+            cc.wVersion = 1;
+            GetCommConfig(pwd->hPort, &cc, &cc.dwSize);
 
             if (!CommConfigDialog(pwd->lpszCommName, hWnd, &cc)) {
                 DISPLAY_ERROR("The comm settings dialogue failed.\nThis port may not exist");
             }
-		    return;
+            return;
 
-		case IDM_STATISTICS:       
-			ShowWindow(pwd->hDlgStats, SW_NORMAL);
+        case IDM_STATISTICS:       
+            ShowWindow(pwd->hDlgStats, SW_NORMAL);
             return;
-		case IDM_DEBUGGER:       
-			ShowWindow(pwd->hDlgDebug, SW_NORMAL);
+        case IDM_DEBUGGER:       
+            ShowWindow(pwd->hDlgDebug, SW_NORMAL);
             return;
-		case ID_OPEN_TRANSMITFILE:
-			OpenFileTransmit(hWnd);
-			return;
-		
+        case ID_OPEN_TRANSMITFILE:
+            OpenFileTransmit(hWnd);
+            return;
+        
         default:
             return;
     }
@@ -244,16 +244,16 @@ VOID Paint(HWND hWnd) {
     UINT            j           = 0;
     UINT            tempfgColor = 0;
     UINT            tempbgColor = 0;
-	UINT            tempStyle	= 0;
+    UINT            tempStyle	= 0;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     hdc = BeginPaint(hWnd, &ps) ;
-	
+    
     SelectObject(hdc, pwd->displayBuf.hFont);
 
     tempfgColor = CUR_FG_COLOR;
     tempbgColor = CUR_BG_COLOR;
-	tempStyle	= CUR_STYLE;
+    tempStyle	= CUR_STYLE;
 
     SetTextColor(hdc, TXT_COLOURS[CUR_FG_COLOR]);
     SetBkColor(hdc, TXT_COLOURS[CUR_BG_COLOR]);
@@ -266,7 +266,7 @@ VOID Paint(HWND hWnd) {
                 tempfgColor = CHARACTER(j, i).fgColor;
             }
             if (CHARACTER(j, i).bgColor != tempbgColor) {
-	            SetBkColor(hdc, TXT_COLOURS[CHARACTER(j, i).bgColor]);
+                SetBkColor(hdc, TXT_COLOURS[CHARACTER(j, i).bgColor]);
                 tempbgColor = CHARACTER(j, i).bgColor;
             }
 
@@ -303,8 +303,8 @@ VOID Paint(HWND hWnd) {
 VOID MakeColumns(HWND hWnd){
     CHAR temp1[10]= "Frame";
     CHAR temp2[15]= "Frame Length";
-	CHAR temp3[5]= "CRC";
-	DWORD i;
+    CHAR temp3[5]= "CRC";
+    DWORD i;
 
     MoveCursor( hWnd, 1, 1, FALSE);
     for(i=0;i<10;i++){
@@ -314,10 +314,10 @@ VOID MakeColumns(HWND hWnd){
     for(i=0;i<15;i++){
         UpdateDisplayBuf(hWnd,temp2[i]);
     }
-	MoveCursor(hWnd, 29, 1, FALSE);
-	for(i = 0; i<5; i++){
-		UpdateDisplayBuf(hWnd,temp3[i]);
-	}
+    MoveCursor(hWnd, 29, 1, FALSE);
+    for(i = 0; i<5; i++){
+        UpdateDisplayBuf(hWnd,temp3[i]);
+    }
 }
 
 /*------------------------------------------------------------------------------
@@ -342,100 +342,100 @@ VOID MakeColumns(HWND hWnd){
 --
 ------------------------------------------------------------------------------*/
 VOID UpdateStats(HWND hWnd) {
-	static FLOAT totalTime = 0;
-	static FLOAT dRate = 0, uRate = 0, tRate = 0, edRate = 0, euRate = 0, etRate = 0;
-	TCHAR text[20];
-	static FLOAT lastTime = 0;
-	FLOAT thisTime;
-	static INT lastdFrames = 0, lastuFrames = 0, lastedFrames = 0, lasteuFrames = 0;
-	static INT count = 0;
-	INT framesDiscarded = 0;
+    static FLOAT totalTime = 0;
+    static FLOAT dRate = 0, uRate = 0, tRate = 0, edRate = 0, euRate = 0, etRate = 0;
+    TCHAR text[20];
+    static FLOAT lastTime = 0;
+    FLOAT thisTime;
+    static INT lastdFrames = 0, lastuFrames = 0, lastedFrames = 0, lasteuFrames = 0;
+    static INT count = 0;
+    INT framesDiscarded = 0;
 
-	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
+    PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
-	if (lastTime == 0) {
-		lastTime = (FLOAT) (GetTickCount() / 1000.0); 
-	}
-	thisTime = (FLOAT) (GetTickCount() / 1000.0);
-	totalTime = thisTime - lastTime;
-	lastTime = thisTime;
+    if (lastTime == 0) {
+        lastTime = (FLOAT) (GetTickCount() / 1000.0); 
+    }
+    thisTime = (FLOAT) (GetTickCount() / 1000.0);
+    totalTime = thisTime - lastTime;
+    lastTime = thisTime;
 
-	if (UP_FRAMES != lastuFrames || DOWN_FRAMES != lastdFrames) {
-		if (count++ == 0) {
-			uRate = 0;
-			dRate = 0;
-			edRate = 0;
-			euRate = 0;
-		} else if (totalTime != 0) {
-			if ((UP_FRAMES - lastuFrames)!= 0) {
-				uRate = ((UP_FRAMES - lastuFrames) * 1024 * 8) / totalTime;
-				lastuFrames = UP_FRAMES;
-			}
-			if ((DOWN_FRAMES - lastdFrames)!= 0) {
-				dRate = ((DOWN_FRAMES - lastdFrames) * 1024 * 8) / totalTime;
-				lastdFrames = DOWN_FRAMES;
-			}
-			if ((DOWN_FRAMES_ACKD - lastedFrames)!= 0) {
-				edRate = ((DOWN_FRAMES_ACKD - lastedFrames) * 1019 * 8) / totalTime;
-				lastedFrames = DOWN_FRAMES_ACKD;
-			}
-			if ((UP_FRAMES_ACKD - lasteuFrames)!= 0) {
-				euRate = ((UP_FRAMES_ACKD - lasteuFrames) * 1019 * 8) / totalTime;
-				lasteuFrames = UP_FRAMES_ACKD;
-			}
-		}
-	}
-	_stprintf(text, _T("%d"), NUM_FILES);
-	SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
+    if (UP_FRAMES != lastuFrames || DOWN_FRAMES != lastdFrames) {
+        if (count++ == 0) {
+            uRate = 0;
+            dRate = 0;
+            edRate = 0;
+            euRate = 0;
+        } else if (totalTime != 0) {
+            if ((UP_FRAMES - lastuFrames)!= 0) {
+                uRate = ((UP_FRAMES - lastuFrames) * 1024 * 8) / totalTime;
+                lastuFrames = UP_FRAMES;
+            }
+            if ((DOWN_FRAMES - lastdFrames)!= 0) {
+                dRate = ((DOWN_FRAMES - lastdFrames) * 1024 * 8) / totalTime;
+                lastdFrames = DOWN_FRAMES;
+            }
+            if ((DOWN_FRAMES_ACKD - lastedFrames)!= 0) {
+                edRate = ((DOWN_FRAMES_ACKD - lastedFrames) * 1019 * 8) / totalTime;
+                lastedFrames = DOWN_FRAMES_ACKD;
+            }
+            if ((UP_FRAMES_ACKD - lasteuFrames)!= 0) {
+                euRate = ((UP_FRAMES_ACKD - lasteuFrames) * 1019 * 8) / totalTime;
+                lasteuFrames = UP_FRAMES_ACKD;
+            }
+        }
+    }
+    _stprintf(text, _T("%d"), NUM_FILES);
+    SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
 
-	_stprintf(text, _T("%d"), SENT_ACK);
-	SetDlgItemText(pwd->hDlgStats, IDC_ACKSENT, text);
+    _stprintf(text, _T("%d"), SENT_ACK);
+    SetDlgItemText(pwd->hDlgStats, IDC_ACKSENT, text);
 
-	_stprintf(text, _T("%d"), REC_ACK);
-	SetDlgItemText(pwd->hDlgStats, IDC_ACKRECEIVED, text);
+    _stprintf(text, _T("%d"), REC_ACK);
+    SetDlgItemText(pwd->hDlgStats, IDC_ACKRECEIVED, text);
 
-	_stprintf(text, _T("%d"), SENT_EOT);
-	SetDlgItemText(pwd->hDlgStats, IDC_EOTSENT, text);
+    _stprintf(text, _T("%d"), SENT_EOT);
+    SetDlgItemText(pwd->hDlgStats, IDC_EOTSENT, text);
 
-	_stprintf(text, _T("%d"), REC_EOT);
-	SetDlgItemText(pwd->hDlgStats, IDC_EOTRECEIVED, text);
+    _stprintf(text, _T("%d"), REC_EOT);
+    SetDlgItemText(pwd->hDlgStats, IDC_EOTRECEIVED, text);
 
-	_stprintf(text, _T("%d"), SENT_RVI);
-	SetDlgItemText(pwd->hDlgStats, IDC_RVISENT, text);
+    _stprintf(text, _T("%d"), SENT_RVI);
+    SetDlgItemText(pwd->hDlgStats, IDC_RVISENT, text);
 
-	_stprintf(text, _T("%d"), REC_RVI);
-	SetDlgItemText(pwd->hDlgStats, IDC_RVIRECEIVED, text);
-	
-	tRate = dRate + uRate;
-	etRate = edRate + euRate;
+    _stprintf(text, _T("%d"), REC_RVI);
+    SetDlgItemText(pwd->hDlgStats, IDC_RVIRECEIVED, text);
+    
+    tRate = dRate + uRate;
+    etRate = edRate + euRate;
 
-	_stprintf(text, _T("%d"), UP_FRAMES);
-	SetDlgItemText(pwd->hDlgStats, IDC_FRAMESENT, text);
+    _stprintf(text, _T("%d"), UP_FRAMES);
+    SetDlgItemText(pwd->hDlgStats, IDC_FRAMESENT, text);
 
-	_stprintf(text, _T("%d"), DOWN_FRAMES);
-	SetDlgItemText(pwd->hDlgStats, IDC_FRAMEREC, text);
+    _stprintf(text, _T("%d"), DOWN_FRAMES);
+    SetDlgItemText(pwd->hDlgStats, IDC_FRAMEREC, text);
 
-	_stprintf(text, _T("%.2f"), dRate);
-	SetDlgItemText(pwd->hDlgStats, IDC_DRATE, text);
+    _stprintf(text, _T("%.2f"), dRate);
+    SetDlgItemText(pwd->hDlgStats, IDC_DRATE, text);
 
-	_stprintf(text, _T("%.2f"), uRate);
-	SetDlgItemText(pwd->hDlgStats, IDC_URATE, text);
+    _stprintf(text, _T("%.2f"), uRate);
+    SetDlgItemText(pwd->hDlgStats, IDC_URATE, text);
 
-	_stprintf(text, _T("%.2f"), tRate);
-	SetDlgItemText(pwd->hDlgStats, IDC_TRATE, text);
-	
-	_stprintf(text, _T("%.2f"), edRate);
-	SetDlgItemText(pwd->hDlgStats, IDC_EDRATE, text);
+    _stprintf(text, _T("%.2f"), tRate);
+    SetDlgItemText(pwd->hDlgStats, IDC_TRATE, text);
+    
+    _stprintf(text, _T("%.2f"), edRate);
+    SetDlgItemText(pwd->hDlgStats, IDC_EDRATE, text);
 
-	_stprintf(text, _T("%.2f"), euRate);
-	SetDlgItemText(pwd->hDlgStats, IDC_EURATE, text);
+    _stprintf(text, _T("%.2f"), euRate);
+    SetDlgItemText(pwd->hDlgStats, IDC_EURATE, text);
 
-	_stprintf(text, _T("%.2f"), etRate);
-	SetDlgItemText(pwd->hDlgStats, IDC_ETRATE, text);
+    _stprintf(text, _T("%.2f"), etRate);
+    SetDlgItemText(pwd->hDlgStats, IDC_ETRATE, text);
 
-	framesDiscarded = DOWN_FRAMES - DOWN_FRAMES_ACKD;
-	_stprintf(text, _T("%d"), framesDiscarded);
-	SetDlgItemText(pwd->hDlgStats, IDC_FRAME_DISCARDED, text);
+    framesDiscarded = DOWN_FRAMES - DOWN_FRAMES_ACKD;
+    _stprintf(text, _T("%d"), framesDiscarded);
+    SetDlgItemText(pwd->hDlgStats, IDC_FRAME_DISCARDED, text);
 }
 
 
@@ -463,35 +463,35 @@ VOID UpdateStats(HWND hWnd) {
 --
 ------------------------------------------------------------------------------*/
 BOOL CALLBACK Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
-	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(GetParent(hDlg), 0);
-	
-	switch (message)
-	{
-	case WM_INITDIALOG:
-		return TRUE;
-	case WM_COMMAND:
-		switch (LOWORD(wParam))
+    PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(GetParent(hDlg), 0);
+    
+    switch (message)
+    {
+    case WM_INITDIALOG:
+        return TRUE;
+    case WM_COMMAND:
+        switch (LOWORD(wParam))
         {
-			case IDC_CLEAR_STATS:
-				NUM_FILES = 0;
-				SENT_ACK = 0;
-				REC_ACK = 0;
-				SENT_EOT = 0;
-				REC_EOT = 0;
-				SENT_RVI = 0;
-				REC_RVI = 0;
-				DOWN_FRAMES = 0;
-				UP_FRAMES = 0;
-				DOWN_FRAMES_ACKD = 0;
-				UP_FRAMES_ACKD = 0;
-				return TRUE;
-		}
-		return FALSE;
-	case WM_CLOSE:
-		ShowWindow(hDlg, SW_HIDE);
-		return TRUE;
-	}
-	return FALSE;
+            case IDC_CLEAR_STATS:
+                NUM_FILES = 0;
+                SENT_ACK = 0;
+                REC_ACK = 0;
+                SENT_EOT = 0;
+                REC_EOT = 0;
+                SENT_RVI = 0;
+                REC_RVI = 0;
+                DOWN_FRAMES = 0;
+                UP_FRAMES = 0;
+                DOWN_FRAMES_ACKD = 0;
+                UP_FRAMES_ACKD = 0;
+                return TRUE;
+        }
+        return FALSE;
+    case WM_CLOSE:
+        ShowWindow(hDlg, SW_HIDE);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 /*------------------------------------------------------------------------------
@@ -522,7 +522,7 @@ VOID UpdateStatStruct(HWND hWnd, WPARAM stat, LPARAM attribute) {
 
         case STAT_STATE:
             DL_STATE = attribute;
-			SendMessage(pwd->hDlgDebug, WM_USER, 0, 0);
+            SendMessage(pwd->hDlgDebug, WM_USER, 0, 0);
             break;
         
         case ACK:
@@ -559,10 +559,10 @@ VOID UpdateStatStruct(HWND hWnd, WPARAM stat, LPARAM attribute) {
 
         case STAT_FRAMEACKD:
             if (attribute == SENT) {
-				pwd->FTPQueueSize--;
+                pwd->FTPQueueSize--;
                 UP_FRAMES_ACKD++;
             } else {
-				pwd->PTFQueueSize++;
+                pwd->PTFQueueSize++;
                 DOWN_FRAMES_ACKD++;
             }
             break;
@@ -571,5 +571,5 @@ VOID UpdateStatStruct(HWND hWnd, WPARAM stat, LPARAM attribute) {
             NUM_FILES++;
             break;
     }
-	UpdateStats(hWnd);
+    UpdateStats(hWnd);
 }

@@ -158,7 +158,7 @@ BOOL AddToFrameQueue(PPFRAME_NODE pHead, PPFRAME_NODE pTail, FRAME data) {
     if ((newNode = (PFRAME_NODE) malloc(sizeof(FRAME_NODE))) == NULL) {
         return FALSE;
     }
-	newNode->f      = data;
+    newNode->f      = data;
     newNode->next   = NULL;
 
     if (*pHead == NULL) {
@@ -197,8 +197,8 @@ PFRAME RemoveFromFrameQueue(PPFRAME_NODE pHead, DWORD dwLength) {
     PFRAME_NODE tracer  = NULL;
     UINT        i       = 0;
     PFRAME      removed = NULL;
-	
-	
+    
+    
     p       = *pHead;
     removed = (PFRAME) malloc(sizeof(FRAME) * dwLength);
 

@@ -121,8 +121,8 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
         DISPLAY_ERROR("Error purging read buffer");
     }
     CloseHandle(ol.hEvent);
-	CloseHandle(hEvents[0]);
-	free(hEvents);
+    CloseHandle(hEvents[0]);
+    free(hEvents);
     return 0;
 }
 
@@ -147,8 +147,8 @@ DWORD WINAPI PortIOThreadProc(HWND hWnd) {
 --              Initializes the protocol state info to its default values.
 ------------------------------------------------------------------------------*/
 VOID InitStateInfo (PSTATEINFO psi) {
-	srand(GetTickCount());
-	psi->rxSeq				= 0;
+    srand(GetTickCount());
+    psi->rxSeq				= 0;
     psi->iState				= STATE_IDLE;
     psi->itoCount			= 0;
     psi->dwTimeout			= TOR0;
@@ -189,7 +189,7 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
     static DWORD    dwQueueSize             = 0;
     PWNDDATA        pwd                     = NULL;
     BYTE            pReadBuf[READ_BUFSIZE]  = {0};
-	PBYTE			pQueue					= NULL;
+    PBYTE			pQueue					= NULL;
     DWORD           dwBytesRead             = 0;
     DWORD           i                       = 0;
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
@@ -206,20 +206,20 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
         // the last port read sent an entire frame to ProcessRead()
         
         if (dwBytesRead >= CTRL_FRAME_SIZE  &&
-			ProcessRead(hWnd, psi, pReadBuf, dwBytesRead)) {
+            ProcessRead(hWnd, psi, pReadBuf, dwBytesRead)) {
             
-			// read completed successfully
+            // read completed successfully
             return;
      
         } else {
             // a full frame is not yet at the port
             for (i = 0; i < dwBytesRead; i++) {
                 AddToByteQueue(&pwd->pReadBufHead, &pwd->pReadBufTail, pReadBuf[i]);
-				dwQueueSize++;
+                dwQueueSize++;
             }
-			if (dwQueueSize != dwBytesRead) {
-				DISPLAY_ERROR("Port read is out of sync");
-			}
+            if (dwQueueSize != dwBytesRead) {
+                DISPLAY_ERROR("Port read is out of sync");
+            }
         }
     
     } else {
@@ -227,9 +227,9 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
         
         for (i = 0; i < dwBytesRead; i++) {
             AddToByteQueue(&pwd->pReadBufHead, &pwd->pReadBufTail, pReadBuf[i]);
-			dwQueueSize++;
+            dwQueueSize++;
         }
-		// checks for 1 byte read, in case the tx side is out of sync
+        // checks for 1 byte read, in case the tx side is out of sync
         if (dwQueueSize >= FRAME_SIZE  ||  dwBytesRead == CTRL_FRAME_SIZE) {
 
             pQueue = RemoveFromByteQueue(&pwd->pReadBufHead, dwQueueSize);
@@ -240,10 +240,10 @@ VOID ReadFromPort(HWND hWnd, PSTATEINFO psi, OVERLAPPED ol, DWORD cbInQue) {
             DeleteByteQueue(pwd->pReadBufHead);
             pwd->pReadBufHead   = NULL;
             pwd->pReadBufTail   = NULL;
-			for (i = 0; i < dwQueueSize; i++) {
-				free(pQueue);
-			}
-		}
+            for (i = 0; i < dwQueueSize; i++) {
+                free(pQueue);
+            }
+        }
     }
 }
 
