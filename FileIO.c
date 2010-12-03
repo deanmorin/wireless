@@ -1,5 +1,55 @@
+/*------------------------------------------------------------------------------
+-- SOURCE FILE:     FileIO.c      Contains functions relating to File IO for
+--									the 3980 wireless protocol.
+--                      
+-- PROGRAM:     Dean and the Rockets' Wireless Protocol Testing and Evaluation 
+--              Facilitator
+--
+-- FUNCTIONS:
+--              FRAME	CreateFrame(HWND hWnd, PBYTE psBuf, DWORD dwLength);
+--				VOID 	OpenFileTransmit(HWND hWnd);
+--				VOID 	CloseFileTransmit(HWND hWnd);
+--				BOOL 	OpenFileReceive(HWND hWnd);
+--				VOID 	CloseFileReceive(HWND hWnd);
+--				VOID 	WriteToFile(HWND hWnd);
+--				VOID 	ReadFromFile(HWND hWnd);
+--				FRAME 	CreateNullFrame(HWND hWnd);
+--
+--
+-- DATE:        Dec 2, 2010
+--
+-- REVISIONS:   
+--
+-- DESIGNER:    Dean Morin/Daniel Wright/Ian Lee
+--
+-- PROGRAMMER:  Daniel Wright/Ian Lee
+--
+-- NOTES:       Functions relating to File IO
+------------------------------------------------------------------------------*/
 #include "FileIO.h"
 
+
+/*------------------------------------------------------------------------------
+-- FUNCTION:    CreateFrame
+--
+-- DATE:        Nov 24, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Ian Lee
+--
+-- PROGRAMMER:  Ian Lee
+--
+-- INTERFACE:   CreateFrame(HWND hWnd, PBYTE psBuf, DWORD dwLength)
+--                      hWnd			- a handle to the window
+--						PBYTE psBuf		- data from file
+--						DWORD dwLength	- length of data from file
+--
+-- RETURNS:     FRAME - the created frame
+--
+-- NOTES:       Creates a frame to be put into the FTP buffer
+--
+------------------------------------------------------------------------------*/
 FRAME CreateFrame(HWND hWnd, PBYTE psBuf, DWORD dwLength){
 	DWORD		i;
 	FRAME myFrame;
@@ -23,12 +73,28 @@ FRAME CreateFrame(HWND hWnd, PBYTE psBuf, DWORD dwLength){
 	if(crcFast((PBYTE)&myFrame,FRAME_SIZE)!=0){
 		DISPLAY_ERROR("Failure Creating Frame");
 	}
-	/*else{
-			DISPLAY_ERROR("Success Creating Frame");
-	}*/
+	
 	return myFrame;
 }
-
+/*------------------------------------------------------------------------------
+-- FUNCTION:    OpenFileTransmit
+--
+-- DATE:        Dec 2, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Daniel Wright
+--
+-- PROGRAMMER:  Daniel Wright
+--
+-- INTERFACE:   OpenFileTransmit(HWND hWnd)
+--                      hWnd			- a handle to the window
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Uses GetOpenFileName to get the name of the file to be
+--				transmitted and opens it.
+------------------------------------------------------------------------------*/
 VOID OpenFileTransmit(HWND hWnd){
 	PWNDDATA pwd = {0};
 	OPENFILENAME ofn;
@@ -51,7 +117,26 @@ VOID OpenFileTransmit(HWND hWnd){
 	PostMessage(hWnd, WM_FILLFTPBUF, 0, 0);
 	pwd->TxSequenceNumber = 0;
 }
-
+/*------------------------------------------------------------------------------
+-- FUNCTION:    CloseFileTransmit
+--
+-- DATE:        Dec 2, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Daniel Wright
+--
+-- PROGRAMMER:  Daniel Wright
+--
+-- INTERFACE:   CloseFileTransmit(HWND hWnd)
+--                      hWnd			- a handle to the window
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Closes the file handle to the file to be transmitted
+--				and sets it to null. Sends message to fill File to Port
+--				Buffer.
+------------------------------------------------------------------------------*/
 VOID CloseFileTransmit(HWND hWnd){
 	PWNDDATA pwd = {0};
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
@@ -64,7 +149,25 @@ VOID CloseFileTransmit(HWND hWnd){
 		pwd->NumOfReads = 0;
 	}
 }
-
+/*------------------------------------------------------------------------------
+-- FUNCTION:    OpenFileReceive
+--
+-- DATE:        Dec 2, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Daniel Wright
+--
+-- PROGRAMMER:  Daniel Wright
+--
+-- INTERFACE:   OpenFileReceive(HWND hWnd)
+--                      hWnd			- a handle to the window
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Uses GetSaveFileName to get the name of the file for data
+--				to be written to and opens it.
+------------------------------------------------------------------------------*/
 BOOL OpenFileReceive(HWND hWnd){
 	PWNDDATA pwd = {0};
 	OPENFILENAME ofn;
@@ -91,7 +194,24 @@ BOOL OpenFileReceive(HWND hWnd){
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 	return TRUE;
 }
-
+/*------------------------------------------------------------------------------
+-- FUNCTION:    CloseFileReceive
+--
+-- DATE:        Dec 2, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Daniel Wright
+--
+-- PROGRAMMER:  Daniel Wright
+--
+-- INTERFACE:   CloseFileReceive(HWND hWnd)
+--                      hWnd			- a handle to the window
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Closes the handle to the receive file and sets it to null.
+------------------------------------------------------------------------------*/
 VOID CloseFileReceive(HWND hWnd){
 	PWNDDATA pwd = {0};
 	pwd = (PWNDDATA)GetWindowLongPtr(hWnd, 0);
@@ -103,7 +223,25 @@ VOID CloseFileReceive(HWND hWnd){
 			
 	}
 }
-
+/*------------------------------------------------------------------------------
+-- FUNCTION:    WriteToFile
+--
+-- DATE:        Dec 2, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Daniel Wright
+--
+-- PROGRAMMER:  Daniel Wright
+--
+-- INTERFACE:   WriteToFile(HWND hWnd)
+--                      hWnd			- a handle to the window
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Removes frames from the Port to File Queue and writes them
+--				to the receive file until the queue is empty.
+------------------------------------------------------------------------------*/
 VOID WriteToFile(HWND hWnd){
 	PWNDDATA pwd = {0};
 	DWORD dwBytesWritten = 0;
@@ -134,7 +272,26 @@ VOID WriteToFile(HWND hWnd){
 		}
 	}
 }
-
+/*------------------------------------------------------------------------------
+-- FUNCTION:    ReadFromFile
+--
+-- DATE:        Dec 2, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Daniel Wright
+--
+-- PROGRAMMER:  Daniel Wright
+--
+-- INTERFACE:   ReadFromFile(HWND hWnd)
+--                      hWnd			- a handle to the window
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       While the File to Port queue is not full, reads in increments
+--				of 1019 bytes from the file to be transmitted, calls CreateFrame
+--				to frame them and adds them to the File to Port queue.
+------------------------------------------------------------------------------*/
 VOID ReadFromFile(HWND hWnd){
 	PWNDDATA pwd = {0};
 	DWORD dwBytesRead = 0;
@@ -187,7 +344,26 @@ VOID ReadFromFile(HWND hWnd){
 		ReleaseMutex(hMutex);
 	}
 }
-
+/*------------------------------------------------------------------------------
+-- FUNCTION:    CreateNullFrame
+--
+-- DATE:        Dec 2, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Daniel Wright
+--
+-- PROGRAMMER:  Daniel Wright
+--
+-- INTERFACE:   CreateNullFrame(HWND hWnd)
+--                      hWnd			- a handle to the window
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Creates a frame with the payload consisting entirely of nulls,
+--				to be send at the end of a file if no nulls were sent in 
+--				previous frames.
+------------------------------------------------------------------------------*/
 FRAME CreateNullFrame(HWND hWnd){
 	FRAME nullFrame = CreateFrame(hWnd, 0, 0);
 	return nullFrame;

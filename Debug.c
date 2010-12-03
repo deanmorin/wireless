@@ -1,5 +1,32 @@
+/*------------------------------------------------------------------------------
+-- SOURCE FILE:     Debug.c      Contains functions relating to the debug dialog window for
+--									the 3980 wireless protocol.
+--                      
+-- PROGRAM:     Dean and the Rockets' Wireless Protocol Testing and Evaluation 
+--              Facilitator
+--
+-- FUNCTIONS:
+--              BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+--				VOID MakeDebugFrameOne(HWND hWnd);
+--				VOID MakeDebugFrameTwo(HWND hWnd);
+--				VOID MakeDebugFrameThree(HWND hWnd);
+--				VOID SendDebugCtrlChar(HWND hWnd, BYTE ctrlChar, LPCWSTR szEventName);
+--
+--
+-- DATE:        Dec 2, 2010
+--
+-- REVISIONS:   
+--
+-- DESIGNER:    Dean Morin/Marcel Vangrootheest/Ian Lee
+--
+-- PROGRAMMER:  Dean Morin/Marcel Vangrootheest/Ian Lee
+--
+-- NOTES:       Functions relating to the Debug dialog window
+------------------------------------------------------------------------------*/
 #include "Debug.h"
-
+/*
+marcel
+*/
 BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 	static HBITMAP	bmp[16];
 	static UINT		i = 0;
@@ -156,6 +183,25 @@ VOID SendDebugCtrlChar(HWND hWnd, BYTE ctrlChar, LPCWSTR szEventName) {
     ResetEvent(hEvent);
 }
 
+/*------------------------------------------------------------------------------
+-- FUNCTION:    MakeDebugFrameOne
+--
+-- DATE:        Nov 25, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Ian Lee
+--
+-- PROGRAMMER:  Ian Lee
+--
+-- INTERFACE:   MakeDebugFrameOne(HWND hWnd)
+--                      hWnd        - a handle to the window
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Creates a frame with 25 letters A-Y
+--				and shoves it onto the queue.
+------------------------------------------------------------------------------*/
 
 VOID MakeDebugFrameOne(HWND hWnd){
 	int i;
@@ -175,6 +221,26 @@ VOID MakeDebugFrameOne(HWND hWnd){
 	pwd->FTPQueueSize+=1;
 }
 
+
+/*------------------------------------------------------------------------------
+-- FUNCTION:    MakeDebugFrameTwo
+--
+-- DATE:        Nov 25, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Ian Lee
+--
+-- PROGRAMMER:  Ian Lee
+--
+-- INTERFACE:   MakeDebugFrameTwo(HWND hWnd)
+--                      hWnd        - a handle to the window
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Creates a full frame with letters A-Z over and over and over.
+--				and shoves it onto the queue.
+------------------------------------------------------------------------------*/
 
 VOID MakeDebugFrameTwo(HWND hWnd){
 	int i;
@@ -202,6 +268,26 @@ VOID MakeDebugFrameTwo(HWND hWnd){
 	pwd->FTPQueueSize+=1;
 }
 
+
+/*------------------------------------------------------------------------------
+-- FUNCTION:    MakeDebugFrameThree
+--
+-- DATE:        Dec 1, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Dean Morin
+--
+-- INTERFACE:   MakeDebugFrameTwo(HWND hWnd)
+--                      hWnd        - a handle to the window
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:       Creates a full frame with letters A-Z but with a bad CRC
+--				and shoves it onto the queue.  Should be ignored by the receiver.
+------------------------------------------------------------------------------*/
 
 VOID MakeDebugFrameThree(HWND hWnd){
 	int i;
