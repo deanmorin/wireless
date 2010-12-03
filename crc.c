@@ -13,6 +13,9 @@
  * the public domain and may be used for any purpose.  However, this
  * notice must not be changed or removed and no warranty is either
  * expressed or implied by its publication or distribution.
+
+--Ian Lee
+--Revisions -   changed settings in crc.h to produce an 8 bit crc result.
  **********************************************************************/
  
 #include "crc.h"

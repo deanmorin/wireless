@@ -24,9 +24,30 @@
 -- NOTES:       Functions relating to the Debug dialog window
 ------------------------------------------------------------------------------*/
 #include "Debug.h"
-/*
-marcel
-*/
+
+/*------------------------------------------------------------------------------
+-- FUNCTION:    Debug
+--
+-- DATE:        Nov 24, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Marcel Vangrootheest
+--
+-- PROGRAMMER:  Marcel Vangrootheest
+--
+-- INTERFACE:   BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+--                      hDlg        - a handle to the dialog window
+--                      message		- the message for the dialog window
+--                      wParam		- contents vary based on the message
+--                      lParam		- contents vary based on the message
+--
+--
+-- RETURNS:      The return value is the result of the message processing and 
+--              depends on the message sent.
+--
+-- NOTES:       The WndProc function for the Debug dialog window.
+------------------------------------------------------------------------------*/
 BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 	static HBITMAP	bmp[16];
 	static UINT		i = 0;
@@ -280,7 +301,7 @@ VOID MakeDebugFrameTwo(HWND hWnd){
 --
 -- PROGRAMMER:  Dean Morin
 --
--- INTERFACE:   MakeDebugFrameTwo(HWND hWnd)
+-- INTERFACE:   MakeDebugFrameThree(HWND hWnd)
 --                      hWnd        - a handle to the window
 --
 -- RETURNS:     VOID.
