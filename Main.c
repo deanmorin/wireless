@@ -27,7 +27,7 @@
 --
 -- DATE:        Nov 24, 2010
 --
--- REVISIONS:
+-- REVISIONS:	Dec 02, 2010 - Added dialog boxes
 --
 -- DESIGNER:    Dean Morin
 --
@@ -90,7 +90,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 	pwd->hDlgStats = CreateDialog (hInstance, TEXT("Statistics"), hWnd, Stats);
 	pwd->hDlgDebug = CreateDialog (hInstance, TEXT("Debug"), hWnd, Debug);
-	//SetTimer(hWnd, TIMER, TIME_LENGTH, (TIMERPROC) NULL);
 	SetWindowLongPtr(hWnd, 0, (LONG_PTR) pwd);
 
     while (GetMessage(&msg, NULL, 0, 0)) {
@@ -108,7 +107,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 --
 -- DATE:        Nov 24, 2010
 --
--- REVISIONS:   
+-- REVISIONS:   Dec 02, 2010 - Added buffer messages
 --
 -- DESIGNER:    Dean Morin
 --
@@ -149,17 +148,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         case WM_COMMAND:
             PerformMenuAction(hWnd, wParam);
             return 0;
-
-		
-		
-
-		//case WM_TIMER:
-		//	if (wParam == TIMER) {
-		//		UpdateStats(hWnd);
-		//		SendMessage(pwd->hDlgDebug, WM_USER, 0, 0);
-		//	}
-		//	return 0;
-
 
 		case WM_FILLFTPBUF:
 			ReadFromFile(hWnd);

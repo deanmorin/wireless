@@ -22,7 +22,7 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 
 // timeout values
 #define TOR0_BASE               0
-#define TOR0_RANGE              1000
+#define TOR0_RANGE              2000
 #define TOR0					TOR0_BASE + rand() % TOR0_RANGE
 #define TOR1					1000
 #define TOR2                    1000
