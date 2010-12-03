@@ -344,6 +344,7 @@ VOID MakeColumns(HWND hWnd){
 ------------------------------------------------------------------------------*/
 VOID UpdateStats(HWND hWnd) {
     static FLOAT totalTime = 0, lastTime = 0, firstTime = 0, overallTime = 0;
+    TCHAR text[20];
     FLOAT thisTime;
     static INT lastdFrames = 0, lastuFrames = 0, lastedFrames = 0, lasteuFrames = 0;
     static INT count = 0;
@@ -394,9 +395,25 @@ VOID UpdateStats(HWND hWnd) {
             }
         }
     }
+	if (pwd->dtrInfo.dRate) {
+		_stprintf(text, _T("%.2f"), pwd->dtrInfo.dRate);
+		SetDlgItemText(pwd->hDlgStats, IDC_DRATE, text);
+	}
+	if (pwd->dtrInfo.uRate) {
+		_stprintf(text, _T("%.2f"), pwd->dtrInfo.uRate);
+		SetDlgItemText(pwd->hDlgStats, IDC_URATE, text);
+	}
+    if (pwd->dtrInfo.edRate) {
+		_stprintf(text, _T("%.2f"), pwd->dtrInfo.edRate);
+		SetDlgItemText(pwd->hDlgStats, IDC_EDRATE, text);
+	}
+	if (pwd->dtrInfo.euRate) {
+		_stprintf(text, _T("%.2f"), pwd->dtrInfo.euRate);
+		SetDlgItemText(pwd->hDlgStats, IDC_EURATE, text);
+	}
 
-	pwd->dtrInfo.odRate = (UP_FRAMES * 1024 * 8) / overallTime;
-	pwd->dtrInfo.ouRate = (DOWN_FRAMES * 1024 * 8) / overallTime;
+	pwd->dtrInfo.ouRate = (UP_FRAMES * 1024 * 8) / overallTime;
+	pwd->dtrInfo.odRate = (DOWN_FRAMES * 1024 * 8) / overallTime;
 	pwd->dtrInfo.oedRate = (DOWN_FRAMES_ACKD * 1024 * 8) / overallTime;
 	pwd->dtrInfo.oeuRate = (UP_FRAMES_ACKD * 1024 * 8) / overallTime;
 	PrintStats(hWnd);
@@ -456,17 +473,6 @@ VOID PrintStats(HWND hWnd) {
     _stprintf(text, _T("%d"), DOWN_FRAMES);
     SetDlgItemText(pwd->hDlgStats, IDC_FRAMEREC, text);
 
-    _stprintf(text, _T("%.2f"), pwd->dtrInfo.dRate);
-    SetDlgItemText(pwd->hDlgStats, IDC_DRATE, text);
-
-    _stprintf(text, _T("%.2f"), pwd->dtrInfo.uRate);
-    SetDlgItemText(pwd->hDlgStats, IDC_URATE, text);
-    
-    _stprintf(text, _T("%.2f"), pwd->dtrInfo.edRate);
-    SetDlgItemText(pwd->hDlgStats, IDC_EDRATE, text);
-
-    _stprintf(text, _T("%.2f"), pwd->dtrInfo.euRate);
-    SetDlgItemText(pwd->hDlgStats, IDC_EURATE, text);
 
 	_stprintf(text, _T("%.2f"), pwd->dtrInfo.odRate);
     SetDlgItemText(pwd->hDlgStats, IDC_ODRATE, text);
@@ -485,8 +491,10 @@ VOID PrintStats(HWND hWnd) {
     SetDlgItemText(pwd->hDlgStats, IDC_FRAME_DISCARDED, text);
 
 	framesResent = UP_FRAMES - UP_FRAMES_ACKD;
-    _stprintf(text, _T("%d"), framesResent);
-    SetDlgItemText(pwd->hDlgStats, IDC_FRAMES_RESENT, text);
+	if (framesResent) {
+		_stprintf(text, _T("%d"), framesResent);
+		SetDlgItemText(pwd->hDlgStats, IDC_FRAMES_RESENT, text);
+	}
 }
 
 /*------------------------------------------------------------------------------
