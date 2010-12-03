@@ -28,7 +28,6 @@
 ------------------------------------------------------------------------------*/
 #include "FileIO.h"
 
-
 /*------------------------------------------------------------------------------
 -- FUNCTION:    CreateFrame
 --
@@ -270,7 +269,8 @@ VOID WriteToFile(HWND hWnd){
         
         if(tempFrame->length != MAX_PAYLOAD_SIZE ){		
             CloseFileReceive(hWnd);
-            MessageBox(hWnd, TEXT("Finished receiving file"), NULL, MB_OK);
+            MessageBox(hWnd, TEXT("Finished receiving file"), 
+					   TEXT("Transfer Complete"), MB_OK);
         }
     }
 }
@@ -326,12 +326,14 @@ VOID ReadFromFile(HWND hWnd){
             
 
             frame = CreateNullFrame(hWnd);
-            MessageBox(hWnd, TEXT("Transmit File Buffering Complete"), 0, MB_OK);
+            MessageBox(hWnd, TEXT("Transmit File Buffering Complete"), 
+				       TEXT("File Read Complete"), MB_OK);
 
         } else {
             
             CloseFileTransmit(hWnd);
-            MessageBox(hWnd, TEXT("Transmit File Buffering Complete"), 0, MB_OK);
+            MessageBox(hWnd, TEXT("Transmit File Buffering Complete"), 
+				       TEXT("File Read Complete"), MB_OK);
             return;
         } 
                 

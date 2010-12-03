@@ -125,6 +125,7 @@ typedef struct wndData {
     INT             cyWindowTop;
     INT             cyWindowBottom;
     STATSINFO		statsInfo;
+	DTRINFO			dtrInfo;
     INT             FTPQueueSize;
     INT             PTFQueueSize;
     PFRAME_NODE		FTPBuffHead;

@@ -30,7 +30,7 @@ VOID			InitTerminal(HWND hWnd);
 VOID 			MakeColumns(HWND hWnd);
 VOID			Paint(HWND hWnd);
 VOID			PerformMenuAction(HWND hWnd, WPARAM wParam);
-VOID			PrintStats(HWND hWnd, DTRINFO dtrInfo);
+VOID			PrintStats(HWND hWnd);
 VOID			SetBell(HWND hWnd, INT iSelected);
 BOOL CALLBACK	Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 VOID			UpdateStats(HWND hWnd);
