@@ -109,7 +109,10 @@ VOID OpenFileTransmit(HWND hWnd){
 	ofn.nMaxFile = sizeof(szFile);
 
 
-	GetOpenFileName(&ofn);
+	if(GetOpenFileName(&ofn) == 0){
+		return;
+	}
+	
 	pwd->hFileTransmit =CreateFile(ofn.lpstrFile, GENERIC_READ | GENERIC_WRITE,
 							FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
 							OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
