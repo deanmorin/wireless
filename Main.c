@@ -56,21 +56,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     static TCHAR    szAppName[] = TEXT("Main");
     HWND            hWnd        = NULL;
     MSG             msg         = {0};
-    WNDCLASS        wndclass    = {0};
+    WNDCLASSEX      wndclass    = {0};
     PWNDDATA        pwd         = NULL;
 
+	wndclass.cbSize			= sizeof(WNDCLASSEX);
     wndclass.style          = CS_HREDRAW | CS_VREDRAW;
     wndclass.lpfnWndProc    = WndProc;
     wndclass.cbClsExtra     = 0;
     wndclass.cbWndExtra     = sizeof(PWNDDATA);
     wndclass.hInstance      = hInstance;
-    wndclass.hIcon          = LoadIcon(NULL, IDI_APPLICATION);
+    wndclass.hIcon          = LoadIcon(NULL, MAKEINTRESOURCE(IDI_ICON1));
     wndclass.hCursor        = LoadCursor(NULL, IDC_ARROW);
     wndclass.hbrBackground  = (HBRUSH) GetStockObject(BLACK_BRUSH);
     wndclass.lpszMenuName   = TEXT("MYMENU");
     wndclass.lpszClassName  = szAppName;
+	wndclass.hIconSm		= LoadIcon(NULL, MAKEINTRESOURCE(IDI_ICON1));
 
-    if (!RegisterClass(&wndclass)) {
+    if (!RegisterClassEx(&wndclass)) {
         MessageBox(NULL, TEXT("Upgrade your OS! Seriously!"),
                    szAppName, MB_ICONERROR);
         return 0;
