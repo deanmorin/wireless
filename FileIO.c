@@ -189,7 +189,6 @@ BOOL OpenFileReceive(HWND hWnd){
         return FALSE;
     } 
     
-    
     pwd->hFileReceive = CreateFile(ofn.lpstrFile, GENERIC_READ | GENERIC_WRITE,
                                     FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
                                     CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -271,7 +270,7 @@ VOID WriteToFile(HWND hWnd){
         
         if(tempFrame->length != MAX_PAYLOAD_SIZE ){		
             CloseFileReceive(hWnd);
-            OpenFileReceive(hWnd);
+            MessageBox(hWnd, TEXT("Finished receiving file"), NULL, MB_OK);
         }
     }
 }
@@ -334,15 +333,6 @@ VOID ReadFromFile(HWND hWnd){
             CloseFileTransmit(hWnd);
             MessageBox(hWnd, TEXT("Transmit File Buffering Complete"), 0, MB_OK);
             return;
-            
-            /*if(!ReadFile(pwd->hFileTransmit, ReadBuffer, dwSizeOfFile%MAX_PAYLOAD_SIZE, &dwBytesRead, NULL)){
-                DISPLAY_ERROR("Failed to read from file");
-            }
-            
-            ++pwd->NumOfReads;	
-            frame = CreateFrame(hWnd, ReadBuffer, dwBytesRead);
-            */
-            
         } 
                 
         hMutex = CreateMutex(NULL, FALSE, TEXT("FTPMutex"));
