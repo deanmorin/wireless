@@ -46,7 +46,9 @@
 -- RETURNS:      The return value is the result of the message processing and 
 --              depends on the message sent.
 --
--- NOTES:       The WndProc function for the Debug dialog window.
+-- NOTES:       The WndProc function for the Debug dialog window. This process
+--				calls functions when a button is pressed, and changes images
+--				based on the current state.
 ------------------------------------------------------------------------------*/
 BOOL CALLBACK Debug (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 	static HBITMAP	bmp[16];
