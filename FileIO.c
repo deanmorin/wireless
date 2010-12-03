@@ -28,6 +28,28 @@
 ------------------------------------------------------------------------------*/
 #include "FileIO.h"
 
+
+/*------------------------------------------------------------------------------
+-- FUNCTION:    CreateFrame
+--
+-- DATE:        Nov 24, 2010
+--
+-- REVISIONS:
+--
+-- DESIGNER:    Ian Lee
+--
+-- PROGRAMMER:  Ian Lee
+--
+-- INTERFACE:   CreateFrame(HWND hWnd, PBYTE psBuf, DWORD dwLength)
+--                      hWnd			- a handle to the window
+--						PBYTE psBuf		- data from file
+--						DWORD dwLength	- length of data from file
+--
+-- RETURNS:     FRAME - the created frame
+--
+-- NOTES:       Creates a frame to be put into the FTP buffer
+--
+------------------------------------------------------------------------------*/
 FRAME CreateFrame(HWND hWnd, PBYTE psBuf, DWORD dwLength){
 	DWORD		i;
 	FRAME myFrame;
@@ -51,9 +73,7 @@ FRAME CreateFrame(HWND hWnd, PBYTE psBuf, DWORD dwLength){
 	if(crcFast((PBYTE)&myFrame,FRAME_SIZE)!=0){
 		DISPLAY_ERROR("Failure Creating Frame");
 	}
-	/*else{
-			DISPLAY_ERROR("Success Creating Frame");
-	}*/
+	
 	return myFrame;
 }
 /*------------------------------------------------------------------------------
