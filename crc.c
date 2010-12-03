@@ -1,5 +1,5 @@
 /**********************************************************************
- *
+ * Retrieved from http://www.netrino.com/Embedded-Systems/How-To/CRC-Calculation-C-Code
  * Filename:    crc.c
  * 
  * Description: Slow and fast implementations of the CRC standards.
