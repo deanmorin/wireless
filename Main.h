@@ -1,24 +1,8 @@
 /*------------------------------------------------------------------------------
--- SOURCE FILE:     Main.c      Contains the WinMain() and WinProc() functions 
---                              for the program.
---                      
--- PROGRAM:     Dean and the Rockets' Wireless Protocol Testing and Evaluation 
---              Facilitator
---
--- FUNCTIONS:
---              int     WINAPI WinMain(HINSTANCE, HINSTANCE, PSTR, int)
---              LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM) 
---
---
--- DATE:        Nov 24, 2010
---
--- REVISIONS:   
---
--- DESIGNER:    Dean Morin
---
--- PROGRAMMER:  Dean Morin
---
--- NOTES:       The main entry point for the program.
+-- FILE:			Main.h                 
+-- PROGRAM:		Dean and the Rockets' Wireless Protocol Testing and Evaluation 
+-- DATE:        Dec 03, 2010
+-- DESIGNER:    Dean Morin, Ian Lee, Daniel Wright, Marcel Vangrootheest
 ------------------------------------------------------------------------------*/
 #ifndef STRICT
 #define STRICT

@@ -1,3 +1,9 @@
+/*------------------------------------------------------------------------------
+-- FILE:			DataLink.h                 
+-- PROGRAM:		Dean and the Rockets' Wireless Protocol Testing and Evaluation 
+-- DATE:        Dec 03, 2010
+-- DESIGNER:    Dean Morin, Ian Lee, Daniel Wright, Marcel Vangrootheest
+------------------------------------------------------------------------------*/
 #ifndef DATALINK_H
 #define DATALINK_H
 

@@ -276,11 +276,11 @@ VOID MakeDebugFrameTwo(HWND hWnd){
 --
 -- REVISIONS:
 --
--- DESIGNER:    Dean Morin
+-- DESIGNER:    Ian Lee, Dean Morin
 --
--- PROGRAMMER:  Dean Morin
+-- PROGRAMMER:  Ian Lee, Dean Morin
 --
--- INTERFACE:   MakeDebugFrameTwo(HWND hWnd)
+-- INTERFACE:   MakeDebugFrameThree(HWND hWnd)
 --                      hWnd        - a handle to the window
 --
 -- RETURNS:     VOID.

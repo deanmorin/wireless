@@ -5,10 +5,13 @@
 -- PROGRAM:     RFID Reader - Enterprise Edition
 --
 -- FUNCTIONS:
---              VOID    InitTerminal(HWND);
---              VOID    Paint(HWND);
---              VOID    PerformMenuAction(HWND, WPARAM);
+--				BOOL CALLBACK UpdateStats(HWND)
+--				BOOL CALLBACK Stats(HWND, UINT, WPARAM, LPARAM)
+--              VOID    InitTerminal(HWND)
+--              VOID    Paint(HWND)
+--              VOID    PerformMenuAction(HWND, WPARAM)
 --              VOID    MakeColumns(VOID)
+--				VOID	UpdateStatStruct(HWND, WPARAM, LPARAM)
 --
 --
 -- DATE:        Oct 19, 2010
@@ -33,7 +36,7 @@
 --
 -- DATE:        Oct 19, 2010
 --
--- REVISIONS:   (Date and Description)
+-- REVISIONS:   Dec 02, 2010 - Added a crc initialization
 --
 -- DESIGNER:    Dean Morin
 --
@@ -133,7 +136,7 @@ VOID InitTerminal(HWND hWnd) {
 --
 -- DATE:        Oct 19, 2010
 --
--- REVISIONS:   (Date and Description)
+-- REVISIONS:   Dec 02, 2010 - added a case for opening a transmit file
 --
 -- DESIGNER:    Dean Morin
 --
@@ -204,11 +207,6 @@ VOID PerformMenuAction(HWND hWnd, WPARAM wParam) {
 		case IDM_DEBUGGER:       
 			ShowWindow(pwd->hDlgDebug, SW_NORMAL);
             return;
-
-		case ID_OPEN_RECEIVEFILE:
-			OpenFileReceive(hWnd);
-			//PostMessage(hWnd, WM_EMPTYPTFBUF, 0, 0);
-			return;
 		case ID_OPEN_TRANSMITFILE:
 			OpenFileTransmit(hWnd);
 			return;
@@ -486,7 +484,27 @@ BOOL CALLBACK Stats (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 	return FALSE;
 }
 
-
+/*------------------------------------------------------------------------------
+-- FUNCTION:    UpdateStatStruct
+--
+-- DATE:        Dec 02, 2010
+--
+-- REVISIONS:   
+--				
+-- DESIGNER:    Dean Morin
+--
+-- PROGRAMMER:  Dean Morin
+--
+-- INTERFACE:   UpdateStatStruct(HWND hWnd, WPARAM stat, LPARAM attribute)
+--						hWnd		- the handle to the window
+--						stat		- the stat category to update
+--						attribute	- info on how to alter the stat
+--
+-- RETURNS:     VOID.
+--
+-- NOTES:
+--              Updates the stats structure.
+------------------------------------------------------------------------------*/
 VOID UpdateStatStruct(HWND hWnd, WPARAM stat, LPARAM attribute) {
     PWNDDATA pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
     

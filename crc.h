@@ -33,7 +33,7 @@ typedef unsigned char  crc;
 
 #define CRC_NAME			"CRC-CCITT"
 #define POLYNOMIAL			0x107
-#define INITIAL_REMAINDER	0xFF
+#define INITIAL_REMAINDER	0x00
 #define FINAL_XOR_VALUE		0x00
 #define REFLECT_DATA		FALSE
 #define REFLECT_REMAINDER	FALSE
