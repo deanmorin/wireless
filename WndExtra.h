@@ -108,14 +108,11 @@ typedef struct wndData {
 	HANDLE			hFileReceive;
 	HANDLE			hFileTransmit;
 	LPTSTR          lpszCommName;
-   // COMMCONFIG      cc;
     BOOL            bConnected;
     HANDLE          hThread;
     DWORD           dwThreadid;
-    COMMTIMEOUTS    defaultTimeOuts;
     INT             cyWindowTop;
     INT             cyWindowBottom;
-	BOOL			relOrigin;
 	STATSINFO		statsInfo;
     INT             FTPQueueSize;
     INT             PTFQueueSize;

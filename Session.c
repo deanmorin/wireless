@@ -58,7 +58,7 @@ BOOL Connect(HWND hWnd) {
     COMMTIMEOUTS    timeOut		= {0};
     DWORD           dwThreadid  = 0;
     DWORD           i           = 0;
-	COMMCONFIG		cc			= {0};
+    COMMCONFIG		cc			= {0};
     pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
     // open serial port
@@ -78,9 +78,9 @@ BOOL Connect(HWND hWnd) {
     pwd->bConnected = TRUE;
 
 
-	cc.dwSize	= sizeof(COMMCONFIG);
-	cc.wVersion = 1;
-	GetCommConfig(pwd->hPort, &cc, &cc.dwSize);
+    cc.dwSize	= sizeof(COMMCONFIG);
+    cc.wVersion = 1;
+    GetCommConfig(pwd->hPort, &cc, &cc.dwSize);
 
     if (!CommConfigDialog(pwd->lpszCommName, hWnd, &cc)) {
         DISPLAY_ERROR("The comm settings dialogue failed.\nThis port may not exist");
@@ -93,20 +93,20 @@ BOOL Connect(HWND hWnd) {
         return FALSE;   
     }
     timeOut.ReadIntervalTimeout         = MAXDWORD;
-	timeOut.ReadTotalTimeoutConstant	= 0;
-	timeOut.ReadTotalTimeoutMultiplier	= 0;
-	timeOut.WriteTotalTimeoutMultiplier = 0;
+    timeOut.ReadTotalTimeoutConstant	= 0;
+    timeOut.ReadTotalTimeoutMultiplier	= 0;
+    timeOut.WriteTotalTimeoutMultiplier = 0;
     timeOut.WriteTotalTimeoutConstant   = 0;
 
     if (!SetCommTimeouts(pwd->hPort, &timeOut)) {
         DISPLAY_ERROR("Could not set comm timeouts");
         return FALSE;
     }
-	if (!SetCommState(pwd->hPort, &cc.dcb)) {
-		DISPLAY_ERROR("Could not set comm state");
-		return FALSE;
-	}
-	
+    if (!SetCommState(pwd->hPort, &cc.dcb)) {
+        DISPLAY_ERROR("Could not set comm state");
+        return FALSE;
+    }
+    
     // create thread for reading
     pwd->hThread = CreateThread(NULL, 0,
                                 (LPTHREAD_START_ROUTINE) PortIOThreadProc,
@@ -117,17 +117,17 @@ BOOL Connect(HWND hWnd) {
         return FALSE;
     }
 
-	if (!EscapeCommFunction(pwd->hPort, SETRTS)) {
+    if (!EscapeCommFunction(pwd->hPort, SETRTS)) {
         DISPLAY_ERROR("Error sending RTS signal");
     }
     if (!EscapeCommFunction(pwd->hPort, SETDTR)) {
         DISPLAY_ERROR("Error sending DTR signal");
     }
-	
+    
     CUR_FG_COLOR = 7;
     CUR_BG_COLOR = 0;
     CUR_STYLE    = 0;
-	BRIGHTNESS	 = 0;
+    BRIGHTNESS	 = 0;
                                 
     // enable/disable appropriate menu choices
     EnableMenuItem(GetMenu(hWnd), IDM_DISCONNECT, MF_ENABLED);
@@ -174,7 +174,7 @@ VOID Disconnect(HWND hWnd) {
     // this will end the outer while loop in the read thread
     pwd->bConnected = FALSE;
     hEvent = CreateEvent(NULL, TRUE, FALSE, TEXT("disconnected"));
-	SetEvent(hEvent);
+    SetEvent(hEvent);
 
     // let the read thread finish up
     do {
@@ -184,14 +184,14 @@ VOID Disconnect(HWND hWnd) {
     CloseHandle(hEvent);
     CloseHandle(pwd->hThread);
     CloseHandle(pwd->hPort);
-	CloseFileReceive(hWnd);
-	CloseFileTransmit(hWnd);
-	DeleteFrameQueue(pwd->FTPBuffHead);
-	pwd->FTPBuffHead = NULL;
-	pwd->FTPQueueSize = 0;
-	DeleteFrameQueue(pwd->PTFBuffHead);
-	pwd->PTFBuffHead = NULL;
-	pwd->PTFQueueSize = 0;
+    CloseFileReceive(hWnd);
+    CloseFileTransmit(hWnd);
+    DeleteFrameQueue(pwd->FTPBuffHead);
+    pwd->FTPBuffHead = NULL;
+    pwd->FTPQueueSize = 0;
+    DeleteFrameQueue(pwd->PTFBuffHead);
+    pwd->PTFBuffHead = NULL;
+    pwd->PTFQueueSize = 0;
     pwd->hPort = NULL;
 
     // enable/disable appropriate menu choices    
