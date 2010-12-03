@@ -349,7 +349,7 @@ VOID UpdateStats(HWND hWnd) {
 	FLOAT thisTime;
 	static INT lastdFrames = 0, lastuFrames = 0, lastedFrames = 0, lasteuFrames = 0;
 	static INT count = 0;
-	INT framesDiscarded;
+	INT framesDiscarded = 0;
 
 	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
@@ -377,11 +377,11 @@ VOID UpdateStats(HWND hWnd) {
 			}
 			if ((DOWN_FRAMES_ACKD - lastedFrames)!= 0) {
 				edRate = ((DOWN_FRAMES_ACKD - lastedFrames) * 1019 * 8) / totalTime;
-				lasteuFrames = UP_FRAMES_ACKD;
+				lastedFrames = DOWN_FRAMES_ACKD;
 			}
 			if ((UP_FRAMES_ACKD - lasteuFrames)!= 0) {
 				euRate = ((UP_FRAMES_ACKD - lasteuFrames) * 1019 * 8) / totalTime;
-				lastedFrames = DOWN_FRAMES_ACKD;
+				lasteuFrames = UP_FRAMES_ACKD;
 			}
 		}
 	}
@@ -434,7 +434,7 @@ VOID UpdateStats(HWND hWnd) {
 	SetDlgItemText(pwd->hDlgStats, IDC_ETRATE, text);
 
 	framesDiscarded = DOWN_FRAMES - DOWN_FRAMES_ACKD;
-	_stprintf(text, _T("d"), framesDiscarded);
+	_stprintf(text, _T("%d"), framesDiscarded);
 	SetDlgItemText(pwd->hDlgStats, IDC_FRAME_DISCARDED, text);
 }
 
