@@ -1,5 +1,5 @@
 /**********************************************************************
- * Retrieved from http://www.netrino.com/Embedded-Systems/How-To/CRC-Calculation-C-Code
+ *
  * Filename:    crc.c
  * 
  * Description: Slow and fast implementations of the CRC standards.
@@ -13,9 +13,6 @@
  * the public domain and may be used for any purpose.  However, this
  * notice must not be changed or removed and no warranty is either
  * expressed or implied by its publication or distribution.
-
---Ian Lee
---Revisions -   changed settings in crc.h to produce an 8 bit crc result.
  **********************************************************************/
  
 #include "crc.h"
@@ -24,7 +21,7 @@
 /*
  * Derive parameters from the standard-specific parameters in crc.h.
  */
-#define WIDTH    (8 * sizeof(crc))
+#define WIDTH    8
 #define TOPBIT   (1 << (WIDTH - 1))
 
 #if (REFLECT_DATA == TRUE)
@@ -158,9 +155,9 @@ crc  crcTable[256];
 void
 crcInit(void)
 {
-    crc			   remainder;
-	int			   dividend;
-	unsigned char  bit;
+    crc remainder;
+	unsigned int dividend;
+	unsigned char bit;
 
 
     /*

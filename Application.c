@@ -350,6 +350,7 @@ VOID UpdateStats(HWND hWnd) {
 	FLOAT thisTime;
 	static INT lastdFrames = 0, lastuFrames = 0, lastedFrames = 0, lasteuFrames = 0;
 	static INT count = 0;
+	INT framesDiscarded;
 
 	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
@@ -361,26 +362,31 @@ VOID UpdateStats(HWND hWnd) {
 	lastTime = thisTime;
 
 	if (UP_FRAMES != lastuFrames || DOWN_FRAMES != lastdFrames) {
-		if (count == 0) {
+		if (count++ == 0) {
 			uRate = 0;
 			dRate = 0;
 			edRate = 0;
 			euRate = 0;
 		} else if (totalTime != 0) {
-			uRate = ((UP_FRAMES - lastuFrames) * 1024 * 8) / totalTime;
-			dRate = ((DOWN_FRAMES - lastdFrames) * 1024 * 8) / totalTime;
-			edRate = ((DOWN_FRAMES_ACKD - lastedFrames) * 1019 * 8) / totalTime;
-			euRate = ((UP_FRAMES_ACKD - lasteuFrames) * 1019 * 8) / totalTime;
-			lastuFrames = UP_FRAMES;
-			lastdFrames = DOWN_FRAMES;
-			lasteuFrames = UP_FRAMES_ACKD;
-			lastedFrames = DOWN_FRAMES_ACKD;
+			if ((UP_FRAMES - lastuFrames)!= 0) {
+				uRate = ((UP_FRAMES - lastuFrames) * 1024 * 8) / totalTime;
+				lastuFrames = UP_FRAMES;
+			}
+			if ((DOWN_FRAMES - lastdFrames)!= 0) {
+				dRate = ((DOWN_FRAMES - lastdFrames) * 1024 * 8) / totalTime;
+				lastdFrames = DOWN_FRAMES;
+			}
+			if ((DOWN_FRAMES_ACKD - lastedFrames)!= 0) {
+				edRate = ((DOWN_FRAMES_ACKD - lastedFrames) * 1019 * 8) / totalTime;
+				lasteuFrames = UP_FRAMES_ACKD;
+			}
+			if ((UP_FRAMES_ACKD - lasteuFrames)!= 0) {
+				euRate = ((UP_FRAMES_ACKD - lasteuFrames) * 1019 * 8) / totalTime;
+				lastedFrames = DOWN_FRAMES_ACKD;
+			}
 		}
 	}
-	count++;
-	//_stprintf(text, _T("%d"), NUM_FILES);
-	//SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
-	_stprintf(text, _T("%.2f"), totalTime);
+	_stprintf(text, _T("%d"), NUM_FILES);
 	SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
 
 	_stprintf(text, _T("%d"), SENT_ACK);
@@ -401,12 +407,7 @@ VOID UpdateStats(HWND hWnd) {
 	_stprintf(text, _T("%d"), REC_RVI);
 	SetDlgItemText(pwd->hDlgStats, IDC_RVIRECEIVED, text);
 	
-	//dRate = (DOWN_FRAMES * 1024 * 8) / totalTime;
-	//uRate = (UP_FRAMES * 1024 * 8) / totalTime;
 	tRate = dRate + uRate;
-
-	//edRate = (DOWN_FRAMES_ACKD * 1019 * 8) / totalTime;
-	//euRate = (UP_FRAMES_ACKD * 1019 * 8) / totalTime;
 	etRate = edRate + euRate;
 
 	_stprintf(text, _T("%d"), UP_FRAMES);
@@ -432,6 +433,10 @@ VOID UpdateStats(HWND hWnd) {
 
 	_stprintf(text, _T("%.2f"), etRate);
 	SetDlgItemText(pwd->hDlgStats, IDC_ETRATE, text);
+
+	framesDiscarded = DOWN_FRAMES - DOWN_FRAMES_ACKD;
+	_stprintf(text, _T("d"), framesDiscarded);
+	SetDlgItemText(pwd->hDlgStats, IDC_FRAME_DISCARDED, text);
 }
 
 

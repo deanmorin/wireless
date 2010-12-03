@@ -32,7 +32,7 @@ enum read_states    { STATE_T1, STATE_T3, STATE_IDLE, STATE_R2 };
 #define TOR0					TOR0_BASE + rand() % TOR0_RANGE
 #define TOR1					1000
 #define TOR2                    1000
-#define TOR3                    1500
+#define TOR3                    3000
 #define MAX_TIMEOUTS            3
 #define TOR2_INCREASE_FACTOR    1
 #define TOR3_INCREASE_FACTOR    1

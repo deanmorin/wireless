@@ -65,12 +65,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     wndclass.cbClsExtra     = 0;
     wndclass.cbWndExtra     = sizeof(PWNDDATA);
     wndclass.hInstance      = hInstance;
-    wndclass.hIcon          = LoadIcon(NULL, MAKEINTRESOURCE(IDI_ICON1));
+    wndclass.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
     wndclass.hCursor        = LoadCursor(NULL, IDC_ARROW);
     wndclass.hbrBackground  = (HBRUSH) GetStockObject(BLACK_BRUSH);
     wndclass.lpszMenuName   = TEXT("MYMENU");
     wndclass.lpszClassName  = szAppName;
-	wndclass.hIconSm		= LoadIcon(NULL, MAKEINTRESOURCE(IDI_ICON1));
+	wndclass.hIconSm		= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON2));
 
     if (!RegisterClassEx(&wndclass)) {
         MessageBox(NULL, TEXT("Upgrade your OS! Seriously!"),
