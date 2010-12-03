@@ -1,5 +1,5 @@
 /**********************************************************************
- *
+ * Retrieved from http://www.netrino.com/Embedded-Systems/How-To/CRC-Calculation-C-Code
  * Filename:    crc.c
  * 
  * Description: Slow and fast implementations of the CRC standards.
@@ -13,6 +13,9 @@
  * the public domain and may be used for any purpose.  However, this
  * notice must not be changed or removed and no warranty is either
  * expressed or implied by its publication or distribution.
+
+--Ian Lee
+--Revisions -   changed settings in crc.h to produce an 8 bit crc result.
  **********************************************************************/
  
 #include "crc.h"

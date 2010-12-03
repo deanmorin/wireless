@@ -326,7 +326,8 @@ VOID MakeColumns(HWND hWnd){
 --
 -- DATE:        Nov 20, 2010
 --
--- REVISIONS:   (Date and Description)
+-- REVISIONS:   Dec 02, 2010 - Changed calculations for better representation of
+--								data rate.
 --
 -- DESIGNER:	Marcel Vangrootheest
 --
@@ -343,11 +344,12 @@ VOID MakeColumns(HWND hWnd){
 ------------------------------------------------------------------------------*/
 VOID UpdateStats(HWND hWnd) {
 	static FLOAT totalTime = 0;
-	FLOAT dRate = 0, uRate = 0, tRate = 0, edRate = 0, euRate = 0, etRate = 0;
+	static FLOAT dRate = 0, uRate = 0, tRate = 0, edRate = 0, euRate = 0, etRate = 0;
 	TCHAR text[20];
 	static FLOAT lastTime = 0;
 	FLOAT thisTime;
-	static INT lastdFrames = 0, lastuFrames = 0;
+	static INT lastdFrames = 0, lastuFrames = 0, lastedFrames = 0, lasteuFrames = 0;
+	static INT count = 0;
 
 	PWNDDATA	pwd = (PWNDDATA) GetWindowLongPtr(hWnd, 0);
 
@@ -357,21 +359,23 @@ VOID UpdateStats(HWND hWnd) {
 	lastTime = thisTime;
 
 	if (UP_FRAMES != lastuFrames || DOWN_FRAMES != lastdFrames) {
-		if (totalTime == 0) {
+		if (count == 0) {
 			uRate = 0;
 			dRate = 0;
 			edRate = 0;
 			euRate = 0;
-		} else {
+		} else if (totalTime != 0) {
 			uRate = ((UP_FRAMES - lastuFrames) * 1024 * 8) / totalTime;
 			dRate = ((DOWN_FRAMES - lastdFrames) * 1024 * 8) / totalTime;
-			edRate = ((DOWN_FRAMES_ACKD - lastdFrames) * 1019 * 8) / totalTime;
-			euRate = ((UP_FRAMES_ACKD - lastuFrames) * 1019 * 8) / totalTime;
+			edRate = ((DOWN_FRAMES_ACKD - lastedFrames) * 1019 * 8) / totalTime;
+			euRate = ((UP_FRAMES_ACKD - lasteuFrames) * 1019 * 8) / totalTime;
+			lastuFrames = UP_FRAMES;
+			lastdFrames = DOWN_FRAMES;
+			lasteuFrames = UP_FRAMES_ACKD;
+			lastedFrames = DOWN_FRAMES_ACKD;
 		}
-		lastuFrames = UP_FRAMES;
-		lastdFrames = DOWN_FRAMES;
 	}
-
+	count++;
 	//_stprintf(text, _T("%d"), NUM_FILES);
 	//SetDlgItemText(pwd->hDlgStats, IDC_FILESUPLOADED, text);
 	_stprintf(text, _T("%.2f"), totalTime);
